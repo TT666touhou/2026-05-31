@@ -8,6 +8,8 @@ var capture_timer: int = 0
 var capture_interval: int = 2
 var frame_count: int = 0
 
+@export var enable_capture: bool = true
+
 func _physics_process(delta: float) -> void:
 	var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 	
@@ -36,7 +38,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 	# === Debug Frame Capture Logic ===
-	if abs(velocity.x) > 10.0 and is_on_floor():
+	if enable_capture and abs(velocity.x) > 10.0 and is_on_floor():
 		capture_timer += 1
 		if capture_timer >= capture_interval:
 			capture_timer = 0
