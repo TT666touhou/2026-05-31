@@ -7,7 +7,6 @@ const FRICTION = 1200.0
 var capture_timer: int = 0
 var capture_interval: int = 2
 var frame_count: int = 0
-
 @export var enable_capture: bool = true
 
 func _physics_process(delta: float) -> void:
