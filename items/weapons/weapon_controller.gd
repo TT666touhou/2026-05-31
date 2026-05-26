@@ -73,36 +73,10 @@ func _change_state(new_state: State) -> void:
 
 func _physics_process(delta: float) -> void:
 	state_timer += delta
-	
-	match current_state:
-		State.WINDUP:
-			if state_timer >= windup_time:
-				_change_state(State.ATTACK)
-		State.ATTACK:
-			if state_timer >= attack_time:
-				_change_state(State.RECOVER)
-		State.RECOVER:
-			if state_timer >= recover_time:
-				_change_state(State.IDLE)
-		State.IDLE:
-			# 在 Idle 狀態下，如果外面的邏輯想要觸發攻擊 (例如偵測到敵人靠近)，可以呼叫 try_attack()
-			pass
-
-# 馬達會不斷呼叫這個函數來決定劍尖應該被拉向哪裡
-func _get_target_tip_position() -> Vector2:
-	var target_offset = idle_offset
-	
-	match current_state:
-		State.WINDUP:
-			target_offset = windup_offset
-		State.ATTACK:
-			target_offset = attack_offset
-		State.RECOVER:
-			# 漸變回到 IDLE
-			var t = clamp(state_timer / recover_time, 0.0, 1.0)
-			target_offset = attack_offset.lerp(idle_offset, t)
-	
-	# 根據角色的朝向翻轉 X 軸
-	target_offset.x *= owner_facing_dir
-	
-	return owner_core_pos + target_offset
+	if tip_index != -1 and weapon_rig and weapon_rig.points.size() > tip_index:
+		# 對劍尖施加抗重力，抵銷 980 的下墜力，並額外往上提
+		weapon_rig.points[tip_index].accumulated_force.y -= 1500.0
+		# 對劍尖施加向前的推力，使其保持前傾
+		weapon_rig.points[tip_index].accumulated_force.x += owner_facing_dir * 800.0
+		
+	# (未來：ATTACK 狀態會在這裡施加向前的巨大揮砍力)

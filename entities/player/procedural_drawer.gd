@@ -82,8 +82,35 @@ func _ready() -> void:
 	verlet.add_motor(J.R_FOOT, func(): 
 		return character_body.global_position + Vector2(10, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
-
-
+	
+	# ==== 掛載長劍 ====
+	var sword_scene = preload("res://items/weapons/sword.tscn")
+	var sword_rig = sword_scene.instantiate() as VerletRig
+	add_child(sword_rig)
+	
+	# 將劍掛載到右手上
+	sword_rig.global_position = verlet.points[J.R_HAND].pos - global_position
+	sword_rig.inject_into(verlet)
+	
+	var main_hand_pivot = sword_rig.get_pivot("MainHand")
+	var off_hand_pivot = sword_rig.get_pivot("OffHand")
+	
+	if main_hand_pivot and off_hand_pivot:
+		# 將右手綁死在 MainHand (柄底端)
+		verlet.add_stick(J.R_HAND, main_hand_pivot.physics_index, 0.0, 1.0, false)
+		
+		# 將左手綁死在 OffHand (柄上方 10px)
+		verlet.add_stick(J.L_HAND, off_hand_pivot.physics_index, 0.0, 1.0, false)
+		
+		# 獲取劍尖索引，設定為像頭一樣「軟」，使其在移動時自然晃動
+		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
+		verlet.points[blade_tip_idx].drag = 0.98  # 高阻尼，像頭一樣
+		verlet.points[blade_tip_idx].mass = 1.5   # 增加質量
+		
+		# 將物理系統傳遞給 WeaponController 進行後續施力
+		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
+		if weapon_controller and weapon_controller.has_method("setup_physics"):
+			weapon_controller.setup_physics(verlet, main_hand_pivot.physics_index, blade_tip_idx, facing_dir)
 
 func _get_foot_offset(phase: float, stride: float) -> Vector2:
 	var amplitude = stride / 2.0
@@ -132,11 +159,15 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	# 手肘往前偏置（參考影片逐幀分析：手肘應在肩膀前方，不是往後）
-	verlet.points[J.L_ELBOW].accumulated_force.x += facing_dir * 700.0
-	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * 700.0
-	verlet.points[J.L_HAND].accumulated_force.y += 200.0
-	verlet.points[J.R_HAND].accumulated_force.y += 200.0
+	# 手肘向後並向內彎曲
+	var elbow_backward_force = -800.0
+	verlet.points[J.L_ELBOW].accumulated_force.x += facing_dir * elbow_backward_force
+	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * elbow_backward_force
+	
+	# 微向下壓手肘，加強彎折感
+	verlet.points[J.L_ELBOW].accumulated_force.y += 200.0
+	verlet.points[J.R_ELBOW].accumulated_force.y += 200.0
+
 	
 
 	
