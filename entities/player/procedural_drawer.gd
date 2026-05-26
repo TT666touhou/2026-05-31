@@ -96,14 +96,17 @@ func _ready() -> void:
 	var off_hand_pivot = sword_rig.get_pivot("OffHand")
 	
 	if main_hand_pivot and off_hand_pivot:
+		# 獲取劍尖索引，設定為像頭一樣「軟」，使其在移動時自然晃動
+		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
+		
 		# 將右手綁死在 MainHand (柄底端)
 		verlet.add_stick(J.R_HAND, main_hand_pivot.physics_index, 0.0, 1.0, false)
 		
-		# 將左手綁死在 OffHand (柄上方 10px)
-		verlet.add_stick(J.L_HAND, off_hand_pivot.physics_index, 0.0, 1.0, false)
+		# 將左手綁死在劍身上方 10px 處
+		# (透過與劍柄距離 10，與劍尖距離 35 的雙重約束，將手定位在劍身上)
+		verlet.add_stick(J.L_HAND, main_hand_pivot.physics_index, 10.0, 1.0, false)
+		verlet.add_stick(J.L_HAND, blade_tip_idx, 35.0, 1.0, false)
 		
-		# 獲取劍尖索引，設定為像頭一樣「軟」，使其在移動時自然晃動
-		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
 		verlet.points[blade_tip_idx].drag = 0.98  # 高阻尼，像頭一樣
 		verlet.points[blade_tip_idx].mass = 1.5   # 增加質量
 		
@@ -159,14 +162,14 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	# 確保雙臂形成五邊形 (強制分離)
-	# 左手（後手，握較高位置）：強烈往後拉，微抬高
-	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 1200.0
-	verlet.points[J.L_ELBOW].accumulated_force.y += -200.0
+	# 手肘姿態雕塑：向下壓並微往後收，形成自然的「V」字彎折
+	# 左手（後手，握較高位置）：自然下垂微後靠
+	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 300.0
+	verlet.points[J.L_ELBOW].accumulated_force.y += 600.0
 	
-	# 右手（前手，握劍柄底端）：強烈往前推，並強烈往下壓
-	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * 1200.0
-	verlet.points[J.R_ELBOW].accumulated_force.y += 1200.0
+	# 右手（前手，握劍柄底端）：手肘較往後收
+	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 600.0
+	verlet.points[J.R_ELBOW].accumulated_force.y += 300.0
 
 
 	
