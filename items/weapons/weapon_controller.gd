@@ -26,6 +26,8 @@ var owner_facing_dir: float = 1.0
 var owner_core_pos: Vector2 = Vector2.ZERO
 
 var motor_id: int = -1
+var physics: VerletPhysics
+
 
 # 這個信號當 Area2D 偵測到碰撞時會被觸發
 signal hit_target(target_node)
@@ -51,6 +53,7 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		hit_target.emit(body)
 
 func setup_physics(verlet: VerletPhysics, base_idx: int, t_index: int, facing_dir: float) -> void:
+	physics = verlet
 	base_index = base_idx
 	tip_index = t_index
 	owner_facing_dir = facing_dir
@@ -73,10 +76,10 @@ func _change_state(new_state: State) -> void:
 
 func _physics_process(delta: float) -> void:
 	state_timer += delta
-	if tip_index != -1 and weapon_rig and weapon_rig.points.size() > tip_index:
+	if tip_index != -1 and physics and physics.points.size() > tip_index:
 		# 對劍尖施加抗重力，抵銷 980 的下墜力，並額外往上提
-		weapon_rig.points[tip_index].accumulated_force.y -= 1500.0
+		physics.points[tip_index].accumulated_force.y -= 1500.0
 		# 對劍尖施加向前的推力，使其保持前傾
-		weapon_rig.points[tip_index].accumulated_force.x += owner_facing_dir * 800.0
+		physics.points[tip_index].accumulated_force.x += owner_facing_dir * 800.0
 		
 	# (未來：ATTACK 狀態會在這裡施加向前的巨大揮砍力)
