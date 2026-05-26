@@ -6,6 +6,7 @@ enum J {
 	R_ELBOW, R_HAND,
 	L_KNEE, L_FOOT,
 	R_KNEE, R_FOOT,
+	BLADE_TIP, # 劍尖：掛在 R_HAND 上的純物理擺錘
 	COUNT
 }
 
@@ -43,6 +44,7 @@ func _ready() -> void:
 			J.L_FOOT: offset = Vector2(-10, 0)
 			J.R_KNEE: offset = Vector2(5, -10.5)
 			J.R_FOOT: offset = Vector2(10, 0)
+			J.BLADE_TIP: offset = Vector2(10, -54) # 從右手正上方 45px 開始（dist≈45）
 			
 		var p_idx = verlet.add_point(base_pos + offset)
 		var p = verlet.points[p_idx]
@@ -53,6 +55,8 @@ func _ready() -> void:
 			
 		if i == J.L_FOOT or i == J.R_FOOT:
 			p.friction = 0.99 # 極端地板摩擦力
+		if i == J.BLADE_TIP:
+			p.drag = 0.985 # 慣性持久，模擬劍身的鐘擺感（原始預設 0.90 衰減太快）
 			
 	# 建立棍子約束 (保持 1:2.67 的魔性細長四肢比例)
 	verlet.add_stick(J.HIPS, J.SPINE_TOP, 8.0)
@@ -83,38 +87,9 @@ func _ready() -> void:
 		return character_body.global_position + Vector2(10, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
 
-	# ==== 掛載長劍 ====
-	var sword_scene = preload("res://items/weapons/sword.tscn")
-	var sword_rig = sword_scene.instantiate() as VerletRig
-	add_child(sword_rig)
-	
-	# 將劍掛載到右手上
-	sword_rig.global_position = verlet.points[J.R_HAND].pos - global_position
-	sword_rig.inject_into(verlet)
-	
-	var main_hand_pivot = sword_rig.get_pivot("MainHand")
-	if main_hand_pivot and main_hand_pivot.physics_index != -1:
-		# 將玩家的右手與劍的主把手綁死
-		verlet.add_stick(J.R_HAND, main_hand_pivot.physics_index, 0.0, 1.0, false)
-		
-		# 獲取劍尖的索引
-		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
-		
-		# 為了產生雙手握持感，將左手綁在劍柄上方 10 像素的位置
-		# 我們透過同時約束左手到劍柄(距離10)與劍尖(距離35)，讓左手被迫留在劍身上
-		verlet.add_stick(J.L_HAND, main_hand_pivot.physics_index, 10.0, 1.0, false)
-		verlet.add_stick(J.L_HAND, blade_tip_idx, 35.0, 1.0, false)
-		
-		# 將武器的物理控制權交給 WeaponController 處理
-		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
-		if weapon_controller and weapon_controller.has_method("setup_physics"):
-			weapon_controller.setup_physics(verlet, main_hand_pivot.physics_index, blade_tip_idx, facing_dir)
-			
-	# 在這裡更新 weapon controller 需要的玩家狀態 (朝向與核心位置)
-	if sword_rig:
-		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
-		if weapon_controller and weapon_controller.has_method("update_owner_status"):
-			weapon_controller.update_owner_status(verlet.points[J.R_HAND].pos, facing_dir)
+	# ==== 劍：作為第 12 個原生物理點，從右手懸掛的純物理擺錘 ====
+	# 劍尖 (BLADE_TIP) 透過一根 45px 的棍子連接到右手，無馬達，完全由物理決定晃動
+	verlet.add_stick(J.R_HAND, J.BLADE_TIP, 45.0)
 
 
 func _get_foot_offset(phase: float, stride: float) -> Vector2:
@@ -164,8 +139,9 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	verlet.points[J.L_ELBOW].accumulated_force.x -= facing_dir * 300.0
-	verlet.points[J.R_ELBOW].accumulated_force.x -= facing_dir * 300.0
+	# 手肘往前偏置（對比影片：原作手肘明顯向前突出，不是向後）
+	verlet.points[J.L_ELBOW].accumulated_force.x += facing_dir * 800.0
+	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * 800.0
 	verlet.points[J.L_HAND].accumulated_force.y += 200.0
 	verlet.points[J.R_HAND].accumulated_force.y += 200.0
 	
