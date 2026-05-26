@@ -159,14 +159,14 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	# 手肘姿態雕塑：向下壓並微往後收，形成自然的「V」字彎折
-	# 左手（後手，握較高位置）：自然下垂微後靠
-	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 300.0
-	verlet.points[J.L_ELBOW].accumulated_force.y += 600.0
+	# 確保雙臂形成五邊形 (強制分離)
+	# 左手（後手，握較高位置）：強烈往後拉，微抬高
+	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 1200.0
+	verlet.points[J.L_ELBOW].accumulated_force.y += -200.0
 	
-	# 右手（前手，握劍柄底端）：手肘較往後收
-	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 600.0
-	verlet.points[J.R_ELBOW].accumulated_force.y += 300.0
+	# 右手（前手，握劍柄底端）：強烈往前推，並強烈往下壓
+	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * 1200.0
+	verlet.points[J.R_ELBOW].accumulated_force.y += 1200.0
 
 
 	
