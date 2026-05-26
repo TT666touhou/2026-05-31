@@ -77,11 +77,8 @@ func _change_state(new_state: State) -> void:
 func _physics_process(delta: float) -> void:
 	state_timer += delta
 	if tip_index != -1 and physics and physics.points.size() > tip_index:
-		# 對劍身（握把）施加抗重力，減輕雙臂負擔
-		physics.points[base_index].accumulated_force.y -= 1000.0
-		
-		# 對劍尖施加更強的抗重力與前傾力，防止武器拖地
-		physics.points[tip_index].accumulated_force.y -= 3000.0
+		# 對劍尖施加稍微弱一點的抗重力與前傾力，讓劍自然下垂到腰部高度
+		physics.points[tip_index].accumulated_force.y -= 2200.0
 		physics.points[tip_index].accumulated_force.x += owner_facing_dir * 1200.0
 		
 	# (未來：ATTACK 狀態會在這裡施加向前的巨大揮砍力)

@@ -159,13 +159,15 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	# 手肘向後並向內彎曲（加入不對稱性，避免雙臂重疊）
-	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 1000.0 # 左手（後手）往後拉更多
-	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 600.0  # 右手（前手）往後拉少一點
+	# 手肘向後並向內下彎曲（加入不對稱性，避免雙臂重疊）
+	# 左手（後手）往後拉多一點，下壓少一點
+	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 600.0
+	verlet.points[J.L_ELBOW].accumulated_force.y += 400.0
 	
-	# 高低差：左手肘稍微抬高，右手肘下壓
-	verlet.points[J.L_ELBOW].accumulated_force.y -= 200.0
-	verlet.points[J.R_ELBOW].accumulated_force.y += 400.0
+	# 右手（前手）往後拉少一點，下壓多一點
+	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 300.0
+	verlet.points[J.R_ELBOW].accumulated_force.y += 800.0
+
 
 
 	
