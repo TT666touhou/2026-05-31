@@ -105,16 +105,14 @@ func _ready() -> void:
 		verlet.add_stick(J.L_HAND, main_hand_pivot.physics_index, 10.0, 1.0, false)
 		verlet.add_stick(J.L_HAND, blade_tip_idx, 35.0, 1.0, false)
 		
+		# 設定劍尖的物理屬性：重量大慣性強，衰減慢讓擺動持久
+		verlet.points[blade_tip_idx].drag = 0.985
+		verlet.points[blade_tip_idx].mass = 2.0
+		
 		# 將武器的物理控制權交給 WeaponController 處理
 		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
 		if weapon_controller and weapon_controller.has_method("setup_physics"):
 			weapon_controller.setup_physics(verlet, main_hand_pivot.physics_index, blade_tip_idx, facing_dir)
-			
-	# 在這裡更新 weapon controller 需要的玩家狀態 (朝向與核心位置)
-	if sword_rig:
-		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
-		if weapon_controller and weapon_controller.has_method("update_owner_status"):
-			weapon_controller.update_owner_status(verlet.points[J.R_HAND].pos, facing_dir)
 
 
 func _get_foot_offset(phase: float, stride: float) -> Vector2:
@@ -152,10 +150,10 @@ func _physics_process(delta: float) -> void:
 	# 1. 脊椎在 X 軸隨機搖擺
 	verlet.points[J.SPINE_TOP].accumulated_force.x += facing_dir * 300.0 * walk_blend
 	
-	# 2. 雙手反相位擺動
+	# 2. 左手自然擺動（右手已焊在劍柄，讓劍的物理慣性決定它的位置）
 	var hand_force = sin(Engine.get_frames_drawn() * delta * 8.0) * 1500.0 * walk_blend
 	verlet.points[J.L_HAND].accumulated_force.x += facing_dir * hand_force
-	verlet.points[J.R_HAND].accumulated_force.x -= facing_dir * hand_force
+	# 注意：R_HAND 不再施加反相位力，避免把劍柄往後拉扯
 	
 	# 3. 關節定向偏置 (Joint Bias) 與 手臂反重力 (Anti-gravity)
 	var arm_anti_gravity = -680.0 # 抵銷 980，讓向下加速度剩 300
@@ -164,10 +162,17 @@ func _physics_process(delta: float) -> void:
 		
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
-	verlet.points[J.L_ELBOW].accumulated_force.x -= facing_dir * 300.0
-	verlet.points[J.R_ELBOW].accumulated_force.x -= facing_dir * 300.0
+	# 手肘往前偏置（參考影片逐幀分析：手肘應在肩膀前方，不是往後）
+	verlet.points[J.L_ELBOW].accumulated_force.x += facing_dir * 700.0
+	verlet.points[J.R_ELBOW].accumulated_force.x += facing_dir * 700.0
 	verlet.points[J.L_HAND].accumulated_force.y += 200.0
 	verlet.points[J.R_HAND].accumulated_force.y += 200.0
+	
+	# 4. 劍柄前向偏置：讓劍柄保持在身體前方，劍尖透過慣性自由擺動
+	#    sw0 = 索引 J.COUNT = 11（劍柄），加強力讓柄穩在肩前
+	if verlet.points.size() > J.COUNT:
+		verlet.points[J.COUNT].accumulated_force.x += facing_dir * 1800.0
+
 	
 	# 執行泛用物理模擬
 	verlet.simulate(delta, Vector2(0, 980.0), character_body.global_position.y)

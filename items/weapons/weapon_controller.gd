@@ -54,13 +54,8 @@ func setup_physics(verlet: VerletPhysics, base_idx: int, t_index: int, facing_di
 	base_index = base_idx
 	tip_index = t_index
 	owner_facing_dir = facing_dir
-	
-	# 移除舊的馬達 (如果有的話)
-	if motor_id != -1:
-		verlet.remove_motor(motor_id)
-		
-	# 註冊一個新的、由狀態機控制的馬達
-	motor_id = verlet.add_motor(tip_index, _get_target_tip_position, 40.0)
+	# 劍尖現在是純物理擺錘，不需要馬達驅動
+	# 馬達會干擾 stick solver，導致手臂被扭曲
 
 func update_owner_status(core_pos: Vector2, facing_dir: float) -> void:
 	owner_core_pos = core_pos
