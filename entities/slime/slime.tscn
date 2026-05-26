@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://cxw40d10raq"]
+
+[ext_resource type="Script" path="res://entities/slime/slime_controller.gd" id="1_controller"]
+[ext_resource type="Script" path="res://entities/slime/slime_drawer.gd" id="2_drawer"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(30, 20)
+
+[node name="Slime" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_controller")
+
+[node name="HitboxArea" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitboxArea"]
+position = Vector2(0, -10)
+shape = SubResource("RectangleShape2D_1")
+
+[node name="AttackArea" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+position = Vector2(0, -10)
+shape = SubResource("RectangleShape2D_1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -10)
+shape = SubResource("RectangleShape2D_1")
+
+[node name="SlimeDrawer" type="Node2D" parent="."]
+script = ExtResource("2_drawer")
