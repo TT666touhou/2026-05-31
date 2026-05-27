@@ -22,6 +22,8 @@ var walk_blend: float = 0.0
 var l_phase: float = 0.0
 var r_phase: float = 0.0
 
+var override_mouse_pos = null # For testing
+
 func _ready() -> void:
 	character_body = get_parent() as CharacterBody2D
 	var base_pos = character_body.global_position
@@ -115,6 +117,9 @@ func _physics_process(delta: float) -> void:
 	
 	# 透過滑鼠游標決定目標面向
 	var mouse_pos = get_global_mouse_position()
+	if override_mouse_pos != null:
+		mouse_pos = override_mouse_pos
+		
 	if mouse_pos.x > character_body.global_position.x:
 		target_facing_dir = 1.0
 	else:
@@ -153,13 +158,14 @@ func _physics_process(delta: float) -> void:
 	verlet.points[J.L_KNEE].accumulated_force.x += facing_dir * 300.0
 	verlet.points[J.R_KNEE].accumulated_force.x += facing_dir * 300.0
 	# 手肘姿態雕塑：向下壓並微往後收，形成自然的「V」字彎折
+	# 為了配合 360 度動態瞄準，後收力道不能太大，只要給予物理引擎一點「彎曲方向」的偏好即可
 	# 左手（後手，握較高位置）：自然下垂微後靠
-	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 300.0
-	verlet.points[J.L_ELBOW].accumulated_force.y += 600.0
+	verlet.points[J.L_ELBOW].accumulated_force.x += -facing_dir * 50.0
+	verlet.points[J.L_ELBOW].accumulated_force.y += 100.0
 	
 	# 右手（前手，握劍柄底端）：手肘較往後收
-	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 600.0
-	verlet.points[J.R_ELBOW].accumulated_force.y += 300.0
+	verlet.points[J.R_ELBOW].accumulated_force.x += -facing_dir * 100.0
+	verlet.points[J.R_ELBOW].accumulated_force.y += 50.0
 
 
 	

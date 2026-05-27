@@ -86,20 +86,26 @@ func _physics_process(delta: float) -> void:
 		return
 		
 	# 計算即時的滑鼠瞄準方向 (用於 IDLE 和 RECOVER)
-	var mouse_pos = get_viewport().get_mouse_position() # 如果有 Camera2D 的話，可能要用 get_global_mouse_position()
-	# 註：因為在 Node 裡面，最好用 get_global_mouse_position()
-	# 但是 WeaponController 不是 CanvasItem，我們可以用 weapon_rig.get_global_mouse_position()
-	var current_aim_dir = (weapon_rig.get_global_mouse_position() - weapon_rig.global_position).normalized()
+	var mouse_pos = weapon_rig.get_global_mouse_position()
+	if weapon_rig.get_parent() and "override_mouse_pos" in weapon_rig.get_parent():
+		if weapon_rig.get_parent().override_mouse_pos != null:
+			mouse_pos = weapon_rig.get_parent().override_mouse_pos
+	
+	# 注意：物理點的座標是相對於 procedural_drawer 的。
+	# 因此我們將物理座標轉換為全域座標來計算真正的瞄準方向。
+	var real_base_global = weapon_rig.get_parent().global_position + physics.points[base_index].pos
+	var current_aim_dir = (mouse_pos - real_base_global).normalized()
 	
 	# 基本抗重力 (減輕雙臂負擔)
 	physics.points[base_index].accumulated_force.y -= 1000.0
+	physics.points[tip_index].accumulated_force.y -= 3000.0 # 抗重力，抵銷 1.5 倍質量的下墜
 	
 	match current_state:
 		State.IDLE:
 			# 閒置：劍尖隨時指向滑鼠
-			physics.points[tip_index].accumulated_force += current_aim_dir * 3000.0
+			physics.points[tip_index].accumulated_force += current_aim_dir * 8000.0
 			# 給劍柄一個反向的抗力，避免整個身體被劍拖著走
-			physics.points[base_index].accumulated_force -= current_aim_dir * 500.0
+			physics.points[base_index].accumulated_force -= current_aim_dir * 3000.0
 			
 		State.WINDUP:
 			# 蓄力：順著鎖定的瞄準方向反向拉 (收劍)
