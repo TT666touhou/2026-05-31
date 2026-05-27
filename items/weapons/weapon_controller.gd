@@ -74,21 +74,8 @@ func update_owner_status(core_pos: Vector2, facing_dir: float) -> void:
 	owner_core_pos = core_pos
 	owner_facing_dir = facing_dir
 
-var attack_target_pos: Vector2 = Vector2.ZERO
-var attack_is_stab: bool = false
-
 func try_attack(mouse_pos: Vector2) -> bool:
 	if current_state == State.IDLE:
-		attack_target_pos = mouse_pos
-		var dist = weapon_rig.global_position.distance_to(mouse_pos)
-		var dir = (mouse_pos - weapon_rig.global_position).normalized()
-		
-		# 判斷是刺擊還是揮砍
-		if dist > 150.0 and abs(dir.y) < 0.5:
-			attack_is_stab = true
-		else:
-			attack_is_stab = false
-			
 		_change_state(State.WINDUP)
 		return true
 	return false
@@ -105,6 +92,9 @@ func _physics_process(delta: float) -> void:
 	# 基本抗重力 (所有狀態共通，減輕雙臂負擔)
 	physics.points[base_index].accumulated_force.y -= 1000.0
 	
+	# 即時取得滑鼠方向，作為全方位攻擊的軸線
+	var aim_dir = (weapon_rig.get_global_mouse_position() - weapon_rig.global_position).normalized()
+	
 	match current_state:
 		State.IDLE:
 			# 閒置：劍尖上揚前傾
@@ -112,29 +102,33 @@ func _physics_process(delta: float) -> void:
 			physics.points[tip_index].accumulated_force.x += owner_facing_dir * 1200.0
 			
 		State.WINDUP:
-			# 蓄力：把劍往後上方拉 (抬手準備)
-			physics.points[tip_index].accumulated_force.y -= 6000.0
-			physics.points[tip_index].accumulated_force.x -= owner_facing_dir * 3000.0
+			# 蓄力：把劍往後收，但劍尖強制指向滑鼠
+			# 1. 劍身旋轉力偶 (Couple Force)，讓劍尖對準滑鼠
+			physics.points[tip_index].accumulated_force += aim_dir * 3000.0
+			physics.points[base_index].accumulated_force -= aim_dir * 3000.0
+			# 2. 整體後收力道 (往滑鼠的反方向收)
+			physics.points[base_index].accumulated_force -= aim_dir * 8000.0
+			
 			if state_timer >= windup_time:
 				_change_state(State.ATTACK)
 				
 		State.ATTACK:
-			# 爆發攻擊
-			var to_target = (attack_target_pos - weapon_rig.global_position).normalized()
-			if attack_is_stab:
-				# 突刺：給劍尖與劍柄極大的直線推力
-				physics.points[tip_index].accumulated_force += to_target * 12000.0
-				physics.points[base_index].accumulated_force += to_target * 8000.0
-			else:
-				# 揮砍：往目標方向，但帶有強烈的下壓與向外甩力
-				var slash_dir = to_target + Vector2(0, 1.5) # 強迫向下壓
-				physics.points[tip_index].accumulated_force += slash_dir.normalized() * 15000.0
+			# 爆發攻擊：維持強烈指向，並給予極大的正向推力
+			physics.points[tip_index].accumulated_force += aim_dir * 5000.0
+			physics.points[base_index].accumulated_force -= aim_dir * 5000.0
+			# 巨大的突刺推力
+			physics.points[tip_index].accumulated_force += aim_dir * 15000.0
+			physics.points[base_index].accumulated_force += aim_dir * 10000.0
 			
 			if state_timer >= attack_time:
 				_change_state(State.RECOVER)
 				
 		State.RECOVER:
-			# 硬直：停止主動加力，只留微弱抗重力，靠慣性與重力自然下垂
-			physics.points[tip_index].accumulated_force.y -= 500.0
+			# 硬直：維持微弱的指向警戒姿態
+			physics.points[tip_index].accumulated_force += aim_dir * 1500.0
+			physics.points[base_index].accumulated_force -= aim_dir * 1500.0
+			# 額外的劍尖抗重力，避免垂得太低
+			physics.points[tip_index].accumulated_force.y -= 1500.0
+			
 			if state_timer >= recover_time:
 				_change_state(State.IDLE)
