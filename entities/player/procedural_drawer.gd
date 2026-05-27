@@ -131,8 +131,13 @@ func _physics_process(delta: float) -> void:
 	if not character_body: return
 	
 	var speed = character_body.velocity.x
-	if speed > 0.1: facing_dir = 1.0
-	elif speed < -0.1: facing_dir = -1.0
+	
+	var weapon = get_node_or_null("Sword/WeaponController")
+	if weapon and weapon.current_state != 0: # State.IDLE == 0
+		facing_dir = weapon.owner_facing_dir
+	else:
+		if speed > 0.1: facing_dir = 1.0
+		elif speed < -0.1: facing_dir = -1.0
 	
 	if abs(speed) > 10.0:
 		walk_blend = move_toward(walk_blend, 1.0, delta * 8.0)
