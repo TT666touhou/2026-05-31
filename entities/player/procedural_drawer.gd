@@ -93,28 +93,10 @@ func _ready() -> void:
 	sword_rig.global_position = verlet.points[J.R_HAND].pos - global_position
 	sword_rig.inject_into(verlet)
 	
-	var main_hand_pivot = sword_rig.get_pivot("MainHand")
-	var off_hand_pivot = sword_rig.get_pivot("OffHand")
-	
-	if main_hand_pivot and off_hand_pivot:
-		# 獲取劍尖索引，設定為像頭一樣「軟」，使其在移動時自然晃動
-		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
-		
-		# 將右手綁死在 MainHand (柄底端)
-		verlet.add_stick(J.R_HAND, main_hand_pivot.physics_index, 0.0, 1.0, false)
-		
-		# 將左手綁死在劍身上方 10px 處
-		# (透過與劍柄距離 10，與劍尖距離 35 的雙重約束，將手定位在劍身上)
-		verlet.add_stick(J.L_HAND, main_hand_pivot.physics_index, 10.0, 1.0, false)
-		verlet.add_stick(J.L_HAND, blade_tip_idx, 35.0, 1.0, false)
-		
-		verlet.points[blade_tip_idx].drag = 0.98  # 高阻尼，像頭一樣
-		verlet.points[blade_tip_idx].mass = 1.5   # 增加質量
-		
-		# 將物理系統傳遞給 WeaponController 進行後續施力
-		var weapon_controller = sword_rig.get_node_or_null("WeaponController")
-		if weapon_controller and weapon_controller.has_method("setup_physics"):
-			weapon_controller.setup_physics(verlet, main_hand_pivot.physics_index, blade_tip_idx, facing_dir)
+	# 將實體與武器的綁定邏輯交由 WeaponController 處理
+	var weapon_controller = sword_rig.get_node_or_null("WeaponController")
+	if weapon_controller and weapon_controller.has_method("equip"):
+		weapon_controller.equip(verlet, J.L_HAND, J.R_HAND, facing_dir)
 
 func _get_foot_offset(phase: float, stride: float) -> Vector2:
 	var amplitude = stride / 2.0

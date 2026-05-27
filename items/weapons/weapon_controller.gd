@@ -52,13 +52,23 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 		# 只有在揮砍階段才算有效打擊
 		hit_target.emit(body)
 
-func setup_physics(verlet: VerletPhysics, base_idx: int, t_index: int, facing_dir: float) -> void:
+func equip(verlet: VerletPhysics, l_hand_idx: int, r_hand_idx: int, facing_dir: float) -> void:
 	physics = verlet
-	base_index = base_idx
-	tip_index = t_index
 	owner_facing_dir = facing_dir
-	# 劍尖現在是純物理擺錘，不需要馬達驅動
-	# 馬達會干擾 stick solver，導致手臂被扭曲
+	
+	var main_hand_pivot = weapon_rig.get_pivot("MainHand")
+	if main_hand_pivot:
+		base_index = main_hand_pivot.physics_index
+		tip_index = weapon_rig.line_point_map[weapon_rig.get_node("Blade")][1]
+		
+		# 綁定雙手
+		physics.add_stick(r_hand_idx, base_index, 0.0, 1.0, false)
+		physics.add_stick(l_hand_idx, base_index, 10.0, 1.0, false)
+		physics.add_stick(l_hand_idx, tip_index, 35.0, 1.0, false)
+		
+		# 設定劍尖物理屬性
+		physics.points[tip_index].drag = 0.98
+		physics.points[tip_index].mass = 1.5
 
 func update_owner_status(core_pos: Vector2, facing_dir: float) -> void:
 	owner_core_pos = core_pos
