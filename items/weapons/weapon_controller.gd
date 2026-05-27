@@ -79,9 +79,6 @@ func try_attack(mouse_pos: Vector2) -> bool:
 		else:
 			attack_is_stab = false
 			
-		# 更新面向
-		owner_facing_dir = 1.0 if dir.x > 0 else -1.0
-			
 		_change_state(State.WINDUP)
 		return true
 	return false

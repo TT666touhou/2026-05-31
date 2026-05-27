@@ -16,6 +16,7 @@ const STRIDE_LENGTH = 28.0
 const STEP_HEIGHT = 6.0
 
 var facing_dir: float = 1.0
+var target_facing_dir: float = 1.0
 var walk_blend: float = 0.0
 
 var l_phase: float = 0.0
@@ -75,12 +76,12 @@ func _ready() -> void:
 	verlet.add_motor(J.SPINE_TOP, func(): return character_body.global_position + Vector2(0, -29), 600.0, Vector2(0, 1))
 	verlet.add_motor(J.HEAD_CENTER, func(): return character_body.global_position + Vector2(0, -35), 400.0, Vector2(0, 1))
 	
-	# 腳部彈射馬達：基底位置乘上 facing_dir，讓雙腿在轉向時自動交叉鏡像
+	# 腳部彈射馬達
 	verlet.add_motor(J.L_FOOT, func(): 
-		return character_body.global_position + Vector2(-10 * facing_dir, 0) + _get_foot_offset(l_phase, STRIDE_LENGTH) * walk_blend
+		return character_body.global_position + Vector2(-10, 0) + _get_foot_offset(l_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
 	verlet.add_motor(J.R_FOOT, func(): 
-		return character_body.global_position + Vector2(10 * facing_dir, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
+		return character_body.global_position + Vector2(10, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
 	
 	# ==== 掛載長劍 ====
@@ -130,14 +131,21 @@ func _get_foot_offset(phase: float, stride: float) -> Vector2:
 func _physics_process(delta: float) -> void:
 	if not character_body: return
 	
-	var speed = character_body.velocity.x
+	# 透過滑鼠游標決定目標面向
+	var mouse_pos = get_global_mouse_position()
+	if mouse_pos.x > character_body.global_position.x:
+		target_facing_dir = 1.0
+	else:
+		target_facing_dir = -1.0
+		
+	# 平滑線性過渡 (轉身動畫時間約 0.25 秒)
+	facing_dir = move_toward(facing_dir, target_facing_dir, delta * 8.0)
 	
 	var weapon = get_node_or_null("Sword/WeaponController")
-	if weapon and weapon.current_state != 0: # State.IDLE == 0
-		facing_dir = weapon.owner_facing_dir
-	else:
-		if speed > 0.1: facing_dir = 1.0
-		elif speed < -0.1: facing_dir = -1.0
+	if weapon and weapon.has_method("update_owner_status"):
+		weapon.update_owner_status(character_body.global_position, facing_dir)
+	
+	var speed = character_body.velocity.x
 	
 	if abs(speed) > 10.0:
 		walk_blend = move_toward(walk_blend, 1.0, delta * 8.0)
@@ -145,8 +153,7 @@ func _physics_process(delta: float) -> void:
 		walk_blend = move_toward(walk_blend, 0.0, delta * 12.0)
 		
 	# 更新全域相位 (供馬達抓取)
-	# 乘上 facing_dir 確保往左走時，相位依然是「往前進」的，避免麥可傑克森式月球漫步
-	var phase_x = character_body.global_position.x * facing_dir
+	var phase_x = character_body.global_position.x
 	var global_phase = fposmod(phase_x / STRIDE_LENGTH, 1.0)
 	l_phase = global_phase
 	r_phase = fposmod(global_phase + 0.5, 1.0)
