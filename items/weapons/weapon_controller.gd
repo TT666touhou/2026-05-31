@@ -6,9 +6,9 @@ enum State { IDLE, WINDUP, ATTACK, RECOVER }
 @export var attack_type: String = "SLASH" # "SLASH" 或 "STAB"
 @export var attack_range: float = 150.0
 
-@export var windup_time: float = 0.2
-@export var attack_time: float = 0.1
-@export var recover_time: float = 0.5
+@export var windup_time: float = 0.1
+@export var attack_time: float = 0.05
+@export var recover_time: float = 0.25
 
 @export var idle_offset: Vector2 = Vector2(30, -30)   # 1點鐘方向
 @export var windup_offset: Vector2 = Vector2(-20, -40) # 11點鐘方向
