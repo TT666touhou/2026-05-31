@@ -1,0 +1,13 @@
+{
+  "name": "godot-studio-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Godot 4 Studio automation - run tests, capture screenshots, validate scripts",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}

@@ -1,0 +1,20 @@
+[gd_scene format=4 uid="uid://cave_chunk_kit"]
+
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/CaveChunk.gd" id="1"]
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1"]
+polygon = PackedVector2Array(-64, -48, 0, -80, 64, -48, 80, 0, 48, 64, -32, 72, -80, 32, -80, -24)
+
+[node name="CaveChunk" type="StaticBody2D" script=ExtResource("1")]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-64, -48, 0, -80, 64, -48, 80, 0, 48, 64, -32, 72, -80, 32, -80, -24)
+color = Color(0.478, 0.361, 0.063, 1)
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-64, -48, 0, -80, 64, -48, 80, 0, 48, 64, -32, 72, -80, 32, -80, -24)
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_1")

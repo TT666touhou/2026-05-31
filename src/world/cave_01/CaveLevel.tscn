@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://src/world/cave_01/CaveWall.tscn" id="1_fsx0u"]
+[ext_resource type="Script" path="res://src/world/cave_01/CaveWall.gd" id="2_1fy87"]
+[ext_resource type="PackedScene" path="res://src/entities/player/Player.tscn" id="3_tnwu8"]
+[ext_resource type="Script" path="res://src/entities/player/PlayerController.gd" id="4_8fcnd"]
+
+[node name="CaveLevel" type="Node2D" unique_id=835637963]
+
+[node name="Background" type="ColorRect" parent="." unique_id=59376275]
+z_index = -100
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -1000.0
+offset_top = -1000.0
+offset_right = 1000.0
+offset_bottom = 1000.0
+color = Color(0.12, 0.1, 0.08, 1)
+
+[node name="Floor" type="ColorRect" parent="." unique_id=897581110]
+z_index = -10
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+color = Color(0.32, 0.22, 0.09, 1)
+
+[node name="CaveWall_0" type="StaticBody2D" parent="." unique_id=719027657 instance=ExtResource("1_fsx0u")]
+position = Vector2(0, -320)
+collision_mask = 0
+script = ExtResource("2_1fy87")
+
+[node name="CaveWall_1" type="StaticBody2D" parent="." unique_id=110337327 instance=ExtResource("1_fsx0u")]
+position = Vector2(0, 320)
+collision_mask = 0
+script = ExtResource("2_1fy87")
+
+[node name="CaveWall_2" type="StaticBody2D" parent="." unique_id=382367687 instance=ExtResource("1_fsx0u")]
+position = Vector2(-420, 0)
+collision_mask = 0
+script = ExtResource("2_1fy87")
+
+[node name="CaveWall_3" type="StaticBody2D" parent="." unique_id=2117979399 instance=ExtResource("1_fsx0u")]
+position = Vector2(420, 0)
+collision_mask = 0
+script = ExtResource("2_1fy87")
+
+[node name="Player" type="CharacterBody2D" parent="." unique_id=44095327 instance=ExtResource("3_tnwu8")]
+z_index = 10
+collision_layer = 2
+script = ExtResource("4_8fcnd")

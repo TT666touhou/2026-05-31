@@ -1,0 +1,6 @@
+[gd_scene format=4 uid="uid://room_floor_kit"]
+
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/RoomFloor.gd" id="1"]
+
+[node name="RoomFloor" type="Node2D" script=ExtResource("1")]
+z_index = -1
