@@ -75,12 +75,12 @@ func _ready() -> void:
 	verlet.add_motor(J.SPINE_TOP, func(): return character_body.global_position + Vector2(0, -29), 600.0, Vector2(0, 1))
 	verlet.add_motor(J.HEAD_CENTER, func(): return character_body.global_position + Vector2(0, -35), 400.0, Vector2(0, 1))
 	
-	# 腳部彈射馬達
+	# 腳部彈射馬達：基底位置乘上 facing_dir，讓雙腿在轉向時自動交叉鏡像
 	verlet.add_motor(J.L_FOOT, func(): 
-		return character_body.global_position + Vector2(-10, 0) + _get_foot_offset(l_phase, STRIDE_LENGTH) * walk_blend
+		return character_body.global_position + Vector2(-10 * facing_dir, 0) + _get_foot_offset(l_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
 	verlet.add_motor(J.R_FOOT, func(): 
-		return character_body.global_position + Vector2(10, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
+		return character_body.global_position + Vector2(10 * facing_dir, 0) + _get_foot_offset(r_phase, STRIDE_LENGTH) * walk_blend
 	, 800.0)
 	
 	# ==== 掛載長劍 ====
@@ -145,7 +145,8 @@ func _physics_process(delta: float) -> void:
 		walk_blend = move_toward(walk_blend, 0.0, delta * 12.0)
 		
 	# 更新全域相位 (供馬達抓取)
-	var phase_x = character_body.global_position.x
+	# 乘上 facing_dir 確保往左走時，相位依然是「往前進」的，避免麥可傑克森式月球漫步
+	var phase_x = character_body.global_position.x * facing_dir
 	var global_phase = fposmod(phase_x / STRIDE_LENGTH, 1.0)
 	l_phase = global_phase
 	r_phase = fposmod(global_phase + 0.5, 1.0)
