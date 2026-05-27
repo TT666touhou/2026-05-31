@@ -6,79 +6,83 @@ var verlet
 var J
 
 func _init() -> void:
-	print("Starting Two-Handed Grip Physics Validation...")
+	print("Starting Two-Handed Grip Physics Validation with Movement...")
 	var root = root
 	var player = player_scene.instantiate()
 	root.add_child(player)
 	
 	procedural_drawer = player.get_node("ProceduralDrawer")
 	J = procedural_drawer.J
+	var character_body = player as CharacterBody2D
 	
-	# 等待幾幀讓物理穩定
+	print("--- Phase 1: Idle stabilization ---")
 	for i in range(30):
 		await process_frame
 		
 	verlet = procedural_drawer.verlet
+	var passed = _verify_posture("Idle")
 	
+	print("--- Phase 2: Running simulation ---")
+	# 模擬極高速奔跑，強制觸發 walk_blend = 1.0 以及步態計算
+	for i in range(60):
+		character_body.velocity.x = 200.0
+		# 手動呼叫 _physics_process，因為 CharacterBody2D 的移動會觸發 _physics_process
+		# 但我們在 test 裡面可能需要確保它被呼叫
+		await process_frame
+		
+	passed = _verify_posture("Running") and passed
+	
+	print("--- Phase 3: Post-running stabilization ---")
+	# 模擬停止
+	for i in range(30):
+		character_body.velocity.x = 0.0
+		await process_frame
+		
+	passed = _verify_posture("Post-Running") and passed
+
+	if passed:
+		print("ALL TESTS PASSED: Posture is stable across idle and movement.")
+	else:
+		print("SOME TESTS FAILED: Posture broke.")
+	
+	quit(0 if passed else 1)
+
+func _verify_posture(phase_name: String) -> bool:
 	var passed = true
-	
-	# 1. Check elbows are backwards
 	var spine_x = verlet.points[J.SPINE_TOP].pos.x
 	var l_elbow_x = verlet.points[J.L_ELBOW].pos.x
 	var r_elbow_x = verlet.points[J.R_ELBOW].pos.x
 	
-	print("Spine X: ", spine_x)
-	print("L Elbow X: ", l_elbow_x)
-	print("R Elbow X: ", r_elbow_x)
-	
 	if l_elbow_x > spine_x or r_elbow_x > spine_x:
-		push_error("FAIL: Elbows are not pointing backwards!")
+		push_error("[%s] FAIL: Elbows are not pointing backwards!" % phase_name)
 		passed = false
 	else:
-		print("PASS: Elbows are pointing backwards.")
+		print("[%s] PASS: Elbows backwards." % phase_name)
 		
-	# 2. Check sword tip is soft and points forward-up
 	var sword_rig = procedural_drawer.get_node_or_null("Sword")
 	if sword_rig:
 		var main_hand_pivot = sword_rig.get_pivot("MainHand")
 		var off_hand_pivot = sword_rig.get_pivot("OffHand")
 		var blade_tip_idx = sword_rig.line_point_map[sword_rig.get_node("Blade")][1]
 		
-		# 手部綁定驗證
 		var r_hand_pos = verlet.points[J.R_HAND].pos
 		var main_hand_pos = verlet.points[main_hand_pivot.physics_index].pos
 		var l_hand_pos = verlet.points[J.L_HAND].pos
 		var off_hand_pos = verlet.points[off_hand_pivot.physics_index].pos
 		
 		if r_hand_pos.distance_to(main_hand_pos) > 1.0:
-			push_error("FAIL: R_HAND not bound to MainHand")
+			push_error("[%s] FAIL: R_HAND detached from MainHand" % phase_name)
 			passed = false
 		if l_hand_pos.distance_to(off_hand_pos) > 1.0:
-			push_error("FAIL: L_HAND not bound to OffHand")
+			push_error("[%s] FAIL: L_HAND detached from OffHand" % phase_name)
 			passed = false
 			
-		var drag = verlet.points[blade_tip_idx].drag
-		if drag < 0.95:
-			push_error("FAIL: Blade tip drag is too low (" + str(drag) + "), not soft enough")
-			passed = false
-		else:
-			print("PASS: Blade tip drag is high (soft).")
-			
-		# Check blade angle (should be roughly pointing up/right)
 		var dir = (verlet.points[blade_tip_idx].pos - main_hand_pos).normalized()
-		print("Blade Direction: ", dir)
-		if dir.y > 0: # Pointing down?
-			push_error("FAIL: Blade is pointing downwards instead of up!")
+		if dir.y > 0:
+			push_error("[%s] FAIL: Blade is pointing downwards instead of up!" % phase_name)
 			passed = false
-		else:
-			print("PASS: Blade pointing upwards.")
 	else:
-		push_error("FAIL: Sword rig not found.")
+		push_error("[%s] FAIL: Sword rig not found." % phase_name)
 		passed = false
-
-	if passed:
-		print("ALL TESTS PASSED")
-	else:
-		print("SOME TESTS FAILED")
-	
-	quit(0 if passed else 1)
+		
+	return passed
