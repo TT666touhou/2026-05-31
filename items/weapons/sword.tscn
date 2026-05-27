@@ -21,7 +21,7 @@ antialiased = false
 script = ExtResource("2_pivot")
 
 [node name="OffHand" type="Marker2D" parent="."]
-position = Vector2(0, -20)
+position = Vector2(0, -10)
 script = ExtResource("2_pivot")
 pivot_name = "OffHand"
 

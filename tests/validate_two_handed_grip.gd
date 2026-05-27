@@ -45,14 +45,23 @@ func _init() -> void:
 		player.velocity.y += 980.0 * 0.016 # gravity
 		await validate_frames(1)
 
+	print("\n--- TEST: ATTACK (Slash) ---")
+	var weapon = player.get_node("ProceduralDrawer/Sword/WeaponController")
+	# Trigger slash (target close and down)
+	weapon.try_attack(player.global_position + Vector2(100, 100))
+	
+	# Validate during windup, attack, recover
+	var total_frames = int((weapon.windup_time + weapon.attack_time + weapon.recover_time) * 60)
+	await validate_frames(total_frames, false) # Disable strict sword angle check during attack
+
 	if passed:
-		print("\nALL DYNAMIC TESTS PASSED: The grip is stable under movement!")
+		print("\nALL DYNAMIC TESTS PASSED: The grip is stable under movement and attacks!")
 	else:
 		push_error("\nSOME TESTS FAILED: The pentagon collapsed.")
 	
 	quit(0 if passed else 1)
 
-func validate_frames(frame_count: int) -> void:
+func validate_frames(frame_count: int, check_angle: bool = true) -> void:
 	for i in range(frame_count):
 		await process_frame
 		if not passed: return
@@ -89,9 +98,10 @@ func validate_frames(frame_count: int) -> void:
 				passed = false
 				return
 				
-			# Check blade angle (should be roughly pointing up)
-			var dir = (verlet.points[blade_tip_idx].pos - main_hand_pos).normalized()
-			if dir.y > 0: # Pointing down?
-				push_error("FAIL: Blade dropped downwards during movement!")
-				passed = false
-				return
+			# Check blade angle (only when idle/moving, skip during attack as it swings down)
+			if check_angle:
+				var dir = (verlet.points[blade_tip_idx].pos - main_hand_pos).normalized()
+				if dir.y > 0: # Pointing down?
+					push_error("FAIL: Blade dropped downwards during movement!")
+					passed = false
+					return

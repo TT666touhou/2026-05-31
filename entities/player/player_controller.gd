@@ -17,11 +17,11 @@ func _physics_process(delta: float) -> void:
 	elif Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_SPACE):
 		velocity.y = -280.0 # 降低 30% 跳躍高度 (原本 400.0)
 		
-	# 處理攻擊輸入 (按 J 鍵)
-	if Input.is_key_pressed(KEY_J):
-		var weapon = get_node_or_null("../Weapon/Sword/WeaponController")
+	# 處理攻擊輸入 (按 J 鍵或滑鼠左鍵)
+	if Input.is_key_pressed(KEY_J) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var weapon = get_node_or_null("ProceduralDrawer/Sword/WeaponController")
 		if weapon and weapon.has_method("try_attack"):
-			weapon.try_attack()
+			weapon.try_attack(get_global_mouse_position())
 			
 	var direction := Input.get_axis("ui_left", "ui_right")
 	if Input.is_key_pressed(KEY_A):
