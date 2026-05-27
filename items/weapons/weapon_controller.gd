@@ -3,16 +3,9 @@ class_name WeaponController
 
 enum State { IDLE, WINDUP, ATTACK, RECOVER }
 
-@export var attack_type: String = "SLASH" # "SLASH" 或 "STAB"
-@export var attack_range: float = 150.0
-
 @export var windup_time: float = 0.1
 @export var attack_time: float = 0.05
 @export var recover_time: float = 0.25
-
-@export var idle_offset: Vector2 = Vector2(30, -30)   # 1點鐘方向
-@export var windup_offset: Vector2 = Vector2(-20, -40) # 11點鐘方向
-@export var attack_offset: Vector2 = Vector2(40, 40)   # 5點鐘方向
 
 var current_state: State = State.IDLE
 var state_timer: float = 0.0
@@ -74,8 +67,11 @@ func update_owner_status(core_pos: Vector2, facing_dir: float) -> void:
 	owner_core_pos = core_pos
 	owner_facing_dir = facing_dir
 
+var locked_aim_dir: Vector2 = Vector2.ZERO
+
 func try_attack(mouse_pos: Vector2) -> bool:
-	if current_state == State.IDLE:
+	if current_state == State.IDLE or current_state == State.RECOVER:
+		locked_aim_dir = (mouse_pos - weapon_rig.global_position).normalized()
 		_change_state(State.WINDUP)
 		return true
 	return false
@@ -89,46 +85,39 @@ func _physics_process(delta: float) -> void:
 	if tip_index == -1 or not physics or physics.points.size() <= tip_index:
 		return
 		
-	# 基本抗重力 (所有狀態共通，減輕雙臂負擔)
-	physics.points[base_index].accumulated_force.y -= 1000.0
+	# 計算即時的滑鼠瞄準方向 (用於 IDLE 和 RECOVER)
+	var mouse_pos = get_viewport().get_mouse_position() # 如果有 Camera2D 的話，可能要用 get_global_mouse_position()
+	# 註：因為在 Node 裡面，最好用 get_global_mouse_position()
+	# 但是 WeaponController 不是 CanvasItem，我們可以用 weapon_rig.get_global_mouse_position()
+	var current_aim_dir = (weapon_rig.get_global_mouse_position() - weapon_rig.global_position).normalized()
 	
-	# 即時取得滑鼠方向，作為全方位攻擊的軸線
-	var aim_dir = (weapon_rig.get_global_mouse_position() - weapon_rig.global_position).normalized()
+	# 基本抗重力 (減輕雙臂負擔)
+	physics.points[base_index].accumulated_force.y -= 1000.0
 	
 	match current_state:
 		State.IDLE:
-			# 閒置：劍尖上揚前傾
-			physics.points[tip_index].accumulated_force.y -= 3000.0
-			physics.points[tip_index].accumulated_force.x += owner_facing_dir * 1200.0
+			# 閒置：劍尖隨時指向滑鼠
+			physics.points[tip_index].accumulated_force += current_aim_dir * 3000.0
+			# 給劍柄一個反向的抗力，避免整個身體被劍拖著走
+			physics.points[base_index].accumulated_force -= current_aim_dir * 500.0
 			
 		State.WINDUP:
-			# 蓄力：把劍往後收，但劍尖強制指向滑鼠
-			# 1. 劍身旋轉力偶 (Couple Force)，讓劍尖對準滑鼠
-			physics.points[tip_index].accumulated_force += aim_dir * 3000.0
-			physics.points[base_index].accumulated_force -= aim_dir * 3000.0
-			# 2. 整體後收力道 (往滑鼠的反方向收)
-			physics.points[base_index].accumulated_force -= aim_dir * 8000.0
-			
+			# 蓄力：順著鎖定的瞄準方向反向拉 (收劍)
+			physics.points[tip_index].accumulated_force -= locked_aim_dir * 4000.0
+			physics.points[base_index].accumulated_force -= locked_aim_dir * 1000.0
 			if state_timer >= windup_time:
 				_change_state(State.ATTACK)
 				
 		State.ATTACK:
-			# 爆發攻擊：維持強烈指向，並給予極大的正向推力
-			physics.points[tip_index].accumulated_force += aim_dir * 5000.0
-			physics.points[base_index].accumulated_force -= aim_dir * 5000.0
-			# 巨大的突刺推力
-			physics.points[tip_index].accumulated_force += aim_dir * 15000.0
-			physics.points[base_index].accumulated_force += aim_dir * 10000.0
+			# 爆發攻擊：朝著鎖定的瞄準方向進行強大的直線突刺
+			physics.points[tip_index].accumulated_force += locked_aim_dir * 18000.0
+			physics.points[base_index].accumulated_force += locked_aim_dir * 12000.0
 			
 			if state_timer >= attack_time:
 				_change_state(State.RECOVER)
 				
 		State.RECOVER:
-			# 硬直：維持微弱的指向警戒姿態
-			physics.points[tip_index].accumulated_force += aim_dir * 1500.0
-			physics.points[base_index].accumulated_force -= aim_dir * 1500.0
-			# 額外的劍尖抗重力，避免垂得太低
-			physics.points[tip_index].accumulated_force.y -= 1500.0
-			
+			# 硬直：稍微恢復追蹤滑鼠，但力度較弱
+			physics.points[tip_index].accumulated_force += current_aim_dir * 1000.0
 			if state_timer >= recover_time:
 				_change_state(State.IDLE)
