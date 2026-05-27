@@ -150,9 +150,6 @@ func _physics_process(delta: float) -> void:
 	# 1. 脊椎在 X 軸隨機搖擺
 	verlet.points[J.SPINE_TOP].accumulated_force.x += facing_dir * 300.0 * walk_blend
 	
-	# 2. 雙手反相位擺動 (已移除：因為角色現在是雙手握持大劍，不應該前後甩手)
-	# (保留空白，不再對 L_HAND 和 R_HAND 施加 hand_force)
-	
 	# 3. 關節定向偏置 (Joint Bias) 與 手臂反重力 (Anti-gravity)
 	var arm_anti_gravity = -680.0 # 抵銷 980，讓向下加速度剩 300
 	for j in [J.L_ELBOW, J.R_ELBOW, J.L_HAND, J.R_HAND]:
