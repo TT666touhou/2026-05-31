@@ -8,6 +8,8 @@ class VPoint:
 	var mass: float = 1.0
 	var friction: float = 0.0
 	var drag: float = 0.90
+	var collide_terrain: bool = true
+	var collision_mask: int = 1
 	var accumulated_force: Vector2 = Vector2.ZERO
 	
 	func _init(start_pos: Vector2):
@@ -58,7 +60,7 @@ func add_motor(p_idx: int, target_func: Callable, stiffness: float, axis: Vector
 	motors.append(VMotor.new(p_idx, target_func, stiffness, axis))
 	return motors.size() - 1
 
-func simulate(delta: float, gravity: Vector2, global_floor_y: float):
+func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, collision_mask: int = 1):
 	# 1. 積分與受力計算
 	for i in range(points.size()):
 		var p = points[i]
@@ -73,7 +75,7 @@ func simulate(delta: float, gravity: Vector2, global_floor_y: float):
 		# 基本空氣阻尼
 		velocity *= p.drag
 		
-		var force = gravity * p.mass + p.accumulated_force
+		var force = p.accumulated_force
 		p.accumulated_force = Vector2.ZERO
 		
 		# 馬達彈簧牽引力
@@ -83,12 +85,6 @@ func simulate(delta: float, gravity: Vector2, global_floor_y: float):
 				force += (target_pos - p.pos) * m.axis * m.stiffness
 				
 		p.pos += velocity + (force * delta * delta) / p.mass
-		
-		# 地板碰撞與摩擦力
-		if p.pos.y > global_floor_y:
-			p.pos.y = global_floor_y
-			var v_x = p.pos.x - p.old_pos.x
-			p.pos.x -= v_x * p.friction
 
 	# 2. 距離約束求解 (Constraints Resolution)
 	for iter in range(10):
@@ -109,3 +105,22 @@ func simulate(delta: float, gravity: Vector2, global_floor_y: float):
 				pA.pos += offset
 			if not pB.locked:
 				pB.pos -= offset
+
+	# 3. 地形射線碰撞 (Terrain Collision)
+	# 把碰撞放在約束之後，確保點被約束推入牆壁後，會被射線檢測並推回表面。
+	if space_state != null:
+		for p in points:
+			if p.locked or p.pos == p.old_pos or not p.collide_terrain: continue
+			var query = PhysicsRayQueryParameters2D.create(p.old_pos, p.pos, p.collision_mask)
+			query.collide_with_areas = false
+			query.collide_with_bodies = true
+			var result = space_state.intersect_ray(query)
+			
+			if result:
+				var normal = result.normal
+				p.pos = result.position + normal * 0.1
+				
+				var vel = p.pos - p.old_pos
+				var tangent = Vector2(-normal.y, normal.x)
+				var vel_tangent = vel.project(tangent)
+				p.old_pos = p.pos - (vel_tangent * (1.0 - p.friction))

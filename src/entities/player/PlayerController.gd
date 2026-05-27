@@ -8,8 +8,119 @@ class_name PlayerController
 var dash_timer: float = 0.0
 var current_dash_dir: Vector2 = Vector2.ZERO
 
+var inv_mgr # Untyped to prevent parse errors before cache update
+var inv_ui # Untyped
+var active_hotbar_index: int = 0
+var current_equipped_item = null # Type ItemData
+var drawer: Node2D
+
 func _ready() -> void:
-	pass
+	drawer = get_node_or_null("ProceduralDrawer")
+	
+	# Setup Inventory System
+	var InventoryManagerClass = preload("res://src/systems/inventory/InventoryManager.gd")
+	inv_mgr = InventoryManagerClass.new()
+	inv_mgr.inventory_changed.connect(_on_inventory_changed)
+	add_child(inv_mgr)
+	
+	# CanvasLayer for UI
+	var canvas = CanvasLayer.new()
+	canvas.layer = 100
+	add_child(canvas)
+	
+	var ui_scene = preload("res://src/ui/inventory/InventoryUI.tscn")
+	if ui_scene:
+		inv_ui = ui_scene.instantiate()
+		inv_ui.set_manager(inv_mgr)
+		inv_ui.item_dropped_outside.connect(_on_item_dropped_outside)
+		inv_ui.visible = true
+		canvas.add_child(inv_ui)
+		
+	# Populate some initial items for testing
+	var ItemDataClass = preload("res://src/systems/inventory/ItemData.gd")
+	if ItemDataClass:
+		var sword_data = ItemDataClass.new()
+		sword_data.id = "sword"
+		sword_data.item_name = "Procedural Sword"
+		sword_data.grid_size = Vector2i(1, 3)
+		sword_data.weapon_scene = preload("res://src/items/weapons/sword.tscn")
+		var s_lines: Array[PackedVector2Array] = [
+			PackedVector2Array([Vector2(0, -0.4), Vector2(0, 0.4)]),
+			PackedVector2Array([Vector2(-0.2, 0.2), Vector2(0.2, 0.2)])
+		]
+		sword_data.icon_lines = s_lines
+		inv_mgr.set_hotbar_item(0, sword_data)
+		
+		var bow_data = ItemDataClass.new()
+		bow_data.id = "bow"
+		bow_data.item_name = "Procedural Bow"
+		bow_data.grid_size = Vector2i(2, 3)
+		bow_data.weapon_scene = preload("res://src/items/weapons/bow.tscn")
+		var b_lines: Array[PackedVector2Array] = [
+			PackedVector2Array([Vector2(0, -0.4), Vector2(-0.2, 0), Vector2(0, 0.4)]), # Bow body
+			PackedVector2Array([Vector2(0, -0.4), Vector2(0, 0.4)]) # String
+		]
+		bow_data.icon_lines = b_lines
+		inv_mgr.set_hotbar_item(1, bow_data)
+		
+		_equip_hotbar_slot(0)
+
+func _on_item_dropped_outside(item_data: ItemData, _global_mouse_pos: Vector2) -> void:
+	var drop_pos = global_position + Vector2(randf_range(-20, 20), randf_range(-20, 20))
+	_drop_item(item_data, drop_pos)
+
+func _drop_item(data, pos: Vector2 = global_position) -> void:
+	var drop_scene = preload("res://src/items/drops/ItemDrop.tscn")
+	if drop_scene and data:
+		var drop = drop_scene.instantiate()
+		get_parent().add_child(drop) # Add to world
+		drop.global_position = pos
+		drop.setup(data)
+
+func _on_inventory_changed() -> void:
+	_equip_hotbar_slot(active_hotbar_index)
+
+func _equip_hotbar_slot(idx: int) -> void:
+	active_hotbar_index = idx
+	if not drawer: return
+	
+	var item = inv_mgr.hotbar_items[idx]
+	var new_item_data = item.data if item else null
+	
+	if current_equipped_item == new_item_data:
+		return # No change in this slot
+		
+	current_equipped_item = new_item_data
+	
+	if new_item_data and new_item_data.weapon_scene:
+		drawer.equip(new_item_data.weapon_scene)
+	else:
+		drawer.equip(preload("res://src/items/weapons/unarmed.tscn")) # Default to fists when empty
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_TAB or event.keycode == KEY_I:
+			if inv_ui:
+				inv_ui.toggle_backpack()
+				get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_1: _equip_hotbar_slot(0)
+		elif event.keycode == KEY_2: _equip_hotbar_slot(1)
+		elif event.keycode == KEY_3: _equip_hotbar_slot(2)
+		elif event.keycode == KEY_4: _equip_hotbar_slot(3)
+		elif event.keycode == KEY_Q:
+			# Drop current equipped item
+			var item = inv_mgr.hotbar_items[active_hotbar_index]
+			if item:
+				_drop_item(item.data, global_position)
+				inv_mgr.remove_from_hotbar(active_hotbar_index)
+				drawer.unequip()
+		elif event.keycode == KEY_F:
+			# Pick up nearby items
+			for node in get_parent().get_children():
+				if node is ItemDrop and node.global_position.distance_to(global_position) < 50.0:
+					if inv_mgr.auto_add_to_backpack(node.item_data):
+						node.queue_free()
+						break # Pick up one at a time
 
 func _physics_process(delta: float) -> void:
 	if dash_timer > 0.0:
@@ -21,7 +132,7 @@ func _physics_process(delta: float) -> void:
 			Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
 		)
 		
-		# 相容原本寫死的 WASD (防止使用者還沒設定 Input Map)
+		# 相容原本寫死的 WASD
 		if input_dir == Vector2.ZERO:
 			if Input.is_key_pressed(KEY_D): input_dir.x += 1
 			if Input.is_key_pressed(KEY_A): input_dir.x -= 1
@@ -41,8 +152,25 @@ func _physics_process(delta: float) -> void:
 		
 	move_and_slide()
 	
-	# 處理攻擊輸入
+	# 處理攻擊輸入 (若 UI 開啟則阻擋攻擊，除非需要)
+	if inv_ui and inv_ui.backpack_open: return
+	
 	if Input.is_action_just_pressed("attack") or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		var weapon = get_node_or_null("ProceduralDrawer/Sword/WeaponController")
-		if weapon and weapon.has_method("try_attack"):
-			weapon.try_attack(get_global_mouse_position())
+		if drawer and drawer.current_weapon_rig:
+			var weapon = drawer.current_weapon_rig.get_node_or_null("WeaponController")
+			if not weapon:
+				weapon = drawer.current_weapon_rig
+			
+			if weapon and weapon.has_method("try_attack"):
+				weapon.try_attack(get_global_mouse_position())
+			elif weapon and weapon.has_method("start_attack"): # For Bow compatibility
+				weapon.start_attack(get_global_mouse_position())
+	
+	if Input.is_action_just_released("attack") or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		if drawer and drawer.current_weapon_rig:
+			var weapon = drawer.current_weapon_rig.get_node_or_null("WeaponController")
+			if not weapon:
+				weapon = drawer.current_weapon_rig
+			
+			if weapon and weapon.has_method("end_attack"):
+				weapon.end_attack(get_global_mouse_position())

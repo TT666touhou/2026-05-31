@@ -74,7 +74,7 @@ func _change_state(new_state: State) -> void:
 
 func _physics_process(delta: float) -> void:
 	state_timer += delta
-	if tip_index == -1 or not physics or physics.points.size() <= tip_index:
+	if tip_index == -1 or base_index == -1 or not physics or physics.points.size() <= tip_index or physics.points.size() <= base_index:
 		return
 		
 	var mouse_pos = weapon_rig.get_global_mouse_position()
@@ -82,8 +82,18 @@ func _physics_process(delta: float) -> void:
 		if weapon_rig.get_parent().override_mouse_pos != null:
 			mouse_pos = weapon_rig.get_parent().override_mouse_pos
 	
-	var real_base_global = weapon_rig.get_parent().global_position + physics.points[base_index].pos
+	var player = weapon_rig.get_parent().get_parent()
+	var real_base_global = physics.points[base_index].pos
 	var current_aim_dir = (mouse_pos - real_base_global).normalized()
+	
+	# Update Hitbox shape dynamically to match the blade physics points exactly
+	var hitbox_shape = weapon_rig.get_node_or_null("Hitbox/CollisionShape2D")
+	if hitbox_shape and hitbox_shape.shape is SegmentShape2D:
+		var seg = hitbox_shape.shape as SegmentShape2D
+		seg.a = physics.points[base_index].pos - player.global_position
+		seg.b = physics.points[tip_index].pos - player.global_position
+		hitbox_shape.position = Vector2.ZERO
+		hitbox_shape.debug_color = Color(1, 0.1, 0.1, 0.6) # Very visible Red Hitbox
 	
 	match current_state:
 		State.IDLE:

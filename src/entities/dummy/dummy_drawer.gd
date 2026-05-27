@@ -16,7 +16,7 @@ var verlet
 var facing_angle: float = 0.0
 var walk_blend: float = 0.0
 
-var override_mouse_pos = null # For testing
+var target_facing_angle: float = 0.0
 
 var base_points_count: int = 0
 var base_sticks_count: int = 0
@@ -49,9 +49,6 @@ func _ready() -> void:
 	for i in range(J.COUNT):
 		var p_idx = verlet.add_point(base_pos)
 		var p = verlet.points[p_idx]
-		
-		# Set collision mask to 5 (Layer 1: World | Layer 3: EnemyBody)
-		p.collision_mask = 5
 		
 		if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
 			p.drag = 0.95 
@@ -118,27 +115,16 @@ func equip(weapon_scene: PackedScene) -> void:
 			current_weapon_rig.inject_into(verlet)
 		
 		var weapon_controller = current_weapon_rig.get_node_or_null("WeaponController")
-		if not weapon_controller:
-			weapon_controller = current_weapon_rig
-		
 		if weapon_controller and weapon_controller.has_method("equip"):
 			weapon_controller.equip(verlet, J.L_HAND, J.R_HAND, 1.0)
 
 func _physics_process(delta: float) -> void:
 	if not character_body: return
 	
-	var mouse_pos = get_global_mouse_position()
-	if override_mouse_pos != null:
-		mouse_pos = override_mouse_pos
-		
-	var target_angle = (mouse_pos - character_body.global_position).angle()
-	facing_angle = lerp_angle(facing_angle, target_angle, delta * 15.0)
+	facing_angle = lerp_angle(facing_angle, target_facing_angle, delta * 15.0)
 	
 	if current_weapon_rig:
 		var weapon = current_weapon_rig.get_node_or_null("WeaponController")
-		if not weapon:
-			weapon = current_weapon_rig
-			
 		if weapon and weapon.has_method("update_owner_status_2d"):
 			weapon.update_owner_status_2d(character_body.global_position, facing_angle)
 	

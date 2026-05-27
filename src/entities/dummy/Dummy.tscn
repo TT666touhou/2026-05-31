@@ -1,0 +1,30 @@
+[gd_scene load_steps=7 format=3 uid="uid://dummy_uuid_1"]
+
+[ext_resource type="Script" path="res://src/entities/dummy/dummy.gd" id="1_script"]
+[ext_resource type="Script" path="res://src/entities/player/procedural_drawer.gd" id="2_drawer"]
+[ext_resource type="Script" path="res://src/entities/dummy/dummy_drawer.gd" id="5_drawer"]
+[ext_resource type="Script" path="res://src/components/HealthComponent.gd" id="3_health"]
+[ext_resource type="Script" path="res://src/components/HurtboxComponent.gd" id="4_hurtbox"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hurtbox"]
+radius = 14.0
+height = 54.0
+
+[node name="Dummy" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="ProceduralDrawer" type="Node2D" parent="."]
+script = ExtResource("5_drawer")
+body_color = Color(0.55, 0.27, 0.07, 1)
+eye_color = Color(1, 0.84, 0, 1)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("3_health")
+max_health = 1000.0
+
+[node name="HurtboxComponent" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 32
+script = ExtResource("4_hurtbox")

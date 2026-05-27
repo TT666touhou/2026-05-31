@@ -27,8 +27,8 @@ position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
 [node name="HurtboxComponent" type="Area2D" parent="."]
-collision_layer = 4
-collision_mask = 7
+collision_layer = 8
+collision_mask = 64
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("hurt_shape")
