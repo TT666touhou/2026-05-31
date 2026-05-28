@@ -13,11 +13,12 @@ signal hit_landed(target: Node2D)
 
 # ─── State ──────────────────────────────────────────────────────────────────
 var _active: bool = false
+var hit_cooldowns: Dictionary = {}
+@export var cooldown_time: float = 0.5
 
-# ─── Lifecycle ──────────────────────────────────────────────────────────────
 func _ready() -> void:
-	area_entered.connect(_on_area_entered)
-	monitoring = false  # Off by default; enable during attack frames
+	if not _active:
+		monitoring = false  # Off by default; enable during attack frames
 
 # ─── Public API ─────────────────────────────────────────────────────────────
 func activate() -> void:
@@ -31,11 +32,19 @@ func deactivate() -> void:
 func is_active() -> bool:
 	return _active
 
-# ─── Private ─────────────────────────────────────────────────────────────────
-func _on_area_entered(area: Area2D) -> void:
-	if not _active:
+func _physics_process(_delta: float) -> void:
+	if not _active or not monitoring:
 		return
-	if area is HurtboxComponent:
-		var hurtbox: HurtboxComponent = area as HurtboxComponent
-		hurtbox.receive_hit(damage, knockback_force, global_position)
-		hit_landed.emit(area.get_parent())
+		
+	for area in get_overlapping_areas():
+		if area is HurtboxComponent:
+			var hurtbox: HurtboxComponent = area as HurtboxComponent
+			var target = hurtbox.get_parent()
+			
+			var current_time = Time.get_ticks_msec() / 1000.0
+			if hit_cooldowns.has(target) and current_time - hit_cooldowns[target] < cooldown_time:
+				continue
+				
+			hit_cooldowns[target] = current_time
+			hurtbox.receive_hit(damage, knockback_force, global_position)
+			hit_landed.emit(target)

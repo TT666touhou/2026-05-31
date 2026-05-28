@@ -30,13 +30,9 @@ func _ready() -> void:
 		
 	set_physics_process(true)
 	
-	var hitbox = get_node_or_null("../Hitbox") as Area2D
-	if hitbox:
-		hitbox.body_entered.connect(_on_hitbox_body_entered)
-
-func _on_hitbox_body_entered(body: Node2D) -> void:
-	if current_state == State.ATTACK:
-		hit_target.emit(body)
+	var hitbox = get_node_or_null("../Hitbox")
+	if hitbox and hitbox.has_method("activate"):
+		hitbox.activate() # Keep hitbox permanently active to deal damage on touch
 
 func equip(verlet, l_hand_idx: int, r_hand_idx: int, _facing_dir: float) -> void:
 	physics = verlet
@@ -86,14 +82,17 @@ func _physics_process(delta: float) -> void:
 	var real_base_global = physics.points[base_index].pos
 	var current_aim_dir = (mouse_pos - real_base_global).normalized()
 	
-	# Update Hitbox shape dynamically to match the blade physics points exactly
-	var hitbox_shape = weapon_rig.get_node_or_null("Hitbox/CollisionShape2D")
-	if hitbox_shape and hitbox_shape.shape is SegmentShape2D:
-		var seg = hitbox_shape.shape as SegmentShape2D
-		seg.a = physics.points[base_index].pos - player.global_position
-		seg.b = physics.points[tip_index].pos - player.global_position
-		hitbox_shape.position = Vector2.ZERO
-		hitbox_shape.debug_color = Color(1, 0.1, 0.1, 0.6) # Very visible Red Hitbox
+	# Update Hitbox dynamically to match the blade physics points exactly
+	var hitbox = weapon_rig.get_node_or_null("Hitbox")
+	if hitbox:
+		var pA = physics.points[base_index].pos
+		var pB = physics.points[tip_index].pos
+		hitbox.global_position = (pA + pB) * 0.5
+		hitbox.global_rotation = (pB - pA).angle() + PI/2.0
+		
+		var shape = hitbox.get_node_or_null("CollisionShape2D")
+		if shape:
+			shape.debug_color = Color(1, 0.1, 0.1, 0.6) # Very visible Red Hitbox
 	
 	match current_state:
 		State.IDLE:
