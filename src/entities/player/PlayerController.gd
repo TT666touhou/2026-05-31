@@ -7,6 +7,7 @@ class_name PlayerController
 
 var dash_timer: float = 0.0
 var current_dash_dir: Vector2 = Vector2.ZERO
+var current_aim_direction: Vector2 = Vector2.RIGHT
 
 var inv_mgr # Untyped to prevent parse errors before cache update
 var inv_ui # Untyped
@@ -14,8 +15,18 @@ var active_hotbar_index: int = 0
 var current_equipped_item = null # Type ItemData
 var drawer: Node2D
 
+@onready var state_machine = get_node_or_null("StateMachine")
+@onready var hurtbox = $HurtboxComponent
+@onready var health = $HealthComponent
+
 func _ready() -> void:
 	drawer = get_node_or_null("ProceduralDrawer")
+	
+	if health:
+		health.health_changed.connect(_on_health_changed)
+		health.died.connect(_on_died)
+	if hurtbox:
+		hurtbox.hit_received.connect(_on_hit_received)
 	
 	# Setup Inventory System
 	var InventoryManagerClass = preload("res://src/systems/inventory/InventoryManager.gd")
@@ -82,6 +93,10 @@ func _on_inventory_changed() -> void:
 
 func _equip_hotbar_slot(idx: int) -> void:
 	active_hotbar_index = idx
+	if inv_ui:
+		inv_ui.active_hotbar_index = idx
+		inv_ui.queue_redraw()
+	
 	if not drawer: return
 	
 	var item = inv_mgr.hotbar_items[idx]
@@ -99,7 +114,7 @@ func _equip_hotbar_slot(idx: int) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_TAB or event.keycode == KEY_I:
+		if event.keycode == KEY_TAB or event.keycode == KEY_E:
 			if inv_ui:
 				inv_ui.toggle_backpack()
 				get_viewport().set_input_as_handled()
@@ -121,6 +136,16 @@ func _unhandled_input(event: InputEvent) -> void:
 					if inv_mgr.auto_add_to_backpack(node.item_data):
 						node.queue_free()
 						break # Pick up one at a time
+	elif event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			var new_idx = (active_hotbar_index - 1) % 4
+			if new_idx < 0: new_idx += 4
+			_equip_hotbar_slot(new_idx)
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			var new_idx = (active_hotbar_index + 1) % 4
+			_equip_hotbar_slot(new_idx)
+			get_viewport().set_input_as_handled()
 
 func _physics_process(delta: float) -> void:
 	if dash_timer > 0.0:
@@ -152,6 +177,19 @@ func _physics_process(delta: float) -> void:
 		
 	move_and_slide()
 	
+	# 對剛體施加推力 (真實物理感)
+	for i in get_slide_collision_count():
+		var c = get_slide_collision(i)
+		var collider = c.get_collider()
+		if collider is RigidBody2D:
+			# 施加在碰撞點上的衝量 (這樣推邊緣會有槓桿效應轉得比較快)
+			var push_force = 800.0
+			var offset = c.get_position() - collider.global_position
+			collider.apply_impulse(-c.get_normal() * push_force, offset)
+	
+	var mouse_pos = get_global_mouse_position()
+	current_aim_direction = (mouse_pos - global_position).normalized()
+	
 	# 處理攻擊輸入 (若 UI 開啟則阻擋攻擊，除非需要)
 	if inv_ui and inv_ui.backpack_open: return
 	
@@ -161,9 +199,7 @@ func _physics_process(delta: float) -> void:
 			if not weapon:
 				weapon = drawer.current_weapon_rig
 			
-			if weapon and weapon.has_method("try_attack"):
-				weapon.try_attack(get_global_mouse_position())
-			elif weapon and weapon.has_method("start_attack"): # For Bow compatibility
+			if weapon and weapon.has_method("start_attack"):
 				weapon.start_attack(get_global_mouse_position())
 	
 	if Input.is_action_just_released("attack") or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -174,3 +210,39 @@ func _physics_process(delta: float) -> void:
 			
 			if weapon and weapon.has_method("end_attack"):
 				weapon.end_attack(get_global_mouse_position())
+
+func _on_hit_received(_damage: float, knockback: Vector2) -> void:
+	# knockback points away from the source, push the player backwards
+	velocity += knockback
+	
+func _on_health_changed(old_val: float, new_val: float) -> void:
+	var dmg = old_val - new_val
+	
+	# Spawn damage number for player
+	var label = Label.new()
+	label.text = str(round(dmg))
+	label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 1)
+	label.add_theme_font_size_override("font_size", 12)
+	label.global_position = global_position + Vector2(randf_range(-20, 20), -60)
+	get_tree().current_scene.add_child(label)
+	
+	var tween = label.create_tween()
+	tween.tween_property(label, "global_position", label.global_position + Vector2(0, -50), 0.5).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.5).set_delay(0.2)
+	tween.tween_callback(label.queue_free)
+	
+	if drawer:
+		var original_color = drawer.body_color
+		drawer.body_color = Color.RED
+		drawer.queue_redraw()
+		await get_tree().create_timer(0.1).timeout
+		if is_instance_valid(drawer):
+			drawer.body_color = original_color
+			drawer.queue_redraw()
+
+func _on_died() -> void:
+	print("Player died! ")
+	get_tree().reload_current_scene()

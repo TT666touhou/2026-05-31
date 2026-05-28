@@ -79,8 +79,9 @@ func _ready() -> void:
 				
 		for line_pair in body_lines:
 			var cshape = CollisionShape2D.new()
-			var seg = SegmentShape2D.new()
-			cshape.shape = seg
+			var cap = CapsuleShape2D.new()
+			cap.radius = 5.0
+			cshape.shape = cap
 			cshape.debug_color = Color(0, 1, 1, 0.42) # Cyan for hurtboxes
 			_hurtbox_node.add_child(cshape)
 			_hurtbox_segments.append(cshape)
@@ -146,6 +147,19 @@ func _physics_process(delta: float) -> void:
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
 	
+	# Hand constraints to chest (idle stance like player)
+	var aim_dir = Vector2.RIGHT.rotated(facing_angle)
+	var left_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(-PI/2) * 8.0
+	var right_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(PI/2) * 8.0
+	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 1500.0
+	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 1500.0
+	
+	if abs(facing_angle - target_facing_angle) > 0.1:
+		var l_hand_local = verlet.points[J.L_HAND].pos - character_body.global_position
+		print("Dummy Turning. facing_angle: %f, target_facing_angle: %f, l_hand_local: %s, left_target_local: %s" % 
+			[facing_angle, target_facing_angle, l_hand_local, left_target - character_body.global_position])
+	
+	
 	# 取得 2D 世界的 space_state 進行地形碰撞檢測 (layer 1)
 	var space_state = character_body.get_world_2d().direct_space_state
 	verlet.simulate(delta, space_state, 1)
@@ -156,9 +170,12 @@ func _physics_process(delta: float) -> void:
 			var pair = body_lines[i]
 			var pA = verlet.points[pair[0]].pos - character_body.global_position
 			var pB = verlet.points[pair[1]].pos - character_body.global_position
-			var seg = _hurtbox_segments[i].shape as SegmentShape2D
-			seg.a = pA
-			seg.b = pB
+			var cshape = _hurtbox_segments[i]
+			var cap = cshape.shape as CapsuleShape2D
+			var dist = pA.distance_to(pB)
+			cap.height = dist + cap.radius * 2.0
+			cshape.position = (pA + pB) * 0.5
+			cshape.rotation = (pB - pA).angle() + PI/2.0
 		
 		if _head_shape:
 			_head_shape.position = verlet.points[J.HEAD].pos - character_body.global_position
@@ -169,12 +186,10 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if not verlet or verlet.points.size() < J.COUNT: return
 	
-	# 畫手臂連線
-	for stick in verlet.sticks:
-		if not stick.visible:
-			continue
-		var pA = (verlet.points[stick.pA].pos - global_position)
-		var pB = (verlet.points[stick.pB].pos - global_position)
+	# 畫身體主幹與手臂連線 (使用 body_lines)
+	for pair in body_lines:
+		var pA = (verlet.points[pair[0]].pos - global_position)
+		var pB = (verlet.points[pair[1]].pos - global_position)
 		draw_line(pA, pB, body_color, 2.0)
 		
 	# 畫頭部 (空心方形或圓形)

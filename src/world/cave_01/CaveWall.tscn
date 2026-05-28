@@ -1,10 +1,10 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cs58gvl5wmq4w"]
 
 [ext_resource type="Script" path="res://src/world/cave_01/CaveWall.gd" id="1_wall"]
 
-[node name="CaveWall" type="StaticBody2D"]
+[node name="CaveWall" type="StaticBody2D" unique_id=684702973]
 collision_mask = 0
 script = ExtResource("1_wall")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="." unique_id=1723363427]
 polygon = PackedVector2Array(-50, -50, 50, -50, 50, 50, -50, 50)

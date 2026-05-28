@@ -1,0 +1,8 @@
+ERROR: 1 RID allocations of type 'P11GodotArea2D' were leaked at exit.
+ERROR: 1 RID allocations of type 'P12GodotShape2D' were leaked at exit.
+WARNING: 6 RIDs of type "CanvasItem" were leaked.
+   at: _free_rids (servers/rendering/renderer_canvas_cull.cpp:2692)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+   at: cleanup (core/object/object.cpp:2641)
+ERROR: 5 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WoodTable.gd" id="1_table"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_table"]
+size = Vector2(30, 20)
+
+[node name="WoodTable" type="RigidBody2D"]
+collision_layer = 256
+collision_mask = 257
+mass = 30.0
+gravity_scale = 0.0
+linear_damp = 10.0
+angular_damp = 10.0
+lock_rotation = true
+script = ExtResource("1_table")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_table")

@@ -7,12 +7,19 @@ var is_stuck: bool = false
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
-	area_entered.connect(_on_area_entered)
+	
+	if has_node("HitboxComponent"):
+		var hitbox = $HitboxComponent
+		hitbox.activate()
+		hitbox.hit_landed.connect(_on_hitbox_hit_landed)
 
 func fire(dir: Vector2, custom_speed: float = 800.0) -> void:
 	direction = dir.normalized()
 	speed = custom_speed
 	rotation = direction.angle()
+	
+	if has_node("HitboxComponent"):
+		$HitboxComponent.knockback_direction_override = direction
 
 func _physics_process(delta: float) -> void:
 	if not is_stuck:
@@ -24,16 +31,19 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.collision_layer & 1 != 0: # Hit terrain
 		_stick_to(body)
 
-func _on_area_entered(area: Area2D) -> void:
+func _on_hitbox_hit_landed(target: Node2D) -> void:
 	if is_stuck: return
-	
-	if area is HurtboxComponent:
-		var hurtbox = area as HurtboxComponent
-		hurtbox.receive_hit(10.0, 100.0, global_position)
-		_stick_to(hurtbox.get_parent())
+	_stick_to(target)
 
 func _stick_to(target_node: Node2D) -> void:
 	is_stuck = true
+	
+	if has_node("HitboxComponent"):
+		$HitboxComponent.deactivate()
+		
+	# 為了避免因為物理幀速度太快導致箭矢插得太深，強制將箭矢往反方向拉出一段隨機距離
+	# 讓箭尖盡量停留在表面，並增加插深插淺的隨機感
+	global_position -= direction * randf_range(12.0, 22.0)
 	
 	# Safely reparent deferred to avoid physics callback errors
 	call_deferred("reparent", target_node)

@@ -19,6 +19,10 @@ run/main_scene="res://src/world/cave_01/CaveLevel.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+CombatFX="*res://src/systems/combat/CombatFX.gd"
+
 [display]
 
 window/size/viewport_width=1280
@@ -68,6 +72,7 @@ move_down={
 2d_physics/layer_6="PlayerAttack"
 2d_physics/layer_7="EnemyAttack"
 2d_physics/layer_8="Weapons"
+2d_physics/layer_9="Props"
 
 [physics]
 

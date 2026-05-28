@@ -19,26 +19,28 @@ func _physics_process(delta: float) -> void:
 func _on_health_changed(old_val: float, new_val: float) -> void:
 	var dmg = old_val - new_val
 	print("Dummy took ", dmg, " damage! Health: ", new_val)
-	# Flash effect
-	if drawer:
-		var original_color = drawer.body_color
-		drawer.body_color = Color.RED
-		drawer.queue_redraw()
-		await get_tree().create_timer(0.1).timeout
-		if is_instance_valid(drawer):
-			drawer.body_color = original_color
-			drawer.queue_redraw()
 
 func _on_hit_received(damage: float, knockback: Vector2) -> void:
+	print("Dummy Hit! Damage: ", damage, ", Knockback: ", knockback)
+	
+	velocity += knockback # Apply true physics knockback
+	
 	if drawer and "target_facing_angle" in drawer:
-		# knockback points away from the source, so -knockback points TO the source.
-		drawer.target_facing_angle = (-knockback).angle()
+		if knockback.length_squared() > 0.1:
+			var new_target = (-knockback).angle()
+			print("Dummy Knockback valid. Updating target_facing_angle from ", drawer.target_facing_angle, " to ", new_target)
+			drawer.target_facing_angle = new_target
+		else:
+			print("Dummy Knockback too small, ignoring turn.")
 	
 	# Spawn damage number
 	var label = Label.new()
 	label.text = str(round(damage))
-	label.add_theme_color_override("font_color", Color.RED)
-	label.add_theme_font_size_override("font_size", 24)
+	label.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	label.add_theme_color_override("font_color", Color.WHITE)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 1)
+	label.add_theme_font_size_override("font_size", 12)
 	label.global_position = global_position + Vector2(randf_range(-20, 20), -60)
 	get_tree().current_scene.add_child(label)
 	

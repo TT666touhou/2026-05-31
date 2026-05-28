@@ -1,0 +1,2 @@
+ERROR: Script inherits from native type 'StaticBody2D', so it can't be assigned to an object of type 'Node2D'.
+   at: instance_create (modules/gdscript/gdscript.cpp:415)

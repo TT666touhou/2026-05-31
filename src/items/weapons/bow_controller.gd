@@ -89,19 +89,38 @@ func _physics_process(_delta: float) -> void:
 	var base_global = physics.points[bow_center].pos
 	var aim_dir = (mouse_pos - base_global).normalized()
 	
+	var active_aim_dir = aim_dir
+	
 	if is_pulling:
 		charge_time = min(charge_time + _delta, max_charge_time)
 		var charge_ratio = charge_time / max_charge_time
 		var tension_force = lerp(3000.0, 15000.0, charge_ratio)
 		
+		# Sway effect: wobbles more the longer it's drawn
+		var sway_magnitude = lerp(0.0, 0.25, charge_ratio) # Max sway ~14 degrees
+		var sway_angle = sin(Time.get_ticks_msec() * 0.015) * sway_magnitude
+		active_aim_dir = aim_dir.rotated(sway_angle)
+		
 		# Pull string back, push bow forward equally to avoid pulling player backwards
-		pull_vector = -aim_dir
+		pull_vector = -active_aim_dir
 		physics.points[string_center].accumulated_force += pull_vector * tension_force
-		physics.points[bow_center].accumulated_force += aim_dir * tension_force
+		physics.points[bow_center].accumulated_force += active_aim_dir * tension_force
 		# Base holding force to keep it in front of the body
-		physics.points[bow_center].accumulated_force += aim_dir * 3000.0
+		physics.points[bow_center].accumulated_force += active_aim_dir * 3000.0
 	else:
 		pull_vector = Vector2.ZERO
 		charge_time = 0.0
 		# Idle holding
-		physics.points[bow_center].accumulated_force += aim_dir * 3000.0
+		physics.points[bow_center].accumulated_force += active_aim_dir * 3000.0
+		
+	# -- Enhanced Turning Performance (Apply torque to the tips) --
+	if bow_body_indices.size() >= 3:
+		var top_tip = bow_body_indices[0]
+		var bottom_tip = bow_body_indices[2]
+		# Normal vector perpendicular to the aim direction
+		var bow_normal = Vector2(-active_aim_dir.y, active_aim_dir.x)
+		
+		# Force the tips to align perpendicularly to the active aim direction
+		# This solves the sluggish turning by directly rotating the bow's arms
+		physics.points[top_tip].accumulated_force += -bow_normal * 8000.0
+		physics.points[bottom_tip].accumulated_force += bow_normal * 8000.0

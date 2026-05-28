@@ -1,56 +1,53 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://dgw881e6ebldu"]
 
-[ext_resource type="PackedScene" path="res://src/world/cave_01/CaveWall.tscn" id="1_fsx0u"]
-[ext_resource type="Script" path="res://src/world/cave_01/CaveWall.gd" id="2_1fy87"]
-[ext_resource type="PackedScene" path="res://src/entities/player/Player.tscn" id="3_tnwu8"]
-[ext_resource type="Script" path="res://src/entities/player/PlayerController.gd" id="4_8fcnd"]
-[ext_resource type="PackedScene" path="res://src/entities/dummy/Dummy.tscn" id="5_dummy"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/FloorSegment.tscn" id="1_floor"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WallSegment.tscn" id="2_wall"]
+[ext_resource type="PackedScene" path="res://src/entities/player/Player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://src/entities/dummy/Dummy.tscn" id="4_dummy"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodDoor.tscn" id="6_wooddoor"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/StoneDoor.tscn" id="7_stonedoor"]
 
-[node name="CaveLevel" type="Node2D" unique_id=835637963]
+[node name="CaveLevel" type="Node2D" unique_id=218559084]
 
-[node name="Background" type="ColorRect" parent="." unique_id=59376275]
+[node name="Background" type="ColorRect" parent="." unique_id=1893740283]
 z_index = -100
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -1000.0
-offset_top = -1000.0
-offset_right = 1000.0
-offset_bottom = 1000.0
+offset_left = -2000.0
+offset_top = -2000.0
+offset_right = 2000.0
+offset_bottom = 2000.0
 color = Color(0.12, 0.1, 0.08, 1)
 
-[node name="Floor" type="ColorRect" parent="." unique_id=897581110]
-z_index = -10
-offset_left = -400.0
-offset_top = -300.0
-offset_right = 400.0
-offset_bottom = 300.0
-color = Color(0.32, 0.22, 0.09, 1)
+[node name="FloorSegment" parent="." unique_id=431544939 instance=ExtResource("1_floor")]
+position = Vector2(-400, -300)
+grid_size = Vector2i(80, 60)
 
-[node name="CaveWall_0" type="StaticBody2D" parent="." unique_id=719027657 instance=ExtResource("1_fsx0u")]
-position = Vector2(0, -320)
-collision_mask = 0
-script = ExtResource("2_1fy87")
+[node name="Wall_Top" parent="." unique_id=1771225771 instance=ExtResource("2_wall")]
+position = Vector2(-410, -310)
+grid_size = Vector2i(82, 1)
 
-[node name="CaveWall_1" type="StaticBody2D" parent="." unique_id=110337327 instance=ExtResource("1_fsx0u")]
-position = Vector2(0, 320)
-collision_mask = 0
-script = ExtResource("2_1fy87")
+[node name="Wall_Bottom" parent="." unique_id=834574710 instance=ExtResource("2_wall")]
+position = Vector2(-410, 300)
+grid_size = Vector2i(82, 1)
 
-[node name="CaveWall_2" type="StaticBody2D" parent="." unique_id=382367687 instance=ExtResource("1_fsx0u")]
-position = Vector2(-420, 0)
-collision_mask = 0
-script = ExtResource("2_1fy87")
+[node name="Wall_Left" parent="." unique_id=457124250 instance=ExtResource("2_wall")]
+position = Vector2(-410, -300)
+grid_size = Vector2i(1, 60)
 
-[node name="CaveWall_3" type="StaticBody2D" parent="." unique_id=2117979399 instance=ExtResource("1_fsx0u")]
-position = Vector2(420, 0)
-collision_mask = 0
-script = ExtResource("2_1fy87")
+[node name="Wall_Right" parent="." unique_id=1099311339 instance=ExtResource("2_wall")]
+position = Vector2(400, -300)
+grid_size = Vector2i(1, 60)
 
-[node name="Player" type="CharacterBody2D" parent="." unique_id=44095327 instance=ExtResource("3_tnwu8")]
-z_index = 10
-collision_layer = 2
-script = ExtResource("4_8fcnd")
+[node name="Player" parent="." unique_id=2033603969 instance=ExtResource("3_player")]
 
-[node name="Dummy" parent="." instance=ExtResource("5_dummy")]
+[node name="Dummy" parent="." unique_id=726227510 instance=ExtResource("4_dummy")]
 position = Vector2(0, 100)
+
+[node name="WoodTable" parent="." unique_id=331483392 instance=ExtResource("5_table")]
+position = Vector2(-200, 0)
+
+[node name="WoodDoor" parent="." unique_id=263090962 instance=ExtResource("6_wooddoor")]
+position = Vector2(200, 0)
+
+[node name="StoneDoor" parent="." unique_id=574986816 instance=ExtResource("7_stonedoor")]
+position = Vector2(200, 150)

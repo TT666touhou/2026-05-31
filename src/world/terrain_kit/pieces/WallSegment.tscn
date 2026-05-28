@@ -1,23 +1,13 @@
-[gd_scene format=4 uid="uid://wall_segment_kit"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WallSegment.gd" id="1"]
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WallSegment.gd" id="1_wall"]
 
-[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_1"]
-polygon = PackedVector2Array(-64, -16, 64, -16, 64, 16, -64, 16)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
-size = Vector2(128, 32)
-
-[node name="WallSegment" type="StaticBody2D" script=ExtResource("1")]
-collision_layer = 1
+[node name="WallSegment" type="StaticBody2D"]
+light_mask = 2
 collision_mask = 0
+script = ExtResource("1_wall")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-64, -16, 64, -16, 64, 16, -64, 16)
-
-[node name="Polygon2D" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(-64, -16, 64, -16, 64, 16, -64, 16)
-color = Color(0.478, 0.361, 0.063, 1)
+polygon = PackedVector2Array(0, 0, 100, 0, 100, 100, 0, 100)
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
-occluder = SubResource("OccluderPolygon2D_1")

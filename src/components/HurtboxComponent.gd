@@ -20,9 +20,7 @@ func _ready() -> void:
 	_health_component = get_node_or_null(health_component_path) as HealthComponent
 
 # ─── Public API (called by HitboxComponent) ──────────────────────────────────
-func receive_hit(damage: float, knockback_force: float, from_position: Vector2) -> void:
-	var knockback_direction: Vector2 = (global_position - from_position).normalized()
-	var knockback: Vector2 = knockback_direction * knockback_force
+func receive_hit(damage: float, knockback: Vector2) -> void:
 	hit_received.emit(damage, knockback)
 	if _health_component:
 		_health_component.take_damage(damage)

@@ -1,0 +1,38 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/BaseDoor.gd" id="1_base"]
+[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/DoorVisuals.gd" id="2_visuals"]
+[ext_resource type="Script" path="res://src/components/InteractableComponent.gd" id="3_interact"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
+size = Vector2(10, 40)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_door"]
+polygon = PackedVector2Array(-5, -20, 5, -20, 5, 20, -5, 20)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 40.0
+
+[node name="StoneDoor" type="AnimatableBody2D"]
+collision_mask = 0
+script = ExtResource("1_base")
+open_style = 1
+open_speed = 0.8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_door")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_door")
+
+[node name="Visuals" type="Node2D" parent="."]
+light_mask = 2
+script = ExtResource("2_visuals")
+material_type = 1
+door_size = Vector2(10, 40)
+
+[node name="InteractableComponent" type="Area2D" parent="."]
+script = ExtResource("3_interact")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractableComponent"]
+shape = SubResource("CircleShape2D_interact")

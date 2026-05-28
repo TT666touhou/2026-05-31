@@ -82,8 +82,9 @@ func _ready() -> void:
 				
 		for line_pair in body_lines:
 			var cshape = CollisionShape2D.new()
-			var seg = SegmentShape2D.new()
-			cshape.shape = seg
+			var cap = CapsuleShape2D.new()
+			cap.radius = 5.0
+			cshape.shape = cap
 			cshape.debug_color = Color(0, 1, 1, 0.42) # Cyan for hurtboxes
 			_hurtbox_node.add_child(cshape)
 			_hurtbox_segments.append(cshape)
@@ -160,6 +161,14 @@ func _physics_process(delta: float) -> void:
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
 	
+	# 防卡死機制：如果質點距離本體過遠，暫時關閉碰撞，讓它能穿牆回來
+	for p in verlet.points:
+		var dist = p.pos.distance_to(character_body.global_position)
+		if dist > 120.0:
+			p.collide_terrain = false
+		elif dist < 80.0:
+			p.collide_terrain = true
+			
 	# 取得 2D 世界的 space_state 進行地形碰撞檢測 (layer 1)
 	var space_state = character_body.get_world_2d().direct_space_state
 	verlet.simulate(delta, space_state, 1)
@@ -170,9 +179,12 @@ func _physics_process(delta: float) -> void:
 			var pair = body_lines[i]
 			var pA = verlet.points[pair[0]].pos - character_body.global_position
 			var pB = verlet.points[pair[1]].pos - character_body.global_position
-			var seg = _hurtbox_segments[i].shape as SegmentShape2D
-			seg.a = pA
-			seg.b = pB
+			var cshape = _hurtbox_segments[i]
+			var cap = cshape.shape as CapsuleShape2D
+			var dist = pA.distance_to(pB)
+			cap.height = dist + cap.radius * 2.0
+			cshape.position = (pA + pB) * 0.5
+			cshape.rotation = (pB - pA).angle() + PI/2.0
 		
 		if _head_shape:
 			_head_shape.position = verlet.points[J.HEAD].pos - character_body.global_position

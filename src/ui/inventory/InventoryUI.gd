@@ -7,6 +7,7 @@ const GRID_ROWS = 4
 const HOTBAR_SLOTS = 4
 
 var mgr # Untyped to prevent parse errors
+var active_hotbar_index: int = 0
 
 # Drag state
 var dragging_item = null
@@ -136,6 +137,8 @@ func _draw() -> void:
 	draw_rect(hotbar_rect, Color(0, 0, 0, 0.7))
 	for i in range(HOTBAR_SLOTS):
 		var r = Rect2(hotbar_rect.position + Vector2(i * SLOT_SIZE, 0), Vector2(SLOT_SIZE, SLOT_SIZE))
+		if i == active_hotbar_index:
+			draw_rect(r, Color(0.4, 0.4, 0.4, 0.7)) # Lighter gray for selected slot
 		draw_rect(r, Color.WHITE, false, 1.0)
 		
 	if not mgr: return
