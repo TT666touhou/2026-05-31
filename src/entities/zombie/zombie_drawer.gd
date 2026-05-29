@@ -16,7 +16,10 @@ var verlet
 var facing_angle: float = 0.0
 var walk_blend: float = 0.0
 
-var override_mouse_pos = null # For testing
+var target_facing_angle: float = 0.0
+
+var is_attacking: bool = false
+var attack_target: Vector2 = Vector2.ZERO
 
 var base_points_count: int = 0
 var base_sticks_count: int = 0
@@ -28,6 +31,9 @@ var current_weapon_rig: Node2D = null
 var _hurtbox_node: Area2D = null
 var _hurtbox_segments: Array = []
 var _head_shape: CollisionShape2D = null
+
+var _hitbox_node: Area2D = null
+var _bite_shape: CollisionShape2D = null
 
 var body_lines = [
 	[J.CENTER, J.HEAD],
@@ -51,8 +57,6 @@ func _ready() -> void:
 		var p_idx = verlet.add_point(base_pos)
 		var p = verlet.points[p_idx]
 		
-		# Point masks will be handled by simulate() global mask
-		
 		if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
 			p.drag = 0.95 
 		else:
@@ -63,7 +67,7 @@ func _ready() -> void:
 	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 10.0)
 	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, 10.0)
 	
-	# 開啟肢體線段碰撞，讓手在揮動時不會穿模過牆角
+	# 開啟肢體線段碰撞
 	verlet.sticks[s1].collide_terrain = true
 	verlet.sticks[s2].collide_terrain = true
 	verlet.sticks[s3].collide_terrain = true
@@ -102,6 +106,11 @@ func _ready() -> void:
 		_head_shape.shape = circ
 		_head_shape.debug_color = Color(0, 1, 1, 0.42)
 		_hurtbox_node.add_child(_head_shape)
+		
+	# Initialize Hitbox shapes
+	_hitbox_node = character_body.get_node_or_null("HitboxComponent")
+	if _hitbox_node:
+		_bite_shape = _hitbox_node.get_node_or_null("BiteShape")
 
 func unequip() -> void:
 	if current_weapon_rig:
@@ -127,27 +136,16 @@ func equip(weapon_scene: PackedScene) -> void:
 			current_weapon_rig.inject_into(verlet)
 		
 		var weapon_controller = current_weapon_rig.get_node_or_null("WeaponController")
-		if not weapon_controller:
-			weapon_controller = current_weapon_rig
-		
 		if weapon_controller and weapon_controller.has_method("equip"):
 			weapon_controller.equip(verlet, J.L_HAND, J.R_HAND, 1.0)
 
 func _physics_process(delta: float) -> void:
 	if not character_body: return
 	
-	var mouse_pos = get_global_mouse_position()
-	if override_mouse_pos != null:
-		mouse_pos = override_mouse_pos
-		
-	var target_angle = (mouse_pos - character_body.global_position).angle()
-	facing_angle = lerp_angle(facing_angle, target_angle, delta * 15.0)
+	facing_angle = lerp_angle(facing_angle, target_facing_angle, delta * 15.0)
 	
 	if current_weapon_rig:
 		var weapon = current_weapon_rig.get_node_or_null("WeaponController")
-		if not weapon:
-			weapon = current_weapon_rig
-			
 		if weapon and weapon.has_method("update_owner_status_2d"):
 			weapon.update_owner_status_2d(character_body.global_position, facing_angle)
 	
@@ -159,25 +157,32 @@ func _physics_process(delta: float) -> void:
 		walk_blend = move_toward(walk_blend, 0.0, delta * 12.0)
 		
 	if walk_blend > 0:
-		var phase = Time.get_ticks_msec() / 150.0
-		var shoulder_swing = sin(phase) * 37.5 * walk_blend
+		var phase = Time.get_ticks_msec() / 250.0 # Slower phase for zombies
+		var shoulder_swing = sin(phase) * 80.0 * walk_blend
 		verlet.points[J.L_SHOULDER].accumulated_force += Vector2(shoulder_swing, 0).rotated(facing_angle)
 		verlet.points[J.R_SHOULDER].accumulated_force += Vector2(-shoulder_swing, 0).rotated(facing_angle)
 	
-	var l_outward = Vector2(0, -25.0).rotated(facing_angle)
-	var r_outward = Vector2(0, 25.0).rotated(facing_angle)
+	var l_outward = Vector2(0, -50.0).rotated(facing_angle)
+	var r_outward = Vector2(0, 50.0).rotated(facing_angle)
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
-
-	var aim_dir = Vector2.RIGHT.rotated(facing_angle)
-	var left_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(-PI/2) * 8.0
-	var right_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(PI/2) * 8.0
-	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 375.0
-	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 375.0
+	
+	if is_attacking:
+		# Swing hands violently towards target
+		verlet.points[J.L_HAND].accumulated_force += (attack_target - verlet.points[J.L_HAND].pos).normalized() * 1200.0
+		verlet.points[J.R_HAND].accumulated_force += (attack_target - verlet.points[J.R_HAND].pos).normalized() * 1200.0
+	else:
+		# Hand constraints to chest (idle stance)
+		var aim_dir = Vector2.RIGHT.rotated(facing_angle)
+		var left_target = character_body.global_position + aim_dir * 18.0 + aim_dir.rotated(-PI/2) * 12.0
+		var right_target = character_body.global_position + aim_dir * 18.0 + aim_dir.rotated(PI/2) * 12.0
+		verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 600.0
+		verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 600.0
+	
 	
 	# 防卡死機制：呼叫共用模組，過遠暫時關閉碰撞
 	verlet.enforce_anti_stuck(character_body.global_position)
-			
+	
 	# 取得 2D 世界的 space_state 進行地形與所有 Hurtbox 碰撞檢測 (mask 281: World=1, PlayerHitbox=8, EnemyHitbox=16, Props=256)
 	var space_state = character_body.get_world_2d().direct_space_state
 	
@@ -202,6 +207,20 @@ func _physics_process(delta: float) -> void:
 		
 		if _head_shape:
 			_head_shape.position = verlet.points[J.HEAD].pos - character_body.global_position
+			
+	# Update Hitbox shapes positions
+	if _hitbox_node:
+		# Only monitor when attacking to avoid damage when just walking near player
+		if is_attacking:
+			if not _hitbox_node.is_active():
+				_hitbox_node.activate()
+		else:
+			if _hitbox_node.is_active():
+				_hitbox_node.deactivate()
+				
+		if _bite_shape:
+			# Bite shape is attached to the head
+			_bite_shape.position = verlet.points[J.HEAD].pos - character_body.global_position
 	
 	queue_redraw()
 
@@ -209,12 +228,10 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	if not verlet or verlet.points.size() < J.COUNT: return
 	
-	# 畫手臂連線
-	for stick in verlet.sticks:
-		if not stick.visible:
-			continue
-		var pA = (verlet.points[stick.pA].pos - global_position)
-		var pB = (verlet.points[stick.pB].pos - global_position)
+	# 畫身體主幹與手臂連線 (使用 body_lines)
+	for pair in body_lines:
+		var pA = (verlet.points[pair[0]].pos - global_position)
+		var pB = (verlet.points[pair[1]].pos - global_position)
 		draw_line(pA, pB, body_color, 2.0)
 		
 	# 畫頭部 (空心方形或圓形)

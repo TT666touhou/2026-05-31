@@ -10,6 +10,7 @@ class VPoint:
 	var drag: float = 0.90
 	var collide_terrain: bool = true
 	var collision_mask: int = 1
+	var radius: float = 5.0
 	var accumulated_force: Vector2 = Vector2.ZERO
 	
 	func _init(start_pos: Vector2):
@@ -91,7 +92,7 @@ func enforce_anti_stuck(origin: Vector2, max_dist: float = 120.0, min_dist: floa
 		elif dist < min_dist:
 			p.collide_terrain = true
 
-func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, collision_mask: int = 1):
+func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, collision_mask: int = 1, exclude_rids: Array[RID] = []):
 	# 1. 積分與受力計算
 	for i in range(points.size()):
 		var p = points[i]
@@ -157,14 +158,24 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 		for i in range(points.size()):
 			var p = points[i]
 			if p.locked or p.pos == p.old_pos or not p.collide_terrain: continue
-			var query = PhysicsRayQueryParameters2D.create(p.old_pos, p.pos, p.collision_mask)
-			query.collide_with_areas = false
+			var query = PhysicsRayQueryParameters2D.create(p.old_pos, p.pos, collision_mask)
+			query.collide_with_areas = true
 			query.collide_with_bodies = true
+			query.exclude = exclude_rids
 			var result = space_state.intersect_ray(query)
 			
 			if result:
 				var normal = result.normal
-				p.pos = result.position + normal * 0.1
+				
+				var collider = result.collider
+				if collider is Area2D:
+					var body = collider.get_parent()
+					if body and "velocity" in body:
+						body.velocity -= normal * 1000.0 * delta
+				elif collider is RigidBody2D:
+					collider.apply_central_impulse(-normal * 20.0)
+						
+				p.pos = result.position + normal * p.radius
 				
 				var vel = p.pos - p.old_pos
 				var tangent = Vector2(-normal.y, normal.x)
@@ -181,9 +192,10 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 			# 如果兩點都在同一個位置，忽略
 			if pA.pos.distance_squared_to(pB.pos) < 1.0: continue
 			
-			var query = PhysicsRayQueryParameters2D.create(pA.pos, pB.pos, stick.collision_mask)
-			query.collide_with_areas = false
+			var query = PhysicsRayQueryParameters2D.create(pA.pos, pB.pos, collision_mask)
+			query.collide_with_areas = true
 			query.collide_with_bodies = true
+			query.exclude = exclude_rids
 			# 允許從內部射出時命中，這樣可以檢測線段橫穿過碰撞體的情況
 			query.hit_from_inside = true
 			var result = space_state.intersect_ray(query)
@@ -193,6 +205,14 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 				# 有些時候 hit_from_inside 會給出 Vector2.ZERO 法線
 				if normal.length_squared() < 0.1:
 					normal = (pA.pos - pB.pos).normalized().rotated(PI/2)
+					
+				var collider = result.collider
+				if collider is Area2D:
+					var body = collider.get_parent()
+					if body and "velocity" in body:
+						body.velocity -= normal * 1500.0 * delta
+				elif collider is RigidBody2D:
+					collider.apply_central_impulse(-normal * 30.0)
 					
 				# 根據穿透點與兩端的距離，按比例分配推力
 				var dist_A = pA.pos.distance_to(result.position)

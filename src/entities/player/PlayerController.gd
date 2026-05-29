@@ -8,6 +8,7 @@ class_name PlayerController
 var dash_timer: float = 0.0
 var current_dash_dir: Vector2 = Vector2.ZERO
 var current_aim_direction: Vector2 = Vector2.RIGHT
+var _was_shift_pressed: bool = false
 
 var inv_mgr # Untyped to prevent parse errors before cache update
 var inv_ui # Untyped
@@ -18,6 +19,8 @@ var drawer: Node2D
 @onready var state_machine = get_node_or_null("StateMachine")
 @onready var hurtbox = $HurtboxComponent
 @onready var health = $HealthComponent
+@onready var stamina = $StaminaComponent
+@onready var mana = $ManaComponent
 
 func _ready() -> void:
 	drawer = get_node_or_null("ProceduralDrawer")
@@ -39,6 +42,13 @@ func _ready() -> void:
 	canvas.layer = 100
 	add_child(canvas)
 	
+	# Setup HUD
+	var hud_scene = preload("res://src/ui/hud/PlayerHUD.tscn")
+	if hud_scene:
+		var hud = hud_scene.instantiate()
+		canvas.add_child(hud)
+		hud.setup(health, stamina, mana)
+	
 	var ui_scene = preload("res://src/ui/inventory/InventoryUI.tscn")
 	if ui_scene:
 		inv_ui = ui_scene.instantiate()
@@ -54,6 +64,7 @@ func _ready() -> void:
 		sword_data.id = "sword"
 		sword_data.item_name = "Procedural Sword"
 		sword_data.grid_size = Vector2i(1, 3)
+		sword_data.stamina_cost = 15.0
 		sword_data.weapon_scene = preload("res://src/items/weapons/sword.tscn")
 		var s_lines: Array[PackedVector2Array] = [
 			PackedVector2Array([Vector2(0, -0.4), Vector2(0, 0.4)]),
@@ -66,6 +77,7 @@ func _ready() -> void:
 		bow_data.id = "bow"
 		bow_data.item_name = "Procedural Bow"
 		bow_data.grid_size = Vector2i(2, 3)
+		bow_data.stamina_cost = 10.0
 		bow_data.weapon_scene = preload("res://src/items/weapons/bow.tscn")
 		var b_lines: Array[PackedVector2Array] = [
 			PackedVector2Array([Vector2(0, -0.4), Vector2(-0.2, 0), Vector2(0, 0.4)]), # Bow body
@@ -167,11 +179,15 @@ func _physics_process(delta: float) -> void:
 		if input_dir.length_squared() > 1.0:
 			input_dir = input_dir.normalized()
 			
-		if Input.is_action_just_pressed("dash") or Input.is_key_pressed(KEY_SHIFT):
+		var is_shift = Input.is_key_pressed(KEY_SHIFT)
+		if Input.is_action_just_pressed("dash") or (is_shift and not _was_shift_pressed):
 			if input_dir != Vector2.ZERO:
-				dash_timer = 0.2
-				current_dash_dir = input_dir
-				velocity = current_dash_dir * dash_speed
+				if not stamina or stamina.consume(15.0): # Dash costs 15 stamina
+					dash_timer = 0.2
+					current_dash_dir = input_dir
+					velocity = current_dash_dir * dash_speed
+		
+		_was_shift_pressed = is_shift
 				
 		velocity = input_dir * move_speed
 		
@@ -200,7 +216,14 @@ func _physics_process(delta: float) -> void:
 				weapon = drawer.current_weapon_rig
 			
 			if weapon and weapon.has_method("start_attack"):
-				weapon.start_attack(get_global_mouse_position())
+				var cost = 0.0
+				if current_equipped_item != null:
+					cost = current_equipped_item.stamina_cost
+				
+				if cost <= 0.0 or not stamina or stamina.has_enough(cost):
+					if weapon.start_attack(get_global_mouse_position()):
+						if stamina and cost > 0.0:
+							stamina.consume(cost)
 	
 	if Input.is_action_just_released("attack") or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if drawer and drawer.current_weapon_rig:
@@ -233,15 +256,6 @@ func _on_health_changed(old_val: float, new_val: float) -> void:
 	tween.tween_property(label, "global_position", label.global_position + Vector2(0, -50), 0.5).set_ease(Tween.EASE_OUT)
 	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.5).set_delay(0.2)
 	tween.tween_callback(label.queue_free)
-	
-	if drawer:
-		var original_color = drawer.body_color
-		drawer.body_color = Color.RED
-		drawer.queue_redraw()
-		await get_tree().create_timer(0.1).timeout
-		if is_instance_valid(drawer):
-			drawer.body_color = original_color
-			drawer.queue_redraw()
 
 func _on_died() -> void:
 	print("Player died! ")

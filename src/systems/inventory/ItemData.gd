@@ -4,6 +4,7 @@ class_name ItemData
 @export var id: String = ""
 @export var item_name: String = "Unknown Item"
 @export var grid_size: Vector2i = Vector2i(1, 1)
+@export var stamina_cost: float = 10.0
 
 # 對應的武器場景 (例如 res://src/items/weapons/sword.tscn)
 @export var weapon_scene: PackedScene

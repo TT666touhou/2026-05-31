@@ -1,14 +1,18 @@
-[gd_scene format=3 uid="uid://dgw881e6ebldu"]
+[gd_scene load_steps=2 format=3 uid="uid://dgw881e6ebldu"]
+
+[ext_resource type="Script" path="res://src/world/cave_01/cave_level.gd" id="1_script"]
 
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/FloorSegment.tscn" id="1_floor"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WallSegment.tscn" id="2_wall"]
 [ext_resource type="PackedScene" path="res://src/entities/player/Player.tscn" id="3_player"]
 [ext_resource type="PackedScene" path="res://src/entities/dummy/Dummy.tscn" id="4_dummy"]
+[ext_resource type="PackedScene" path="res://src/entities/zombie/Zombie.tscn" id="8_zombie"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodDoor.tscn" id="6_wooddoor"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/StoneDoor.tscn" id="7_stonedoor"]
 
-[node name="CaveLevel" type="Node2D" unique_id=218559084]
+[node name="CaveLevel" type="NavigationRegion2D" unique_id=218559084]
+script = ExtResource("1_script")
 
 [node name="Background" type="ColorRect" parent="." unique_id=1893740283]
 z_index = -100
@@ -62,6 +66,9 @@ grid_size = Vector2i(1, 40)
 
 [node name="Dummy" parent="." unique_id=726227510 instance=ExtResource("4_dummy")]
 position = Vector2(0, 100)
+
+[node name="Zombie" parent="." instance=ExtResource("8_zombie")]
+position = Vector2(800, -50)
 
 [node name="WoodTable" parent="." unique_id=331483392 instance=ExtResource("5_table")]
 position = Vector2(-200, 0)

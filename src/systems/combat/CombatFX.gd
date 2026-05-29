@@ -30,4 +30,8 @@ func spawn_hit_spark(pos: Vector2, knockback_dir: Vector2) -> void:
 	var spark = hit_spark_scene.instantiate()
 	spark.global_position = pos
 	spark.rotation = knockback_dir.angle()
-	get_tree().current_scene.add_child(spark)
+	var root = get_tree().current_scene
+	if root:
+		root.add_child(spark)
+	else:
+		add_child(spark)

@@ -51,8 +51,11 @@ func equip(verlet, l_hand_idx: int, r_hand_idx: int, _facing_dir: float) -> void
 func update_owner_status_2d(_core_pos: Vector2, _facing_angle: float) -> void:
 	pass
 
-func start_attack(_mouse_pos: Vector2) -> void:
-	is_pulling = true
+func start_attack(_mouse_pos: Vector2) -> bool:
+	if not is_pulling:
+		is_pulling = true
+		return true
+	return false
 
 func end_attack(_mouse_pos: Vector2) -> void:
 	if is_pulling:

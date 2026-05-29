@@ -33,8 +33,8 @@ func _ready() -> void:
 	
 	var hitbox = get_node_or_null("../Hitbox")
 	if hitbox:
-		if hitbox.has_method("activate"):
-			hitbox.activate() # Keep hitbox permanently active to deal damage on touch
+		if hitbox.has_method("deactivate"):
+			hitbox.deactivate() # Default to off
 		if hitbox.has_signal("hit_landed"):
 			hitbox.hit_landed.connect(_on_hitbox_hit_landed)
 
@@ -69,7 +69,7 @@ func update_owner_status_2d(core_pos: Vector2, facing_angle: float) -> void:
 
 var locked_aim_dir: Vector2 = Vector2.ZERO
 
-func start_attack(mouse_pos: Vector2) -> void:
+func start_attack(mouse_pos: Vector2) -> bool:
 	if current_state == State.IDLE or current_state == State.RECOVER:
 		locked_aim_dir = (mouse_pos - weapon_rig.global_position).normalized()
 		
@@ -79,6 +79,8 @@ func start_attack(mouse_pos: Vector2) -> void:
 			combo_step = 1 - combo_step
 			
 		_change_state(State.WINDUP)
+		return true
+	return false
 
 func end_attack(_mouse_pos: Vector2) -> void:
 	pass
@@ -86,6 +88,15 @@ func end_attack(_mouse_pos: Vector2) -> void:
 func _change_state(new_state: State) -> void:
 	current_state = new_state
 	state_timer = 0.0
+	
+	var hitbox = weapon_rig.get_node_or_null("Hitbox")
+	if hitbox:
+		if new_state == State.ATTACK:
+			if hitbox.has_method("activate"):
+				hitbox.activate()
+		else:
+			if hitbox.has_method("deactivate"):
+				hitbox.deactivate()
 
 func _physics_process(delta: float) -> void:
 	state_timer += delta
