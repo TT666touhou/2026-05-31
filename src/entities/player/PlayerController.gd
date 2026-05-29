@@ -2,8 +2,8 @@ extends CharacterBody2D
 
 class_name PlayerController
 
-@export var move_speed: float = 160.0
-@export var dash_speed: float = 500.0
+@export var move_speed: float = 80.0
+@export var dash_speed: float = 250.0
 
 var dash_timer: float = 0.0
 var current_dash_dir: Vector2 = Vector2.ZERO

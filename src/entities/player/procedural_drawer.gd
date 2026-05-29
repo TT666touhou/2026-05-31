@@ -21,6 +21,7 @@ var override_mouse_pos = null # For testing
 var base_points_count: int = 0
 var base_sticks_count: int = 0
 var base_motors_count: int = 0
+var base_anti_flips_count: int = 0
 
 var current_weapon_rig: Node2D = null
 
@@ -58,19 +59,26 @@ func _ready() -> void:
 		else:
 			p.drag = 0.90
 			
-	verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 10.0)
-	verlet.add_stick(J.L_ELBOW, J.L_HAND, 10.0)
-	verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 10.0)
-	verlet.add_stick(J.R_ELBOW, J.R_HAND, 10.0)
+	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 10.0)
+	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 10.0)
+	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 10.0)
+	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, 10.0)
 	
-	verlet.add_motor(J.CENTER, func(): return character_body.global_position, 800.0)
-	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(4, 0).rotated(facing_angle), 600.0)
-	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -10).rotated(facing_angle), 800.0)
-	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, 10).rotated(facing_angle), 800.0)
+	# 開啟肢體線段碰撞，讓手在揮動時不會穿模過牆角
+	verlet.sticks[s1].collide_terrain = true
+	verlet.sticks[s2].collide_terrain = true
+	verlet.sticks[s3].collide_terrain = true
+	verlet.sticks[s4].collide_terrain = true
+	
+	verlet.add_motor(J.CENTER, func(): return character_body.global_position, 400.0)
+	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(4, 0).rotated(facing_angle), 300.0)
+	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -10).rotated(facing_angle), 400.0)
+	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, 10).rotated(facing_angle), 400.0)
 	
 	base_points_count = verlet.points.size()
 	base_sticks_count = verlet.sticks.size()
 	base_motors_count = verlet.motors.size()
+	base_anti_flips_count = verlet.anti_flips.size()
 	
 	# 初始化 Hurtbox 動態碰撞箱
 	_hurtbox_node = character_body.get_node_or_null("HurtboxComponent")
@@ -106,6 +114,7 @@ func unequip() -> void:
 		verlet.points.resize(base_points_count)
 		verlet.sticks.resize(base_sticks_count)
 		verlet.motors.resize(base_motors_count)
+		verlet.anti_flips.resize(base_anti_flips_count)
 
 func equip(weapon_scene: PackedScene) -> void:
 	unequip() # 先解除目前裝備
@@ -152,22 +161,23 @@ func _physics_process(delta: float) -> void:
 		
 	if walk_blend > 0:
 		var phase = Time.get_ticks_msec() / 150.0
-		var shoulder_swing = sin(phase) * 150.0 * walk_blend
+		var shoulder_swing = sin(phase) * 37.5 * walk_blend
 		verlet.points[J.L_SHOULDER].accumulated_force += Vector2(shoulder_swing, 0).rotated(facing_angle)
 		verlet.points[J.R_SHOULDER].accumulated_force += Vector2(-shoulder_swing, 0).rotated(facing_angle)
 	
-	var l_outward = Vector2(0, -100.0).rotated(facing_angle)
-	var r_outward = Vector2(0, 100.0).rotated(facing_angle)
+	var l_outward = Vector2(0, -25.0).rotated(facing_angle)
+	var r_outward = Vector2(0, 25.0).rotated(facing_angle)
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
+
+	var aim_dir = Vector2.RIGHT.rotated(facing_angle)
+	var left_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(-PI/2) * 8.0
+	var right_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(PI/2) * 8.0
+	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 375.0
+	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 375.0
 	
-	# 防卡死機制：如果質點距離本體過遠，暫時關閉碰撞，讓它能穿牆回來
-	for p in verlet.points:
-		var dist = p.pos.distance_to(character_body.global_position)
-		if dist > 120.0:
-			p.collide_terrain = false
-		elif dist < 80.0:
-			p.collide_terrain = true
+	# 防卡死機制：呼叫共用模組，過遠暫時關閉碰撞
+	verlet.enforce_anti_stuck(character_body.global_position)
 			
 	# 取得 2D 世界的 space_state 進行地形碰撞檢測 (layer 1)
 	var space_state = character_body.get_world_2d().direct_space_state

@@ -34,9 +34,29 @@ grid_size = Vector2i(82, 1)
 position = Vector2(-410, -300)
 grid_size = Vector2i(1, 60)
 
-[node name="Wall_Right" parent="." unique_id=1099311339 instance=ExtResource("2_wall")]
+[node name="Wall_Right_Top" parent="." unique_id=1099311339 instance=ExtResource("2_wall")]
 position = Vector2(400, -300)
-grid_size = Vector2i(1, 60)
+grid_size = Vector2i(1, 28)
+
+[node name="Wall_Right_Bottom" parent="." instance=ExtResource("2_wall")]
+position = Vector2(400, 20)
+grid_size = Vector2i(1, 28)
+
+[node name="FloorSegment2" parent="." instance=ExtResource("1_floor")]
+position = Vector2(400, -200)
+grid_size = Vector2i(60, 40)
+
+[node name="Wall_East_Top" parent="." instance=ExtResource("2_wall")]
+position = Vector2(410, -210)
+grid_size = Vector2i(60, 1)
+
+[node name="Wall_East_Bottom" parent="." instance=ExtResource("2_wall")]
+position = Vector2(410, 200)
+grid_size = Vector2i(60, 1)
+
+[node name="Wall_East_Right" parent="." instance=ExtResource("2_wall")]
+position = Vector2(1000, -200)
+grid_size = Vector2i(1, 40)
 
 [node name="Player" parent="." unique_id=2033603969 instance=ExtResource("3_player")]
 
@@ -47,7 +67,7 @@ position = Vector2(0, 100)
 position = Vector2(-200, 0)
 
 [node name="WoodDoor" parent="." unique_id=263090962 instance=ExtResource("6_wooddoor")]
-position = Vector2(200, 0)
+position = Vector2(405, -20)
 
 [node name="StoneDoor" parent="." unique_id=574986816 instance=ExtResource("7_stonedoor")]
 position = Vector2(200, 150)

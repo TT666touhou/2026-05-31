@@ -48,7 +48,9 @@ func _inject_line(line: Line2D) -> void:
 		
 		# Connect to previous point with a stick (invisible, Line2D handles drawing)
 		if i > 0:
-			target_physics.add_stick(indices[i-1], p_idx, -1.0, 1.0, false)
+			var stick_idx = target_physics.add_stick(indices[i-1], p_idx, -1.0, 1.0, false)
+			# Line2D represents a solid weapon part, so it should collide with terrain as a segment
+			target_physics.sticks[stick_idx].collide_terrain = true
 			
 	line_point_map[line] = indices
 

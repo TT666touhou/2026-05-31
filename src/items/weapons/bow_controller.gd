@@ -15,6 +15,8 @@ var pull_vector: Vector2 = Vector2.ZERO
 var charge_time: float = 0.0
 var max_charge_time: float = 1.0
 
+
+
 func _ready() -> void:
 	weapon_rig = get_parent() as VerletRig
 	set_physics_process(true)
@@ -42,6 +44,9 @@ func equip(verlet, l_hand_idx: int, r_hand_idx: int, _facing_dir: float) -> void
 	var string_center_idx = string_indices[1]
 	physics.add_stick(l_hand_idx, string_center_idx, 0.0, 1.0, false)
 	off_hand_idx = l_hand_idx
+	
+	# Prevent the bow body from flipping inside out
+	physics.add_anti_flip(bow_body_indices[0], bow_body_indices[1], bow_body_indices[2])
 
 func update_owner_status_2d(_core_pos: Vector2, _facing_angle: float) -> void:
 	pass

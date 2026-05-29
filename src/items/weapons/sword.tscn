@@ -7,13 +7,13 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_blade"]
 radius = 4.0
-height = 45.0
+height = 25.0
 
 [node name="Sword" type="Node2D"]
 script = ExtResource("1_rig")
 
 [node name="Blade" type="Line2D" parent="."]
-points = PackedVector2Array(0, 0, 0, -45)
+points = PackedVector2Array(0, 0, 0, -25)
 width = 1.0
 default_color = Color(0.8, 0.8, 0.8, 1)
 antialiased = false
