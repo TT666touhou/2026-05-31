@@ -77,21 +77,24 @@ func _update_texture() -> void:
 		self.texture = ImageTexture.create_from_image(img)
 
 # Returns true if world_pos is inside the vision cone/ambient circle
-# AND there is no wall occluder between this light and world_pos.
-func is_in_vision(world_pos: Vector2, exclude_body: Object = null) -> bool:
+# (geometric check only — no wall raycast).
+# Use this for interactive objects (doors, tables) that sit near walls.
+func is_in_vision_range(world_pos: Vector2) -> bool:
 	var local_pos: Vector2 = to_local(world_pos)
 	var dist: float = local_pos.length()
-
-	# --- Geometric check ---
-	var geom_ok: bool = false
 	if dist <= ambient_radius:
-		geom_ok = true
-	elif dist <= cone_radius:
+		return true
+	if dist <= cone_radius:
 		var angle_deg: float = rad_to_deg(abs(local_pos.angle()))
 		if angle_deg <= cone_angle:
-			geom_ok = true
+			return true
+	return false
 
-	if not geom_ok:
+# Returns true if world_pos is inside the vision area
+# AND there is no wall between this light and world_pos.
+# Use this for enemies (zombies, dummies) — excludes their own body from raycast.
+func is_in_vision(world_pos: Vector2, exclude_body: Object = null) -> bool:
+	if not is_in_vision_range(world_pos):
 		return false
 
 	# --- Raycast check (wall occlusion) ---

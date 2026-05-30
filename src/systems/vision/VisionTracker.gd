@@ -22,7 +22,7 @@ func _init_tracker() -> void:
 		push_warning("VisionTracker: VisionLight not found on Player.")
 
 func _physics_process(_delta: float) -> void:
-	if not _vision_light or not _vision_light.has_method("is_in_vision"):
+	if not _vision_light or not _vision_light.has_method("is_in_vision_range"):
 		return
 
 	# Discover newly added trackable objects each frame (cheap set-diff)
@@ -48,7 +48,9 @@ func _physics_process(_delta: float) -> void:
 		if obj.has_method("_get_vision_check_position"):
 			check_pos = obj._get_vision_check_position()
 
-		var now_visible: bool = _vision_light.is_in_vision(check_pos)
+		# Use geometric-only check (no raycast) — interactive objects sit near
+		# walls and the raycast would falsely detect them as occluded.
+		var now_visible: bool = _vision_light.is_in_vision_range(check_pos)
 		var was_visible: bool = entry["in_vision"]
 
 		if was_visible and not now_visible:
