@@ -1,6 +1,7 @@
 ## GhostNode.gd
 ## Renders a frozen "last known state" of an interactive object.
 ## Created by VisionTracker when an object leaves the player's vision.
+class_name GhostNode
 extends Node2D
 
 var _snapshot: Dictionary = {}

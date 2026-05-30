@@ -24,10 +24,9 @@ func _ready() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var w = grid_size.x * GRID_CELL_SIZE
-	var h = grid_size.y * GRID_CELL_SIZE
-	var rect = Rect2(0, 0, w, h)
-	
+	var w := float(grid_size.x) * GRID_CELL_SIZE
+	var h := float(grid_size.y) * GRID_CELL_SIZE
+
 	if floor_texture:
 		# Tile at 80 game px per repeat (240 screen px at zoom=3 → mipmap level ~2 → clear detail)
 		var tile_px := 80.0

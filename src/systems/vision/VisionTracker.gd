@@ -35,9 +35,9 @@ func _physics_process(_delta: float) -> void:
 	for obj in _tracked:
 		if not is_instance_valid(obj):
 			# Object was freed — clean up its ghost
-			var entry = _tracked[obj]
-			if entry["ghost"] != null and is_instance_valid(entry["ghost"]):
-				entry["ghost"].queue_free()
+			var freed_entry: Dictionary = _tracked[obj]
+			if freed_entry["ghost"] != null and is_instance_valid(freed_entry["ghost"]):
+				freed_entry["ghost"].queue_free()
 			to_remove.append(obj)
 			continue
 

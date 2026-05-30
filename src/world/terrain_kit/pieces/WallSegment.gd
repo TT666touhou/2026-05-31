@@ -62,7 +62,7 @@ func _draw() -> void:
 		#   X: tile 80 game px wide (good detail at zoom=3)
 		#   Y: tile exactly as tall as wall (= h) so no brick cutoff
 		var tile_w := 80.0
-		var tile_h := h  # wall height = one full tile height → complete bricks
+		var tile_h: float = h  # wall height = one full tile height → complete bricks
 		var sc_x := tile_w / float(wall_texture.get_width())
 		var sc_y := tile_h / float(wall_texture.get_height())
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc_x, sc_y))
