@@ -15,14 +15,11 @@ const GRID_CELL_SIZE = 10.0
 @export var mortar_color: Color = Color(0.05, 0.05, 0.05, 1.0)
 @export var highlight_color: Color = Color(0.28, 0.28, 0.28, 1.0)
 
-var _floor_tex: Texture2D = null
+@export var floor_texture: Texture2D
 
 func _ready() -> void:
 	# Floor should be drawn behind entities
 	z_index = -10
-	var _tex_path = "res://assets/textures/stone_floor.png"
-	if ResourceLoader.exists(_tex_path):
-		_floor_tex = load(_tex_path)
 	queue_redraw()
 
 func _draw() -> void:
@@ -30,8 +27,8 @@ func _draw() -> void:
 	var h = grid_size.y * GRID_CELL_SIZE
 	var rect = Rect2(0, 0, w, h)
 	
-	if _floor_tex:
-		draw_texture_rect(_floor_tex, rect, false)
+	if floor_texture:
+		draw_texture_rect(floor_texture, rect, false)
 	else:
 		# Fallback: procedural grey fill
 		draw_rect(rect, base_color)

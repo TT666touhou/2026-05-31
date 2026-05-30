@@ -14,26 +14,19 @@ class_name DoorVisuals
 
 var sink_progress: float = 0.0
 
-var _wood_tex: Texture2D = null
-var _stone_tex: Texture2D = null
+@export var wood_texture: Texture2D
+@export var stone_texture: Texture2D
 
 func set_sink_progress(progress: float) -> void:
 	sink_progress = progress
 	queue_redraw()
 
-func _ready() -> void:
-	var wood_path = "res://assets/textures/wood_door.png"
-	var stone_path = "res://assets/textures/stone_door.png"
-	if ResourceLoader.exists(wood_path):
-		_wood_tex = load(wood_path)
-	if ResourceLoader.exists(stone_path):
-		_stone_tex = load(stone_path)
 
 func _draw() -> void:
 	if material_type == 0: # Wood
 		var wood_rect = Rect2(-door_size.x/2, -door_size.y/2, door_size.x, door_size.y)
-		if _wood_tex:
-			draw_texture_rect(_wood_tex, wood_rect, false)
+		if wood_texture:
+			draw_texture_rect(wood_texture, wood_rect, false)
 		else:
 			# Fallback procedural wood
 			draw_rect(wood_rect, Color(0.45, 0.28, 0.16))
@@ -46,10 +39,10 @@ func _draw() -> void:
 		if sink_progress < 1.0:
 			var visible_h = door_size.y * (1.0 - sink_progress)
 			var dest_rect = Rect2(-door_size.x/2, door_size.y/2 - visible_h, door_size.x, visible_h)
-			if _stone_tex:
-				var tex_h = float(_stone_tex.get_height())
-				var src_rect = Rect2(0, sink_progress * tex_h, float(_stone_tex.get_width()), (1.0 - sink_progress) * tex_h)
-				draw_texture_rect_region(_stone_tex, dest_rect, src_rect)
+			if stone_texture:
+				var tex_h = float(stone_texture.get_height())
+				var src_rect = Rect2(0, sink_progress * tex_h, float(stone_texture.get_width()), (1.0 - sink_progress) * tex_h)
+				draw_texture_rect_region(stone_texture, dest_rect, src_rect)
 			else:
 				# Fallback procedural stone
 				draw_rect(dest_rect, Color(0.22, 0.22, 0.23))

@@ -15,7 +15,7 @@ const GRID_CELL_SIZE = 10.0
 @export var line_color: Color = Color(0.05, 0.05, 0.05, 1.0)
 @export var highlight_color: Color = Color(0.35, 0.35, 0.35, 1.0)
 
-var _wall_tex: Texture2D = null
+@export var wall_texture: Texture2D
 
 var collision_poly: CollisionPolygon2D
 var light_occluder: LightOccluder2D
@@ -23,10 +23,7 @@ var light_occluder: LightOccluder2D
 func _ready() -> void:
 	collision_poly = get_node_or_null("CollisionPolygon2D")
 	light_occluder = get_node_or_null("LightOccluder2D")
-	var _tex_path = "res://assets/textures/stone_wall.png"
-	if ResourceLoader.exists(_tex_path):
-		_wall_tex = load(_tex_path)
-	
+
 	_update_visuals()
 
 func _update_visuals() -> void:
@@ -60,8 +57,8 @@ func _draw() -> void:
 	var h = grid_size.y * GRID_CELL_SIZE
 	var rect = Rect2(0, 0, w, h)
 	
-	if _wall_tex:
-		draw_texture_rect(_wall_tex, rect, false)
+	if wall_texture:
+		draw_texture_rect(wall_texture, rect, false)
 	else:
 		# Fallback: procedural grey fill
 		draw_rect(rect, base_color)

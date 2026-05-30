@@ -8,14 +8,11 @@ extends RigidBody2D
 		queue_redraw()
 
 var collision: CollisionShape2D
-var _table_tex: Texture2D = null
+@export var table_texture: Texture2D
 
 func _ready() -> void:
 	collision = get_node_or_null("CollisionShape2D")
 	_update_collision()
-	var _tex_path = "res://assets/textures/wood_table.png"
-	if ResourceLoader.exists(_tex_path):
-		_table_tex = load(_tex_path)
 	if not Engine.is_editor_hint():
 		add_to_group("trackable")
 
@@ -26,8 +23,8 @@ func _update_collision() -> void:
 func _draw() -> void:
 	var rect = Rect2(-table_size/2, table_size)
 	
-	if _table_tex:
-		draw_texture_rect(_table_tex, rect, false)
+	if table_texture:
+		draw_texture_rect(table_texture, rect, false)
 	else:
 		# Fallback: procedural wood
 		draw_rect(rect, Color(0.45, 0.28, 0.16))
