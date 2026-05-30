@@ -55,14 +55,9 @@ func _update_visuals() -> void:
 func _draw() -> void:
 	var w = grid_size.x * GRID_CELL_SIZE
 	var h = grid_size.y * GRID_CELL_SIZE
-	var rect = Rect2(0, 0, w, h)
-	
-	if wall_texture:
-		# Tile size = wall thickness (GRID_CELL_SIZE = 10px)
-		# This ensures each tile is exactly as wide as the wall — bricks never cut
-		var tile_px := GRID_CELL_SIZE
-		var sc := tile_px / float(wall_texture.get_width())
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc, sc))
-		draw_texture_rect(wall_texture, Rect2(0.0, 0.0, w / sc, h / sc), true)
-		draw_set_transform(Vector2.ZERO)
+	# Walls are 10 px thick — no texture can show a complete brick at that scale.
+	# Use solid dark charcoal matching Darkwood palette (#2a2826).
+	draw_rect(Rect2(0, 0, w, h), Color(0.165, 0.157, 0.149, 1.0))
+	# Subtle lighter top-edge for depth
+	draw_line(Vector2(0, 0), Vector2(w, 0), Color(0.28, 0.26, 0.24, 0.6), 1.0)
 

@@ -9,6 +9,7 @@ var _stone_tex: Texture2D
 var _table_tex: Texture2D
 
 func _ready() -> void:
+	texture_filter = TEXTURE_FILTER_NEAREST
 	_wood_tex  = load("res://assets/textures/wood_door.png")
 	_stone_tex = load("res://assets/textures/stone_door.png")
 	_table_tex = load("res://assets/textures/wood_table.png")
