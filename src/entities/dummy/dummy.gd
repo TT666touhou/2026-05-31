@@ -18,8 +18,9 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	# 視野外淡出 — 超出玩家的環境光圓形範圍時隱藏
+	var vm := get_node_or_null("/root/VisionManager") as VisionManagerSingleton
 	var target_alpha: float = 1.0
-	if VisionManager and not VisionManager.is_in_vision(global_position):
+	if vm and not vm.is_in_vision(global_position):
 		target_alpha = 0.0
 	modulate.a = move_toward(modulate.a, target_alpha, delta * 4.0)
 
