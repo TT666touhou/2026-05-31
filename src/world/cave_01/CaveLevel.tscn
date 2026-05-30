@@ -11,28 +11,20 @@
 [ext_resource type="PackedScene" path="res://src/entities/zombie/Zombie.tscn" id="8_zombie"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ukvv7"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ogf40"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ucvpp"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_8h2go"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_6hi5b"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lvio7"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5x3ho"]
-light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_7xs81"]
-light_mode = 0
 
 [sub_resource type="Image" id="Image_ukvv7"]
 data = {
@@ -55,12 +47,14 @@ offset_left = -2000.0
 offset_top = -2000.0
 offset_right = 2000.0
 offset_bottom = 2000.0
-color = Color(0.12, 0.1, 0.08, 1)
+light_mask = 2
+color = Color(1, 1, 1, 1)
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=129525780]
-color = Color(0.05, 0.05, 0.05, 1)
+color = Color(0, 0, 0, 1)
 
 [node name="FloorSegment" parent="." unique_id=431544939 instance=ExtResource("1_floor")]
+light_mask = 2
 position = Vector2(-400, -300)
 grid_size = Vector2i(80, 60)
 
@@ -90,6 +84,7 @@ position = Vector2(400, 20)
 grid_size = Vector2i(1, 28)
 
 [node name="FloorSegment2" parent="." unique_id=40423305 instance=ExtResource("1_floor")]
+light_mask = 2
 position = Vector2(400, -200)
 grid_size = Vector2i(60, 40)
 
@@ -111,6 +106,8 @@ grid_size = Vector2i(1, 40)
 [node name="Player" parent="." unique_id=2033603969 instance=ExtResource("3_player")]
 
 [node name="VisionLight" parent="Player" index="7"]
+position = Vector2(0, -1)
+range_item_cull_mask = 1
 texture = SubResource("ImageTexture_ogf40")
 texture_scale = 1.171875
 ambient_radius = 50.0
@@ -118,6 +115,7 @@ ambient_blur = 10.0
 cone_radius = 300.0
 cone_blur = 0.0
 cone_angle = 10.0
+fog_brightness = 0.5
 
 [node name="Dummy" parent="." unique_id=726227510 instance=ExtResource("4_dummy")]
 position = Vector2(0, 100)
