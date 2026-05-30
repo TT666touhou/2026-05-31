@@ -39,10 +39,14 @@ func _get_vision_check_position() -> Vector2:
 
 func get_vision_snapshot() -> Dictionary:
 	var visuals: Node = door_body.get_node_or_null("Visuals")
+	if not visuals:
+		return {}
 	return {
 		"type": "WoodDoor",
-		"global_transform": door_body.global_transform,
-		"door_size": visuals.door_size if visuals and "door_size" in visuals else Vector2(10, 40),
+		# Use Visuals' own global_transform (includes its (0,20) offset from DoorBody)
+		# so GhostNode._draw() draws from the correct centre point.
+		"global_transform": visuals.global_transform,
+		"door_size": visuals.door_size if "door_size" in visuals else Vector2(10, 40),
 	}
 
 func set_vision_visible(v: bool) -> void:

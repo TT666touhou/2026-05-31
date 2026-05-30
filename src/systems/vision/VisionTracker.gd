@@ -69,6 +69,10 @@ func _on_object_left_vision(obj: Node, entry: Dictionary) -> void:
 	# Collect snapshot from the object
 	var snapshot: Dictionary = obj.get_vision_snapshot()
 
+	# If snapshot is empty (visuals not ready), abort — keep real visual visible
+	if snapshot.is_empty() or not snapshot.has("type"):
+		return
+
 	# Create ghost at scene root (so it doesn't move with the object)
 	var ghost := Node2D.new()
 	ghost.set_script(GhostNodeScript)
