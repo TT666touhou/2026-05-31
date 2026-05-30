@@ -6,7 +6,8 @@
 [ext_resource type="Script" uid="uid://butcqsl6em474" path="res://src/components/HurtboxComponent.gd" id="4_hurtbox"]
 [ext_resource type="Script" uid="uid://dj0pt3qfwke6y" path="res://src/components/StaminaComponent.gd" id="5_stamina"]
 [ext_resource type="Script" uid="uid://dhvi5a0itdn0i" path="res://src/components/ManaComponent.gd" id="6_mana"]
-[ext_resource type="Texture2D" path="res://src/world/vision/flashlight_1.png" id="7_flashlight"]
+[ext_resource type="Texture2D" uid="uid://7xgd2nv47lwk" path="res://src/world/vision/flashlight_1.png" id="7_flashlight"]
+[ext_resource type="Texture2D" path="res://src/world/vision/flashlight_2.png" id="8_ambient"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 1.0
@@ -48,10 +49,19 @@ script = ExtResource("5_stamina")
 [node name="ManaComponent" type="Node" parent="." unique_id=736086774]
 script = ExtResource("6_mana")
 
-[node name="Flashlight" type="PointLight2D" parent="."]
-texture = ExtResource("7_flashlight")
-offset = Vector2(240, 0)
-texture_scale = 0.5
+[node name="Flashlight" type="PointLight2D" parent="." unique_id=290049502]
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
+texture = ExtResource("7_flashlight")
+offset = Vector2(240, 0)
+texture_scale = 0.5
+energy = 0.8
+
+[node name="AmbientLight" type="PointLight2D" parent="."]
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 1.0
+texture = ExtResource("8_ambient")
+texture_scale = 1.5
+energy = 0.6
