@@ -25,12 +25,6 @@ func _draw() -> void:
 	
 	if table_texture:
 		draw_texture_rect(table_texture, rect, false)
-	else:
-		# Fallback: procedural wood
-		draw_rect(rect, Color(0.45, 0.28, 0.16))
-		var plank_width = 15.0
-		for y in range(-table_size.y/2, table_size.y/2, int(plank_width)):
-			draw_line(Vector2(-table_size.x/2, y), Vector2(table_size.x/2, y), Color(0.2, 0.1, 0.05), 1.0)
 
 # ── Trackable interface ────────────────────────────────────────────────────────
 func get_vision_snapshot() -> Dictionary:

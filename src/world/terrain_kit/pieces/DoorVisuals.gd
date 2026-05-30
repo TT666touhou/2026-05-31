@@ -24,28 +24,21 @@ func set_sink_progress(progress: float) -> void:
 
 func _draw() -> void:
 	if material_type == 0: # Wood
-		var wood_rect = Rect2(-door_size.x/2, -door_size.y/2, door_size.x, door_size.y)
 		if wood_texture:
+			var wood_rect = Rect2(-door_size.x/2, -door_size.y/2, door_size.x, door_size.y)
 			draw_texture_rect(wood_texture, wood_rect, false)
-		else:
-			# Fallback procedural wood
-			draw_rect(wood_rect, Color(0.45, 0.28, 0.16))
 			
 	else: # Stone
 		var full_rect = Rect2(-door_size.x/2, -door_size.y/2, door_size.x, door_size.y)
 		if sink_progress > 0.0:
-			draw_rect(full_rect, Color(0.05, 0.05, 0.05)) # Dark hole
+			draw_rect(full_rect, Color(0.05, 0.05, 0.05)) # Dark pit
 		
-		if sink_progress < 1.0:
+		if sink_progress < 1.0 and stone_texture:
 			var visible_h = door_size.y * (1.0 - sink_progress)
 			var dest_rect = Rect2(-door_size.x/2, door_size.y/2 - visible_h, door_size.x, visible_h)
-			if stone_texture:
-				var tex_h = float(stone_texture.get_height())
-				var src_rect = Rect2(0, sink_progress * tex_h, float(stone_texture.get_width()), (1.0 - sink_progress) * tex_h)
-				draw_texture_rect_region(stone_texture, dest_rect, src_rect)
-			else:
-				# Fallback procedural stone
-				draw_rect(dest_rect, Color(0.22, 0.22, 0.23))
+			var tex_h = float(stone_texture.get_height())
+			var src_rect = Rect2(0, sink_progress * tex_h, float(stone_texture.get_width()), (1.0 - sink_progress) * tex_h)
+			draw_texture_rect_region(stone_texture, dest_rect, src_rect)
 
 func _draw_rough_line(p1: Vector2, p2: Vector2, color: Color, base_thickness: float = 1.0) -> void:
 	var dist = p1.distance_to(p2)

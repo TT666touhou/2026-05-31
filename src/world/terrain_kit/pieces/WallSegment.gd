@@ -58,29 +58,10 @@ func _draw() -> void:
 	var rect = Rect2(0, 0, w, h)
 	
 	if wall_texture:
-		draw_texture_rect(wall_texture, rect, false)
-	else:
-		# Fallback: procedural grey fill
-		draw_rect(rect, base_color)
-
-func _draw_rough_line(p1: Vector2, p2: Vector2, color: Color, base_thickness: float = 1.0) -> void:
-	var dist = p1.distance_to(p2)
-	var dir = (p2 - p1).normalized()
-	var normal = Vector2(-dir.y, dir.x)
-	var current_dist = 0.0
-	var current_pos = p1
-	
-	while current_dist < dist:
-		var step = randf_range(2.0, 8.0)
-		if current_dist + step > dist:
-			step = dist - current_dist
-		
-		var next_pos = p1 + dir * (current_dist + step)
-		# Add a tiny random offset to the normal for roughness
-		var offset = normal * randf_range(-0.5, 0.5)
-		var thickness = base_thickness * randf_range(0.5, 1.5)
-		
-		draw_line(current_pos, next_pos + offset, color, thickness)
-		current_pos = next_pos + offset
-		current_dist += step
+		# Tile at 100 game px per texture repeat
+		var tile_px := 100.0
+		var sc := tile_px / float(wall_texture.get_width())
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc, sc))
+		draw_texture_rect(wall_texture, Rect2(0.0, 0.0, w / sc, h / sc), true)
+		draw_set_transform(Vector2.ZERO)
 
