@@ -1,2 +1,0 @@
-WARNING: res://levels/main.tscn:3 - ext_resource, invalid UID: uid://0pnnj1fg8udb - using text path instead: res://levels/Main.gd
-   at: load (scene/resources/resource_format_text.cpp:500)
