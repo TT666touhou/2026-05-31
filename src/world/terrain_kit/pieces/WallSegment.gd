@@ -21,6 +21,10 @@ var light_occluder: LightOccluder2D
 func _ready() -> void:
 	collision_poly = get_node_or_null("CollisionPolygon2D")
 	light_occluder = get_node_or_null("LightOccluder2D")
+	
+	material = CanvasItemMaterial.new()
+	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	
 	_update_visuals()
 
 func _update_visuals() -> void:

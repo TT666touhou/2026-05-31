@@ -40,6 +40,10 @@ extends StaticBody2D
 func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 0
+	
+	material = CanvasItemMaterial.new()
+	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	
 	_rebuild()
 
 func _draw() -> void:
