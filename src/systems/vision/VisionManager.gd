@@ -1,5 +1,6 @@
 ## VisionManager — Autoload singleton for querying player vision.
 ## Enemies call VisionManager.is_in_vision(global_position) to check if they should be visible.
+class_name VisionManager
 extends Node
 
 var _player_node: Node2D = null
