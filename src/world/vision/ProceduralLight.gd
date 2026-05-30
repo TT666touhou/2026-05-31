@@ -70,4 +70,7 @@ func _update_texture() -> void:
 				var c = int(clamp(final_val, 0.0, 1.0) * 255.0)
 				img.set_pixel(x, y, Color8(c, c, c, 255))
 				
-	self.texture = ImageTexture.create_from_image(img)
+	if self.texture is ImageTexture and self.texture.get_width() == TEX_RES and self.texture.get_height() == TEX_RES:
+		self.texture.update(img)
+	else:
+		self.texture = ImageTexture.create_from_image(img)

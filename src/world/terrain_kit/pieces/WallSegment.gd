@@ -22,9 +22,6 @@ func _ready() -> void:
 	collision_poly = get_node_or_null("CollisionPolygon2D")
 	light_occluder = get_node_or_null("LightOccluder2D")
 	
-	material = CanvasItemMaterial.new()
-	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
-	
 	_update_visuals()
 
 func _update_visuals() -> void:
@@ -48,6 +45,7 @@ func _update_visuals() -> void:
 			Vector2(w, h),
 			Vector2(0, h)
 		])
+		occ_poly.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
 		light_occluder.occluder = occ_poly
 		
 	queue_redraw()

@@ -41,9 +41,6 @@ func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 0
 	
-	material = CanvasItemMaterial.new()
-	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
-	
 	_rebuild()
 
 func _draw() -> void:
@@ -90,6 +87,7 @@ func _rebuild() -> void:
 	var occluder_node: LightOccluder2D = get_node_or_null("LightOccluder2D")
 	if occluder_node and occluder_node.occluder:
 		occluder_node.occluder.polygon = pts
+		occluder_node.occluder.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
 
 	queue_redraw()
 

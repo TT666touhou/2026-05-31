@@ -19,8 +19,7 @@ func set_sink_progress(progress: float) -> void:
 	queue_redraw()
 
 func _ready() -> void:
-	material = CanvasItemMaterial.new()
-	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	pass
 
 func _draw() -> void:
 	var rect = Rect2(-door_size/2, door_size)
