@@ -23,7 +23,8 @@ func _queue_update() -> void:
 		call_deferred("_update_texture")
 
 func _ready() -> void:
-	_queue_update()
+	_update_queued = false
+	_update_texture()
 
 func _update_texture() -> void:
 	_update_queued = false

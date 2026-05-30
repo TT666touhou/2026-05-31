@@ -58,12 +58,11 @@ script = ExtResource("7_procedural")
 
 [node name="FogLight" type="PointLight2D" parent="."]
 range_item_cull_mask = 1
-shadow_enabled = true
-shadow_filter = 0
-energy = 0.15
+shadow_enabled = false
+energy = 0.5
 color = Color(0.55, 0.6, 0.65, 1)
 script = ExtResource("7_procedural")
-ambient_radius = 900.0
+ambient_radius = 700.0
 ambient_blur = 150.0
 cone_radius = 0.0
 cone_blur = 0.0
