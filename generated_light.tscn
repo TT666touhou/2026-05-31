@@ -1,0 +1,5 @@
+[gd_scene format=3]
+
+[node name="" type="PointLight2D" unique_id=789424206]
+range_item_cull_mask = 3
+shadow_item_cull_mask = 3
