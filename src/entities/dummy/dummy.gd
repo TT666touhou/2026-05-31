@@ -16,6 +16,13 @@ func _physics_process(delta: float) -> void:
 	velocity = velocity.move_toward(Vector2.ZERO, 800 * delta)
 	move_and_slide()
 
+func _process(delta: float) -> void:
+	# 視野外淡出 — 超出玩家的環境光圓形範圍時隱藏
+	var target_alpha: float = 1.0
+	if VisionManager and not VisionManager.is_in_vision(global_position):
+		target_alpha = 0.0
+	modulate.a = move_toward(modulate.a, target_alpha, delta * 4.0)
+
 func _on_health_changed(old_val: float, new_val: float) -> void:
 	var dmg = old_val - new_val
 	print("Dummy took ", dmg, " damage! Health: ", new_val)

@@ -52,7 +52,7 @@ func _physics_process(delta: float) -> void:
 			_process_chase(delta)
 		State.ATTACK:
 			_process_attack(delta)
-			
+
 	if knockback_velocity.length() > 10.0:
 		# Apply high friction to knockback
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 1500.0 * delta)
@@ -60,6 +60,13 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 			
 	move_and_slide()
+
+func _process(delta: float) -> void:
+	# 視野外淡出 — 當敵人超出玩家的環境光圓形範圍時隱藏
+	var target_alpha: float = 1.0
+	if VisionManager and not VisionManager.is_in_vision(global_position):
+		target_alpha = 0.0
+	modulate.a = move_toward(modulate.a, target_alpha, delta * 4.0)
 	
 	# Push rigid bodies (like unlocked doors)
 	for i in get_slide_collision_count():
