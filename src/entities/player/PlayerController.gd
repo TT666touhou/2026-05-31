@@ -29,14 +29,19 @@ func _ready() -> void:
 	add_to_group("player")
 	drawer = get_node_or_null("ProceduralDrawer")
 	
-	if vision_light and light_builder:
-		vision_light.texture = light_builder.get_texture()
-	
 	if health:
 		health.health_changed.connect(_on_health_changed)
 		health.died.connect(_on_died)
 	if hurtbox:
 		hurtbox.hit_received.connect(_on_hit_received)
+		
+	# DEBUG: Take a screenshot and quit
+	get_tree().create_timer(1.0).timeout.connect(func():
+		var img = get_viewport().get_texture().get_image()
+		img.save_png("res://debug_screenshot_light.png")
+		print("SCREENSHOT_SAVED")
+		get_tree().quit()
+	)
 	
 	# Setup Inventory System
 	var InventoryManagerClass = preload("res://src/systems/inventory/InventoryManager.gd")

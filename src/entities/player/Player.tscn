@@ -9,6 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://7xgd2nv47lwk" path="res://src/world/vision/flashlight_1.png" id="7_flashlight"]
 [ext_resource type="Texture2D" path="res://src/world/vision/flashlight_2.png" id="8_ambient"]
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_light"]
+viewport_path = NodePath("LightTextureBuilder")
+
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 1.0
 
@@ -52,8 +55,8 @@ script = ExtResource("6_mana")
 [node name="LightTextureBuilder" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
-size = Vector2i(1024, 1024)
 render_target_update_mode = 4
+size = Vector2i(1024, 1024)
 
 [node name="AmbientSprite" type="Sprite2D" parent="LightTextureBuilder"]
 position = Vector2(512, 512)
@@ -71,3 +74,4 @@ shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
 energy = 0.8
+texture = SubResource("ViewportTexture_light")
