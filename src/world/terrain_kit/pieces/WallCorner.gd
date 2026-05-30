@@ -24,14 +24,6 @@ enum CornerType { OUTER_90, INNER_90 }
 		_rebuild()
 
 # ─── Shape Definition ────────────────────────────────────────────────────────
-func _ready() -> void:
-	collision_poly = get_node_or_null("CollisionPolygon2D")
-	light_occluder = get_node_or_null("LightOccluder2D")
-	
-	material = CanvasItemMaterial.new()
-	material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
-	
-	_update_visuals()
 
 func _get_polygon_points() -> PackedVector2Array:
 	var s: float = corner_size
