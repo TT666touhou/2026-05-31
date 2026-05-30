@@ -18,6 +18,9 @@ const GRID_CELL_SIZE = 10.0
 func _ready() -> void:
 	# Floor should be drawn behind entities
 	z_index = -10
+	# Put floor on light layer 2 so fog ambient light (fog_item_mask=2) can illuminate it
+	# Enemies are on default layer 1, so they stay invisible in fog
+	light_mask = 2
 	queue_redraw()
 
 func _draw() -> void:
