@@ -50,6 +50,7 @@ script = ExtResource("5_stamina")
 script = ExtResource("6_mana")
 
 [node name="Flashlight" type="PointLight2D" parent="." unique_id=290049502]
+blend_mode = 2
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
@@ -59,6 +60,7 @@ texture_scale = 0.5
 energy = 0.8
 
 [node name="AmbientLight" type="PointLight2D" parent="."]
+blend_mode = 2
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
