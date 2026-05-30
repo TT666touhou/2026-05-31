@@ -21,6 +21,7 @@ var drawer: Node2D
 @onready var health = $HealthComponent
 @onready var stamina = $StaminaComponent
 @onready var mana = $ManaComponent
+@onready var flashlight = get_node_or_null("Flashlight")
 
 func _ready() -> void:
 	add_to_group("player")
@@ -206,6 +207,9 @@ func _physics_process(delta: float) -> void:
 	
 	var mouse_pos = get_global_mouse_position()
 	current_aim_direction = (mouse_pos - global_position).normalized()
+	
+	if flashlight:
+		flashlight.look_at(mouse_pos)
 	
 	# 處理攻擊輸入 (若 UI 開啟則阻擋攻擊，除非需要)
 	if inv_ui and inv_ui.backpack_open: return
