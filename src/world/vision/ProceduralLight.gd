@@ -15,14 +15,6 @@ const TEX_RES: int = 512
 @export_range(0.0, 180.0) var cone_angle: float = 30.0:
 	set(v): cone_angle = v; _queue_update()
 
-# ── Fog of War 視野外色調 ──────────────────────────────────────────
-# 分析參考圖：視野外亮度約 17-19%，帶冷藍綠色調
-# RGB(40,48,43) normalized ≈ Color(0.157, 0.188, 0.169)
-@export var fog_color: Color = Color(0.157, 0.188, 0.169):
-	set(v):
-		fog_color = v
-		_apply_fog_color()
-
 var _update_queued: bool = false
 
 func _queue_update() -> void:
@@ -32,29 +24,6 @@ func _queue_update() -> void:
 
 func _ready() -> void:
 	_queue_update()
-	_apply_fog_color()
-
-func _apply_fog_color() -> void:
-	if not is_inside_tree():
-		return
-	# 找場景中的 CanvasModulate 並套用霧化顏色
-	var modulate_node = get_tree().get_first_node_in_group("canvas_modulate")
-	if not modulate_node:
-		# 嘗試直接從父場景節點找
-		var scene_root = get_tree().current_scene
-		if scene_root:
-			modulate_node = _find_canvas_modulate(scene_root)
-	if modulate_node and modulate_node is CanvasModulate:
-		modulate_node.color = fog_color
-
-func _find_canvas_modulate(node: Node) -> Node:
-	if node is CanvasModulate:
-		return node
-	for child in node.get_children():
-		var result = _find_canvas_modulate(child)
-		if result:
-			return result
-	return null
 
 func _update_texture() -> void:
 	_update_queued = false

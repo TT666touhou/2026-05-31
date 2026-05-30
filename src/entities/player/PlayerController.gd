@@ -35,12 +35,6 @@ func _ready() -> void:
 	if hurtbox:
 		hurtbox.hit_received.connect(_on_hit_received)
 	
-	# 向 VisionManager 注册玩家与视野光源
-	if vision_light:
-		var vm := get_node_or_null("/root/VisionManager") as VisionManagerSingleton
-		if vm:
-			vm.register_player(self, vision_light)
-	
 	# Setup Inventory System
 	var InventoryManagerClass = preload("res://src/systems/inventory/InventoryManager.gd")
 	inv_mgr = InventoryManagerClass.new()

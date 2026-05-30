@@ -22,7 +22,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 CombatFX="*res://src/systems/combat/CombatFX.gd"
-VisionManager="*res://src/systems/vision/VisionManager.gd"
 
 [display]
 

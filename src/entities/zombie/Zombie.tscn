@@ -31,6 +31,7 @@ script = ExtResource("1_script")
 shape = SubResource("CircleShape2D_body")
 
 [node name="ProceduralDrawer" type="Node2D" parent="."]
+light_mask = 4
 script = ExtResource("2_drawer")
 body_color = Color(0.29, 0.42, 0.24, 1)
 eye_color = Color(1, 0.13, 0.13, 1)
@@ -64,6 +65,7 @@ path_desired_distance = 20.0
 target_desired_distance = 30.0
 
 [node name="UI" type="Node2D" parent="."]
+light_mask = 4
 z_index = 10
 position = Vector2(-20, -40)
 
