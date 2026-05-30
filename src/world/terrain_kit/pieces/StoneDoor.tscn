@@ -8,7 +8,7 @@
 size = Vector2(10, 40)
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_door"]
-cull_mode = 2
+cull_mode = 0
 polygon = PackedVector2Array(-5, -20, 5, -20, 5, 20, -5, 20)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_interact"]

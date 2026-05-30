@@ -45,7 +45,7 @@ func _update_visuals() -> void:
 			Vector2(w, h),
 			Vector2(0, h)
 		])
-		occ_poly.cull_mode = OccluderPolygon2D.CULL_COUNTER_CLOCKWISE
+		occ_poly.cull_mode = OccluderPolygon2D.CULL_DISABLED
 		light_occluder.occluder = occ_poly
 		
 	queue_redraw()
