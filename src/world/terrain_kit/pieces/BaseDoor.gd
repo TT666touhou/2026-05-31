@@ -17,6 +17,7 @@ var occluder: LightOccluder2D
 var interactable: InteractableComponent
 
 func _ready() -> void:
+	add_to_group("trackable")
 	original_rotation = rotation_degrees
 	
 	collision = get_node_or_null("CollisionShape2D")

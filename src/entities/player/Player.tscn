@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://dj0pt3qfwke6y" path="res://src/components/StaminaComponent.gd" id="5_stamina"]
 [ext_resource type="Script" uid="uid://dhvi5a0itdn0i" path="res://src/components/ManaComponent.gd" id="6_mana"]
 [ext_resource type="Script" path="res://src/world/vision/ProceduralLight.gd" id="7_procedural"]
+[ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="8_vtracker"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 1.0
@@ -67,3 +68,9 @@ ambient_blur = 150.0
 cone_radius = 0.0
 cone_blur = 0.0
 cone_angle = 0.0
+
+[node name="VisionTracker" type="Node" parent="."]
+script = ExtResource("8_vtracker")
+ambient_radius = 50.0
+cone_radius = 300.0
+cone_angle_deg = 10.0

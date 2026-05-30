@@ -8,6 +8,7 @@ var interactable: InteractableComponent
 @onready var door_body: RigidBody2D = $DoorBody
 
 func _ready() -> void:
+	add_to_group("trackable")
 	interactable = get_node_or_null("DoorBody/InteractableComponent")
 	if interactable:
 		interactable.interacted.connect(_on_interacted)
