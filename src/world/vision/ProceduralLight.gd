@@ -2,34 +2,49 @@
 extends PointLight2D
 class_name ProceduralLight
 
-@export var tex_size: int = 512:
-	set(v): tex_size = max(64, v); call_deferred("_update_texture")
-@export var ambient_radius: float = 100.0:
-	set(v): ambient_radius = max(0.0, v); call_deferred("_update_texture")
-@export var ambient_blur: float = 40.0:
-	set(v): ambient_blur = max(0.0, v); call_deferred("_update_texture")
-@export var cone_radius: float = 350.0:
-	set(v): cone_radius = max(0.0, v); call_deferred("_update_texture")
-@export var cone_blur: float = 80.0:
-	set(v): cone_blur = max(0.0, v); call_deferred("_update_texture")
-@export var cone_angle: float = 30.0:
-	set(v): cone_angle = clamp(v, 0.0, 180.0); call_deferred("_update_texture")
+const TEX_RES: int = 512
+
+@export_range(0.0, 2000.0) var ambient_radius: float = 100.0:
+	set(v): ambient_radius = v; _queue_update()
+@export_range(0.0, 500.0) var ambient_blur: float = 40.0:
+	set(v): ambient_blur = v; _queue_update()
+@export_range(0.0, 2000.0) var cone_radius: float = 350.0:
+	set(v): cone_radius = v; _queue_update()
+@export_range(0.0, 500.0) var cone_blur: float = 80.0:
+	set(v): cone_blur = v; _queue_update()
+@export_range(0.0, 180.0) var cone_angle: float = 30.0:
+	set(v): cone_angle = v; _queue_update()
+
+var _update_queued: bool = false
+
+func _queue_update() -> void:
+	if not _update_queued:
+		_update_queued = true
+		call_deferred("_update_texture")
 
 func _ready() -> void:
-	if texture == null or texture.get_size() != Vector2(tex_size, tex_size):
-		_update_texture()
+	_queue_update()
 
 func _update_texture() -> void:
-	if tex_size <= 0: return
+	_update_queued = false
 	
-	var img = Image.create_empty(tex_size, tex_size, false, Image.FORMAT_L8)
-	img.fill(Color(0, 0, 0, 1))
-	var center = Vector2(tex_size * 0.5, tex_size * 0.5)
+	var max_r = max(ambient_radius + ambient_blur, cone_radius + cone_blur)
+	if max_r <= 0.0:
+		self.texture = null
+		return
+		
+	# Keep texture generation fast by fixing it to TEX_RES and scaling the light
+	var scale_factor = (TEX_RES * 0.5) / max_r
+	self.texture_scale = max_r / (TEX_RES * 0.5)
 	
-	for y in range(tex_size):
-		for x in range(tex_size):
+	var img = Image.create_empty(TEX_RES, TEX_RES, false, Image.FORMAT_L8)
+	var center = Vector2(TEX_RES * 0.5, TEX_RES * 0.5)
+	
+	# Generate pixels mapping coordinate space to logical distance
+	for y in range(TEX_RES):
+		for x in range(TEX_RES):
 			var pos = Vector2(x, y)
-			var dist = pos.distance_to(center)
+			var dist = pos.distance_to(center) / scale_factor
 			
 			var ambient_val = 0.0
 			if dist <= ambient_radius:
@@ -51,7 +66,8 @@ func _update_texture() -> void:
 					cone_val *= max(0.0, 1.0 - ((dist - cone_radius) / cone_blur))
 			
 			var final_val = max(ambient_val, cone_val)
-			if final_val > 0:
-				img.set_pixel(x, y, Color(final_val, final_val, final_val, 1.0))
+			if final_val > 0.0:
+				var c = int(clamp(final_val, 0.0, 1.0) * 255.0)
+				img.set_pixel(x, y, Color8(c, c, c, 255))
 				
 	self.texture = ImageTexture.create_from_image(img)
