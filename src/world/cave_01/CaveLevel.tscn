@@ -11,28 +11,28 @@
 [ext_resource type="PackedScene" path="res://src/entities/zombie/Zombie.tscn" id="8_zombie"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ukvv7"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ogf40"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ucvpp"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_8h2go"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_6hi5b"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lvio7"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5x3ho"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_7xs81"]
-light_mode = 1
+light_mode = 0
 
 [sub_resource type="Image" id="Image_ukvv7"]
 data = {
