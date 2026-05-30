@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ob1b17q7ac6v"
-valid=false
+uid="uid://bn8khss7hkcn2"
+path="res://.godot/imported/wood_door.png-75085ac7489321ccc3d6311a6f2f8afa.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/wood_door.png"
+dest_files=["res://.godot/imported/wood_door.png-75085ac7489321ccc3d6311a6f2f8afa.ctex"]
 
 [params]
 

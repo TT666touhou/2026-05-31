@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=4 format=3 uid="uid://woodtable"]
 
 [ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WoodTable.gd" id="1_table"]
-[ext_resource type="Texture2D" path="res://assets/textures/wood_table.png" id="2_table_tex"]
+[ext_resource type="Texture2D" uid="uid://bse8myqhmt5rp" path="res://assets/textures/wood_table.png" id="2_table_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_table"]
 size = Vector2(30, 20)

@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1k1vej170ca5"
-valid=false
+uid="uid://b0p851c8nmy1g"
+path="res://.godot/imported/stone_door.png-abd6b385ca5b7c7a68a9e75af57077ad.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/stone_door.png"
+dest_files=["res://.godot/imported/stone_door.png-abd6b385ca5b7c7a68a9e75af57077ad.ctex"]
 
 [params]
 

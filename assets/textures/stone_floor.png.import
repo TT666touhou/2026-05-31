@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://buro1lcs4ytv0"
-valid=false
+uid="uid://bf48sdaee1bfv"
+path="res://.godot/imported/stone_floor.png-b5f240c87bf6d9e2e02e23ffab3a644c.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/stone_floor.png"
+dest_files=["res://.godot/imported/stone_floor.png-b5f240c87bf6d9e2e02e23ffab3a644c.ctex"]
 
 [params]
 

@@ -2,12 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cl06a4bgmod3y"
-valid=false
+uid="uid://bbpoabtj7o4er"
+path="res://.godot/imported/stone_wall.png-75563a704c32fd0b1fa6e30659c44e75.ctex"
+metadata={
+"vram_texture": false
+}
 
 [deps]
 
 source_file="res://assets/textures/stone_wall.png"
+dest_files=["res://.godot/imported/stone_wall.png-75563a704c32fd0b1fa6e30659c44e75.ctex"]
 
 [params]
 
