@@ -13,6 +13,7 @@ enum State {
 
 var current_state: State = State.IDLE
 var target_player: Node2D = null
+var _vision_light: Node = null  # ProceduralLight ref
 
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
 @onready var drawer = $ProceduralDrawer
@@ -36,10 +37,11 @@ func _ready() -> void:
 	call_deferred("_setup_nav")
 
 func _setup_nav() -> void:
-	# Find player
+	# Find player and cache VisionLight reference
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		target_player = players[0]
+		_vision_light = target_player.get_node_or_null("VisionLight")
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD:
@@ -60,6 +62,7 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 			
 	move_and_slide()
+	_update_visibility()
 	
 	# Push rigid bodies (like unlocked doors)
 	for i in get_slide_collision_count():
@@ -127,6 +130,13 @@ func _process_attack(_delta: float) -> void:
 	drawer.is_attacking = true
 	drawer.attack_target = target_player.global_position
 	drawer.target_facing_angle = global_position.direction_to(target_player.global_position).angle()
+
+func _update_visibility() -> void:
+	if not _vision_light or not _vision_light.has_method("is_in_vision"):
+		return
+	var in_vision: bool = _vision_light.is_in_vision(global_position, self)
+	drawer.visible = in_vision
+	$UI.visible = in_vision
 
 func _on_health_changed(_old_health: float, new_health: float) -> void:
 	health_bar.value = new_health

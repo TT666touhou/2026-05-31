@@ -12,6 +12,8 @@ var collision: CollisionShape2D
 func _ready() -> void:
 	collision = get_node_or_null("CollisionShape2D")
 	_update_collision()
+	if not Engine.is_editor_hint():
+		add_to_group("trackable")
 
 func _update_collision() -> void:
 	if collision and collision.shape is RectangleShape2D:
@@ -38,3 +40,14 @@ func _draw() -> void:
 			var px2 = px + randf_range(10, 30)
 			if px2 > table_size.x/2 - 2: px2 = table_size.x/2 - 2
 			draw_line(Vector2(px, py), Vector2(px2, py), Color(0.3, 0.15, 0.08), 1.0)
+
+# ── Trackable interface ────────────────────────────────────────────────────────
+func get_vision_snapshot() -> Dictionary:
+	return {
+		"type": "WoodTable",
+		"global_transform": global_transform,
+		"table_size": table_size,
+	}
+
+func set_vision_visible(v: bool) -> void:
+	visible = v

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://zombie_uuid_1"]
+[gd_scene load_steps=8 format=3 uid="uid://zombie_uuid_1"]
 
 [ext_resource type="Script" path="res://src/entities/zombie/zombie.gd" id="1_script"]
 [ext_resource type="Script" path="res://src/entities/zombie/zombie_drawer.gd" id="2_drawer"]
@@ -22,9 +22,6 @@ bg_color = Color(0.2, 0.2, 0.2, 0.8)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_health_fill"]
 bg_color = Color(0.8, 0.2, 0.2, 1.0)
 
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_add"]
-blend_mode = 1
-
 [node name="Zombie" type="CharacterBody2D"]
 collision_layer = 4
 collision_mask = 257
@@ -35,7 +32,6 @@ shape = SubResource("CircleShape2D_body")
 
 [node name="ProceduralDrawer" type="Node2D" parent="."]
 light_mask = 4
-material = SubResource("CanvasItemMaterial_add")
 script = ExtResource("2_drawer")
 body_color = Color(0.29, 0.42, 0.24, 1)
 eye_color = Color(1, 0.13, 0.13, 1)

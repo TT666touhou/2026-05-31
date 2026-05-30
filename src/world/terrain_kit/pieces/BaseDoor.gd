@@ -17,7 +17,6 @@ var occluder: LightOccluder2D
 var interactable: InteractableComponent
 
 func _ready() -> void:
-	add_to_group("trackable")
 	original_rotation = rotation_degrees
 	
 	collision = get_node_or_null("CollisionShape2D")
@@ -32,6 +31,7 @@ func _ready() -> void:
 		interactable.interacted.connect(_on_interacted)
 		
 	_update_state(true) # instant snap
+	_ready_trackable()  # register as trackable
 
 func _on_interacted() -> void:
 	if is_animating: return
@@ -87,3 +87,19 @@ func _apply_physics_state() -> void:
 			
 	if occluder:
 		occluder.visible = not is_open
+
+# ── Trackable interface ────────────────────────────────────────────────────────
+func _ready_trackable() -> void:
+	add_to_group("trackable")
+
+func get_vision_snapshot() -> Dictionary:
+	return {
+		"type": "StoneDoor",
+		"global_transform": global_transform,
+		"door_size": visual_node.door_size if visual_node and "door_size" in visual_node else Vector2(10, 40),
+		"sink_progress": sink_progress,
+	}
+
+func set_vision_visible(v: bool) -> void:
+	if visual_node:
+		visual_node.visible = v

@@ -1,148 +1,93 @@
+## VisionTracker.gd
+## Child node of Player. Monitors all "trackable" objects and manages
+## GhostNode creation/destruction when objects leave/enter the player's vision.
 extends Node
-class_name VisionTracker
 
-## VisionTracker
-## Attach to Player. Monitors all nodes in group "trackable".
-## When a trackable leaves vision -> freeze its Visuals node, spawn a Ghost.
-## When a trackable re-enters vision -> restore live Visuals, destroy Ghost.
+const GhostNodeScript = preload("res://src/systems/vision/GhostNode.gd")
 
-# ── Tunable vision params (matched to VisionLight in CaveLevel) ──────────────
-@export var ambient_radius: float = 50.0
-@export var cone_radius: float    = 300.0
-@export var cone_angle_deg: float = 10.0   # half-angle of the cone
+# Map: trackable_node -> { "in_vision": bool, "ghost": Node2D | null }
+var _tracked: Dictionary = {}
 
-# ── Internal state ────────────────────────────────────────────────────────────
-# Dict[ Node2D -> { ghost: Node2D|null, visuals: Node2D|null, in_vision: bool } ]
-var _states: Dictionary = {}
+var _vision_light: Node = null  # ProceduralLight (VisionLight on Player)
+var _scene_root: Node = null    # Where ghost nodes are added
 
-# Wall physics layer mask for line-of-sight raycasts
-const WALL_MASK: int = 1
-
-# ─────────────────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	# Give the scene a frame to settle before we start tracking
-	set_process(false)
-	await get_tree().process_frame
-	set_process(true)
+	# Wait one frame so siblings are available
+	call_deferred("_init_tracker")
 
+func _init_tracker() -> void:
+	_vision_light = get_parent().get_node_or_null("VisionLight")
+	_scene_root = get_tree().current_scene
+	if not _vision_light:
+		push_warning("VisionTracker: VisionLight not found on Player.")
 
-func _process(_dt: float) -> void:
-	var player := get_parent() as CharacterBody2D
-	if player == null:
+func _physics_process(_delta: float) -> void:
+	if not _vision_light or not _vision_light.has_method("is_in_vision"):
 		return
 
-	var player_pos := player.global_position
-	# PlayerController stores current_aim_direction as a public var
-	var aim_dir: Vector2 = Vector2.RIGHT
-	if "current_aim_direction" in player:
-		aim_dir = player.current_aim_direction
-
+	# Discover newly added trackable objects each frame (cheap set-diff)
 	for obj in get_tree().get_nodes_in_group("trackable"):
+		if not _tracked.has(obj):
+			_tracked[obj] = {"in_vision": true, "ghost": null}
+
+	# Update each tracked object
+	var to_remove: Array = []
+	for obj in _tracked:
 		if not is_instance_valid(obj):
+			# Object was freed — clean up its ghost
+			var entry = _tracked[obj]
+			if entry["ghost"] != null and is_instance_valid(entry["ghost"]):
+				entry["ghost"].queue_free()
+			to_remove.append(obj)
 			continue
-		_update(obj as Node2D, player_pos, aim_dir)
 
+		var entry: Dictionary = _tracked[obj]
+		var check_pos: Vector2 = obj.global_position
 
-# ── Per-object update ─────────────────────────────────────────────────────────
-func _update(obj: Node2D, player_pos: Vector2, aim_dir: Vector2) -> void:
-	# Resolve the Visuals node (WoodDoor stores it at DoorBody/Visuals)
-	var visuals: Node2D = _get_visuals(obj)
-	if visuals == null:
+		# For WoodDoor use DoorBody's position (PinJoint pivot is root pos)
+		if obj.has_method("_get_vision_check_position"):
+			check_pos = obj._get_vision_check_position()
+
+		var now_visible: bool = _vision_light.is_in_vision(check_pos)
+		var was_visible: bool = entry["in_vision"]
+
+		if was_visible and not now_visible:
+			_on_object_left_vision(obj, entry)
+		elif not was_visible and now_visible:
+			_on_object_entered_vision(obj, entry)
+
+		entry["in_vision"] = now_visible
+
+	for obj in to_remove:
+		_tracked.erase(obj)
+
+# ── Object Leaves Vision ──────────────────────────────────────────────────────
+func _on_object_left_vision(obj: Node, entry: Dictionary) -> void:
+	if not obj.has_method("get_vision_snapshot"):
 		return
 
-	# Register state on first encounter
-	if not _states.has(obj):
-		_states[obj] = { "ghost": null, "visuals": visuals, "in_vision": false }
+	# Collect snapshot from the object
+	var snapshot: Dictionary = obj.get_vision_snapshot()
 
-	var state: Dictionary = _states[obj]
-	var now_visible: bool = _is_in_vision(obj.global_position, player_pos, aim_dir)
+	# Create ghost at scene root (so it doesn't move with the object)
+	var ghost := Node2D.new()
+	ghost.set_script(GhostNodeScript)
+	_scene_root.add_child(ghost)
+	ghost.setup(snapshot)
 
-	if now_visible:
-		# ── Entering / staying in vision ──────────────────────────────────
-		if not state["in_vision"]:
-			# Was hidden → restore real Visuals, destroy ghost
-			_destroy_ghost(state)
-			if is_instance_valid(visuals):
-				visuals.visible = true
-		state["in_vision"] = true
+	entry["ghost"] = ghost
 
-	else:
-		# ── Leaving / staying outside vision ─────────────────────────────
-		if state["in_vision"]:
-			# Just left vision → spawn ghost at current transform, hide real Visuals
-			if is_instance_valid(visuals) and visuals.visible:
-				_spawn_ghost(state, visuals)
-				visuals.visible = false
-		state["in_vision"] = false
+	# Hide the real visual so the object is invisible
+	if obj.has_method("set_vision_visible"):
+		obj.set_vision_visible(false)
 
-	_states[obj] = state
+# ── Object Enters Vision ──────────────────────────────────────────────────────
+func _on_object_entered_vision(obj: Node, entry: Dictionary) -> void:
+	# Destroy ghost
+	if entry["ghost"] != null and is_instance_valid(entry["ghost"]):
+		entry["ghost"].queue_free()
+	entry["ghost"] = null
 
-
-# ── Ghost lifecycle ───────────────────────────────────────────────────────────
-func _spawn_ghost(state: Dictionary, visuals: Node2D) -> void:
-	# Duplicate the Visuals Node2D (copies script + exported properties)
-	var ghost: Node2D = visuals.duplicate(0)
-	# Freeze at current world transform
-	ghost.global_transform = visuals.global_transform
-	# Only visible in fog layer (FogLight range_item_cull_mask = 1)
-	ghost.light_mask = 1
-	# Prevent DoorVisuals from calling queue_redraw() via its setters
-	# by removing the script – the canvas commands drawn so far are retained
-	# for this frame, but Godot will redraw using _draw().
-	# Instead we keep the script but override it: we re-draw in the ghost
-	# using the SAME script, same params, same transform → same result.
-	# The trick: detach from DoorBody so it doesn't follow physics.
-	get_tree().current_scene.add_child(ghost)
-	state["ghost"] = ghost
-
-
-func _destroy_ghost(state: Dictionary) -> void:
-	if state.get("ghost") != null and is_instance_valid(state["ghost"]):
-		state["ghost"].queue_free()
-	state["ghost"] = null
-
-
-# ── Vision check ──────────────────────────────────────────────────────────────
-func _is_in_vision(obj_pos: Vector2, player_pos: Vector2, aim_dir: Vector2) -> bool:
-	var dist: float = obj_pos.distance_to(player_pos)
-
-	# 1. Ambient circle around player
-	if dist <= ambient_radius:
-		return _has_los(player_pos, obj_pos)
-
-	# 2. Flashlight cone
-	if dist <= cone_radius:
-		if aim_dir.length_squared() > 0.01:
-			var dir_to_obj: Vector2 = (obj_pos - player_pos).normalized()
-			var angle: float = rad_to_deg(abs(aim_dir.normalized().angle_to(dir_to_obj)))
-			if angle <= cone_angle_deg:
-				return _has_los(player_pos, obj_pos)
-
-	return false
-
-
-func _has_los(from: Vector2, to: Vector2) -> bool:
-	var space := get_tree().root.get_world_2d().direct_space_state
-	if space == null:
-		return true
-	var params := PhysicsRayQueryParameters2D.create(from, to)
-	params.collision_mask = WALL_MASK
-	# Exclude the player body itself
-	var parent := get_parent()
-	if parent is CollisionObject2D:
-		params.exclude = [parent.get_rid()]
-	var hit := space.intersect_ray(params)
-	return hit.is_empty()
-
-
-# ── Helper: find the Visuals node regardless of scene hierarchy ───────────────
-func _get_visuals(obj: Node2D) -> Node2D:
-	# WoodDoor: root=Node2D, Visuals is at DoorBody/Visuals
-	var v = obj.get_node_or_null("DoorBody/Visuals")
-	if v:
-		return v as Node2D
-	# StoneDoor / others: Visuals is a direct child
-	v = obj.get_node_or_null("Visuals")
-	if v:
-		return v as Node2D
-	return null
+	# Show real visual again
+	if obj.has_method("set_vision_visible"):
+		obj.set_vision_visible(true)

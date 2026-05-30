@@ -75,3 +75,33 @@ func _update_texture() -> void:
 		self.texture.update(img)
 	else:
 		self.texture = ImageTexture.create_from_image(img)
+
+# Returns true if world_pos is inside the vision cone/ambient circle
+# AND there is no wall occluder between this light and world_pos.
+func is_in_vision(world_pos: Vector2, exclude_body: Object = null) -> bool:
+	var local_pos: Vector2 = to_local(world_pos)
+	var dist: float = local_pos.length()
+
+	# --- Geometric check ---
+	var geom_ok: bool = false
+	if dist <= ambient_radius:
+		geom_ok = true
+	elif dist <= cone_radius:
+		var angle_deg: float = rad_to_deg(abs(local_pos.angle()))
+		if angle_deg <= cone_angle:
+			geom_ok = true
+
+	if not geom_ok:
+		return false
+
+	# --- Raycast check (wall occlusion) ---
+	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(
+		global_position,
+		world_pos,
+		1  # collision_mask: wall layer (StaticBody2D default = 1)
+	)
+	if exclude_body is CollisionObject2D:
+		query.exclude = [exclude_body.get_rid()]
+	var result: Dictionary = space.intersect_ray(query)
+	return result.is_empty()
