@@ -23,6 +23,7 @@ var drawer: Node2D
 @onready var mana = $ManaComponent
 
 func _ready() -> void:
+	add_to_group("player")
 	drawer = get_node_or_null("ProceduralDrawer")
 	
 	if health:

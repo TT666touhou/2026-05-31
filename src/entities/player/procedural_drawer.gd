@@ -54,9 +54,14 @@ func _ready() -> void:
 		# Point masks will be handled by simulate() global mask
 		
 		if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
-			p.drag = 0.95 
+			p.drag = 0.95
+			p.radius = 5.0
+		elif i == J.HEAD:
+			p.drag = 0.90
+			p.radius = 8.0
 		else:
 			p.drag = 0.90
+			p.radius = 5.0
 			
 	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 10.0)
 	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 10.0)

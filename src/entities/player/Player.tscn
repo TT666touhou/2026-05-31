@@ -4,6 +4,8 @@
 [ext_resource type="Script" path="res://src/entities/player/procedural_drawer.gd" id="2_drawer"]
 [ext_resource type="Script" path="res://src/components/HealthComponent.gd" id="3_health"]
 [ext_resource type="Script" path="res://src/components/HurtboxComponent.gd" id="4_hurtbox"]
+[ext_resource type="Script" path="res://src/components/StaminaComponent.gd" id="5_stamina"]
+[ext_resource type="Script" path="res://src/components/ManaComponent.gd" id="6_mana"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 1.0
@@ -40,3 +42,9 @@ script = ExtResource("4_hurtbox")
 
 [node name="HurtboxShape" type="CollisionShape2D" parent="HurtboxComponent"]
 shape = SubResource("hurt_shape")
+
+[node name="StaminaComponent" type="Node" parent="."]
+script = ExtResource("5_stamina")
+
+[node name="ManaComponent" type="Node" parent="."]
+script = ExtResource("6_mana")

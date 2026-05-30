@@ -62,6 +62,9 @@ var sticks: Array[VStick] = []
 var motors: Array[VMotor] = []
 var anti_flips: Array[VAntiFlip] = []
 
+var _query_shape: CircleShape2D = CircleShape2D.new()
+var _query_params: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
+
 func add_point(pos: Vector2) -> int:
 	points.append(VPoint.new(pos))
 	return points.size() - 1
@@ -93,32 +96,73 @@ func enforce_anti_stuck(origin: Vector2, max_dist: float = 120.0, min_dist: floa
 			p.collide_terrain = true
 
 func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, collision_mask: int = 1, exclude_rids: Array[RID] = []):
-	# 1. 積分與受力計算
+	if space_state != null:
+		_query_params.collide_with_areas = true
+		_query_params.collide_with_bodies = true
+		_query_params.collision_mask = collision_mask
+		_query_params.exclude = exclude_rids
+
+	# 1. 積分與受力計算 (Integration with Swept Circle Collision)
 	for i in range(points.size()):
 		var p = points[i]
 		if p.locked:
-			# 即使是 locked，也把累積的力清空避免殘留
 			p.accumulated_force = Vector2.ZERO
 			continue
 			
 		var velocity = p.pos - p.old_pos
-		p.old_pos = p.pos
-		
-		# 基本空氣阻尼
 		velocity *= p.drag
 		
 		var force = p.accumulated_force
 		p.accumulated_force = Vector2.ZERO
 		
-		# 馬達彈簧牽引力
 		for m in motors:
 			if m.p_idx == i:
 				var target_pos = m.target_func.call()
 				force += (target_pos - p.pos) * m.axis * m.stiffness
 				
-		p.pos += velocity + (force * delta * delta) / p.mass
+		var intended_motion = velocity + (force * delta * delta) / p.mass
+		p.old_pos = p.pos
+		
+		if space_state != null and p.collide_terrain and intended_motion.length_squared() > 0.0001:
+			_query_shape.radius = p.radius
+			_query_params.shape_rid = _query_shape.get_rid()
+			_query_params.transform = Transform2D(0, p.pos)
+			_query_params.motion = intended_motion
+			
+			var fractions = space_state.cast_motion(_query_params)
+			if fractions.size() == 2 and fractions[0] < 1.0:
+				var hit_fraction = fractions[0]
+				_query_params.transform = Transform2D(0, p.pos + intended_motion * hit_fraction)
+				var rest = space_state.get_rest_info(_query_params)
+				
+				if not rest.is_empty():
+					var normal = rest.normal
+					var collider_id = rest.collider_id
+					var collider = instance_from_id(collider_id) if collider_id != 0 else null
+					
+					if collider is Area2D:
+						var body = collider.get_parent()
+						if body and "velocity" in body:
+							body.velocity -= normal * 1000.0 * delta
+					elif collider is RigidBody2D:
+						collider.apply_central_impulse(-normal * 20.0)
+					
+					var remaining_motion = intended_motion * (1.0 - hit_fraction)
+					var slide_motion = remaining_motion.slide(normal)
+					p.pos += intended_motion * hit_fraction + slide_motion
+					
+					var vel = p.pos - p.old_pos
+					var tangent = Vector2(-normal.y, normal.x)
+					var vel_tangent = vel.project(tangent)
+					p.old_pos = p.pos - (vel_tangent * (1.0 - p.friction))
+				else:
+					p.pos += intended_motion
+			else:
+				p.pos += intended_motion
+		else:
+			p.pos += intended_motion
 
-	# 2. 距離約束求解 (Constraints Resolution)
+	# 2. 距離約束求解 (Constraints Resolution with Swept Circle)
 	for iter in range(10):
 		for stick in sticks:
 			var pA = points[stick.pA]
@@ -126,17 +170,34 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 			
 			var delta_pos = pB.pos - pA.pos
 			var dist = delta_pos.length()
-			if dist == 0:
-				continue
+			if dist == 0: continue
 				
 			var diff = (dist - stick.length) / dist
-			# 使用 stiffness 來決定約束的剛硬程度 (預設 1.0 = 完全剛硬)
 			var offset = delta_pos * diff * 0.5 * stick.stiffness
 			
 			if not pA.locked:
-				pA.pos += offset
+				if space_state != null and pA.collide_terrain and stick.collide_terrain:
+					_query_shape.radius = pA.radius
+					_query_params.shape_rid = _query_shape.get_rid()
+					_query_params.transform = Transform2D(0, pA.pos)
+					_query_params.motion = offset
+					var fractions = space_state.cast_motion(_query_params)
+					if fractions.size() == 2:
+						pA.pos += offset * fractions[0]
+				else:
+					pA.pos += offset
+					
 			if not pB.locked:
-				pB.pos -= offset
+				if space_state != null and pB.collide_terrain and stick.collide_terrain:
+					_query_shape.radius = pB.radius
+					_query_params.shape_rid = _query_shape.get_rid()
+					_query_params.transform = Transform2D(0, pB.pos)
+					_query_params.motion = -offset
+					var fractions = space_state.cast_motion(_query_params)
+					if fractions.size() == 2:
+						pB.pos -= offset * fractions[0]
+				else:
+					pB.pos -= offset
 				
 		for af in anti_flips:
 			var pA = points[af.pA]
@@ -148,85 +209,25 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 			var current_cross = vA.cross(vC)
 			
 			if sign(current_cross) != af.target_sign:
-				# 發現翻轉！強制將 A 與 C 互相排斥以解開交叉
 				var push_dir = (vA - vC).normalized().rotated(PI/2) * af.target_sign
-				if not pA.locked: pA.pos += push_dir * 5.0
-				if not pC.locked: pC.pos -= push_dir * 5.0
-
-	# 3. 地形射線碰撞 (Terrain Collision)
-	if space_state != null:
-		for i in range(points.size()):
-			var p = points[i]
-			if p.locked or p.pos == p.old_pos or not p.collide_terrain: continue
-			var query = PhysicsRayQueryParameters2D.create(p.old_pos, p.pos, collision_mask)
-			query.collide_with_areas = true
-			query.collide_with_bodies = true
-			query.exclude = exclude_rids
-			var result = space_state.intersect_ray(query)
-			
-			if result:
-				var normal = result.normal
+				var push_offset = push_dir * 5.0
 				
-				var collider = result.collider
-				if collider is Area2D:
-					var body = collider.get_parent()
-					if body and "velocity" in body:
-						body.velocity -= normal * 1000.0 * delta
-				elif collider is RigidBody2D:
-					collider.apply_central_impulse(-normal * 20.0)
-						
-				p.pos = result.position + normal * p.radius
-				
-				var vel = p.pos - p.old_pos
-				var tangent = Vector2(-normal.y, normal.x)
-				var vel_tangent = vel.project(tangent)
-				p.old_pos = p.pos - (vel_tangent * (1.0 - p.friction))
-	
-	# 4. 線段地形碰撞 (Stick vs Terrain Collision)
-	if space_state != null:
-		for stick in sticks:
-			if not stick.collide_terrain: continue
-			var pA = points[stick.pA]
-			var pB = points[stick.pB]
-			
-			# 如果兩點都在同一個位置，忽略
-			if pA.pos.distance_squared_to(pB.pos) < 1.0: continue
-			
-			var query = PhysicsRayQueryParameters2D.create(pA.pos, pB.pos, collision_mask)
-			query.collide_with_areas = true
-			query.collide_with_bodies = true
-			query.exclude = exclude_rids
-			# 允許從內部射出時命中，這樣可以檢測線段橫穿過碰撞體的情況
-			query.hit_from_inside = true
-			var result = space_state.intersect_ray(query)
-			
-			if result:
-				var normal = result.normal
-				# 有些時候 hit_from_inside 會給出 Vector2.ZERO 法線
-				if normal.length_squared() < 0.1:
-					normal = (pA.pos - pB.pos).normalized().rotated(PI/2)
+				if not pA.locked:
+					if space_state != null and pA.collide_terrain:
+						_query_shape.radius = pA.radius
+						_query_params.shape_rid = _query_shape.get_rid()
+						_query_params.transform = Transform2D(0, pA.pos)
+						_query_params.motion = push_offset
+						var fractions = space_state.cast_motion(_query_params)
+						if fractions.size() == 2: pA.pos += push_offset * fractions[0]
+					else: pA.pos += push_offset
 					
-				var collider = result.collider
-				if collider is Area2D:
-					var body = collider.get_parent()
-					if body and "velocity" in body:
-						body.velocity -= normal * 1500.0 * delta
-				elif collider is RigidBody2D:
-					collider.apply_central_impulse(-normal * 30.0)
-					
-				# 根據穿透點與兩端的距離，按比例分配推力
-				var dist_A = pA.pos.distance_to(result.position)
-				var dist_B = pB.pos.distance_to(result.position)
-				var total = dist_A + dist_B
-				
-				if total > 0:
-					# 越靠近碰撞點的端點，受到的推力越大
-					var weight_A = 1.0 - (dist_A / total)
-					var weight_B = 1.0 - (dist_B / total)
-					
-					# 施加向外推擠的力 (調整係數控制滑出牆角的速度，1.5 比較平緩不彈跳)
-					var push_strength = 1.5
-					if not pA.locked:
-						pA.pos += normal * weight_A * push_strength
-					if not pB.locked:
-						pB.pos += normal * weight_B * push_strength
+				if not pC.locked:
+					if space_state != null and pC.collide_terrain:
+						_query_shape.radius = pC.radius
+						_query_params.shape_rid = _query_shape.get_rid()
+						_query_params.transform = Transform2D(0, pC.pos)
+						_query_params.motion = -push_offset
+						var fractions = space_state.cast_motion(_query_params)
+						if fractions.size() == 2: pC.pos -= push_offset * fractions[0]
+					else: pC.pos -= push_offset

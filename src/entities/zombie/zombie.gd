@@ -54,8 +54,10 @@ func _physics_process(delta: float) -> void:
 			_process_attack(delta)
 			
 	if knockback_velocity.length() > 10.0:
-		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 800.0 * delta)
-		velocity += knockback_velocity
+		# Apply high friction to knockback
+		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 1500.0 * delta)
+		# Override velocity to act as stun/knockback
+		velocity = knockback_velocity
 			
 	move_and_slide()
 	
