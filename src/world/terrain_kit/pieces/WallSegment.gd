@@ -58,8 +58,9 @@ func _draw() -> void:
 	var rect = Rect2(0, 0, w, h)
 	
 	if wall_texture:
-		# Tile at 100 game px per texture repeat
-		var tile_px := 100.0
+		# Tile size = wall thickness (GRID_CELL_SIZE = 10px)
+		# This ensures each tile is exactly as wide as the wall — bricks never cut
+		var tile_px := GRID_CELL_SIZE
 		var sc := tile_px / float(wall_texture.get_width())
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc, sc))
 		draw_texture_rect(wall_texture, Rect2(0.0, 0.0, w / sc, h / sc), true)
