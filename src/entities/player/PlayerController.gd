@@ -21,11 +21,16 @@ var drawer: Node2D
 @onready var health = $HealthComponent
 @onready var stamina = $StaminaComponent
 @onready var mana = $ManaComponent
-@onready var flashlight = get_node_or_null("Flashlight")
+@onready var vision_light = get_node_or_null("VisionLight")
+@onready var light_builder = get_node_or_null("LightTextureBuilder")
+@onready var flashlight_sprite = get_node_or_null("LightTextureBuilder/FlashlightSprite")
 
 func _ready() -> void:
 	add_to_group("player")
 	drawer = get_node_or_null("ProceduralDrawer")
+	
+	if vision_light and light_builder:
+		vision_light.texture = light_builder.get_texture()
 	
 	if health:
 		health.health_changed.connect(_on_health_changed)
@@ -208,8 +213,8 @@ func _physics_process(delta: float) -> void:
 	var mouse_pos = get_global_mouse_position()
 	current_aim_direction = (mouse_pos - global_position).normalized()
 	
-	if flashlight:
-		flashlight.look_at(mouse_pos)
+	if flashlight_sprite:
+		flashlight_sprite.rotation = current_aim_direction.angle()
 	
 	# 處理攻擊輸入 (若 UI 開啟則阻擋攻擊，除非需要)
 	if inv_ui and inv_ui.backpack_open: return

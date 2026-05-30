@@ -49,21 +49,24 @@ script = ExtResource("5_stamina")
 [node name="ManaComponent" type="Node" parent="." unique_id=736086774]
 script = ExtResource("6_mana")
 
-[node name="Flashlight" type="PointLight2D" parent="." unique_id=290049502]
-blend_mode = 2
-shadow_enabled = true
-shadow_filter = 1
-shadow_filter_smooth = 1.0
+[node name="LightTextureBuilder" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(512, 512)
+
+[node name="AmbientSprite" type="Sprite2D" parent="LightTextureBuilder"]
+position = Vector2(256, 256)
+scale = Vector2(1.5, 1.5)
+texture = ExtResource("8_ambient")
+
+[node name="FlashlightSprite" type="Sprite2D" parent="LightTextureBuilder"]
+position = Vector2(256, 256)
+scale = Vector2(0.5, 0.5)
 texture = ExtResource("7_flashlight")
 offset = Vector2(240, 0)
-texture_scale = 0.5
-energy = 0.8
 
-[node name="AmbientLight" type="PointLight2D" parent="."]
-blend_mode = 2
+[node name="VisionLight" type="PointLight2D" parent="."]
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
-texture = ExtResource("8_ambient")
-texture_scale = 1.5
-energy = 0.6
+energy = 0.8
