@@ -18,6 +18,7 @@ const GRID_CELL_SIZE = 10.0
 @export var floor_texture: Texture2D
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	# Floor should be drawn behind entities
 	z_index = -10
 	queue_redraw()
@@ -28,8 +29,8 @@ func _draw() -> void:
 	var rect = Rect2(0, 0, w, h)
 	
 	if floor_texture:
-		# Tile at 100 game px per texture repeat
-		var tile_px := 100.0
+		# Tile at 80 game px per repeat (240 screen px at zoom=3 → mipmap level ~2 → clear detail)
+		var tile_px := 80.0
 		var sc := tile_px / float(floor_texture.get_width())
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc, sc))
 		draw_texture_rect(floor_texture, Rect2(0.0, 0.0, w / sc, h / sc), true)

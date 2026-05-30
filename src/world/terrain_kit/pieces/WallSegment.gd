@@ -21,6 +21,7 @@ var collision_poly: CollisionPolygon2D
 var light_occluder: LightOccluder2D
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	collision_poly = get_node_or_null("CollisionPolygon2D")
 	light_occluder = get_node_or_null("LightOccluder2D")
 
@@ -53,11 +54,17 @@ func _update_visuals() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var w = grid_size.x * GRID_CELL_SIZE
-	var h = grid_size.y * GRID_CELL_SIZE
-	# Walls are 10 px thick — no texture can show a complete brick at that scale.
-	# Use solid dark charcoal matching Darkwood palette (#2a2826).
-	draw_rect(Rect2(0, 0, w, h), Color(0.165, 0.157, 0.149, 1.0))
-	# Subtle lighter top-edge for depth
-	draw_line(Vector2(0, 0), Vector2(w, 0), Color(0.28, 0.26, 0.24, 0.6), 1.0)
+	var w = float(grid_size.x) * GRID_CELL_SIZE
+	var h = float(grid_size.y) * GRID_CELL_SIZE
 
+	if wall_texture:
+		# Non-uniform tiling:
+		#   X: tile 80 game px wide (good detail at zoom=3)
+		#   Y: tile exactly as tall as wall (= h) so no brick cutoff
+		var tile_w := 80.0
+		var tile_h := h  # wall height = one full tile height → complete bricks
+		var sc_x := tile_w / float(wall_texture.get_width())
+		var sc_y := tile_h / float(wall_texture.get_height())
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc_x, sc_y))
+		draw_texture_rect(wall_texture, Rect2(0.0, 0.0, w / sc_x, h / sc_y), true)
+		draw_set_transform(Vector2.ZERO)

@@ -28,7 +28,7 @@ shape = SubResource("body_shape")
 script = ExtResource("2_drawer")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1350196785]
-zoom = Vector2(1.87, 1.87)
+zoom = Vector2(3.0, 3.0)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 

@@ -28,7 +28,6 @@ shape = SubResource("RectangleShape2D_door")
 occluder = SubResource("OccluderPolygon2D_door")
 
 [node name="Visuals" type="Node2D" parent="."]
-texture_filter = 1
 light_mask = 3
 script = ExtResource("2_visuals")
 material_type = 1

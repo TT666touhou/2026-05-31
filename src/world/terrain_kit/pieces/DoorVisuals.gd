@@ -21,6 +21,9 @@ func set_sink_progress(progress: float) -> void:
 	sink_progress = progress
 	queue_redraw()
 
+func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	queue_redraw()
 
 func _draw() -> void:
 	if material_type == 0: # Wood
