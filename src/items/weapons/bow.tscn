@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://physics/verlet/verlet_rig.gd" id="1_rig"]
+[ext_resource type="Script" path="res://physics/verlet/verlet_pivot.gd" id="2_pivot"]
+[ext_resource type="Script" path="res://src/items/weapons/bow_controller.gd" id="3_ctrl"]
+[ext_resource type="Script" path="res://physics/verlet/verlet_strut.gd" id="4_strut"]
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_bow"]
+a = Vector2(0, 20)
+b = Vector2(0, -20)
+
+[node name="Bow" type="Node2D"]
+script = ExtResource("1_rig")
+
+[node name="BowBody" type="Line2D" parent="."]
+points = PackedVector2Array(0, -25, 15, 0, 0, 25)
+width = 2.0
+default_color = Color(0.8, 0.8, 0.8, 1)
+antialiased = false
+
+[node name="BowString" type="Line2D" parent="."]
+points = PackedVector2Array(0, -25, 5, 0, 0, 25)
+width = 1.0
+default_color = Color(0.5, 0.5, 0.5, 1)
+antialiased = false
+
+[node name="MainHand" type="Marker2D" parent="."]
+position = Vector2(15, 0)
+script = ExtResource("2_pivot")
+
+[node name="OffHand" type="Marker2D" parent="."]
+position = Vector2(5, 0)
+script = ExtResource("2_pivot")
+pivot_name = "OffHand"
+
+[node name="Strut_0_2" type="Node" parent="."]
+script = ExtResource("4_strut")
+node_a = NodePath("BowBody")
+point_index_a = 0
+node_b = NodePath("BowBody")
+point_index_b = 2
+stiffness = 1.0
+
+[node name="WeaponController" type="Node" parent="."]
+script = ExtResource("3_ctrl")

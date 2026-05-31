@@ -1,42 +1,76 @@
 [gd_scene format=3 uid="uid://cpy5e0qi7s67u"]
 
-[ext_resource type="Script" path="res://src/entities/player/PlayerController.gd" id="1_ctrl"]
-[ext_resource type="Script" path="res://src/entities/player/procedural_drawer.gd" id="2_drawer"]
+[ext_resource type="Script" uid="uid://dms24hn8w6kk2" path="res://src/entities/player/PlayerController.gd" id="1_ctrl"]
+[ext_resource type="Script" uid="uid://bsmnmnoc61sg3" path="res://src/entities/player/procedural_drawer.gd" id="2_drawer"]
+[ext_resource type="Script" uid="uid://bvx7rsf8fti03" path="res://src/components/HealthComponent.gd" id="3_health"]
+[ext_resource type="Script" uid="uid://butcqsl6em474" path="res://src/components/HurtboxComponent.gd" id="4_hurtbox"]
+[ext_resource type="Script" uid="uid://dj0pt3qfwke6y" path="res://src/components/StaminaComponent.gd" id="5_stamina"]
+[ext_resource type="Script" uid="uid://dhvi5a0itdn0i" path="res://src/components/ManaComponent.gd" id="6_mana"]
+[ext_resource type="Script" path="res://src/world/vision/ProceduralLight.gd" id="7_procedural"]
+[ext_resource type="Texture2D" path="res://src/world/vision/combined_flashlight.png" id="7_combined"]
+[ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="10_tracker"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
-radius = 6.0
+radius = 1.0
+
+[sub_resource type="CircleShape2D" id="hurt_shape"]
+radius = 12.0
 
 [node name="Player" type="CharacterBody2D" unique_id=2129014968]
+z_index = 10
 collision_layer = 2
-collision_mask = 1
+collision_mask = 257
 script = ExtResource("1_ctrl")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1027530011]
 shape = SubResource("body_shape")
 
-[node name="ProceduralDrawer" type="Node2D" parent="."]
+[node name="ProceduralDrawer" type="Node2D" parent="." unique_id=1684215395]
 script = ExtResource("2_drawer")
-body_color = Color(0.9, 0.9, 0.9, 1)
-eye_color = Color(0.2, 0.8, 1, 1)
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1350196785]
 zoom = Vector2(3.0, 3.0)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 
+[node name="HealthComponent" type="Node" parent="." unique_id=1699404200]
+script = ExtResource("3_health")
+
+[node name="HurtboxComponent" type="Area2D" parent="." unique_id=544222281]
+collision_layer = 8
+collision_mask = 64
+script = ExtResource("4_hurtbox")
+
+[node name="HurtboxShape" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1048372041]
+shape = SubResource("hurt_shape")
+
+[node name="StaminaComponent" type="Node" parent="." unique_id=1331581515]
+script = ExtResource("5_stamina")
+
+[node name="ManaComponent" type="Node" parent="." unique_id=736086774]
+script = ExtResource("6_mana")
+
 [node name="VisionLight" type="PointLight2D" parent="."]
 range_item_cull_mask = 3
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
-energy = 1.2
-texture_scale = 2.0
+energy = 0.8
+texture = ExtResource("7_combined")
 
-
-[node name="VisionLight" type="PointLight2D" parent="."]
-range_item_cull_mask = 3
+[node name="FogLight" type="PointLight2D" parent="."]
+range_item_cull_mask = 1
 shadow_enabled = true
-shadow_filter = 1
-shadow_filter_smooth = 1.0
-energy = 1.2
-texture_scale = 2.0
+shadow_filter = 0
+energy = 0.15
+color = Color(0.55, 0.6, 0.65, 1)
+script = ExtResource("7_procedural")
+ambient_radius = 900.0
+ambient_blur = 150.0
+cone_radius = 0.0
+cone_blur = 0.0
+cone_angle = 0.0
+
+[node name="VisionTracker" type="Node" parent="."]
+script = ExtResource("10_tracker")
+
