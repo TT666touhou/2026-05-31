@@ -43,7 +43,7 @@ func _ready() -> void:
 	character_body = get_parent() as CharacterBody2D
 	var base_pos = character_body.global_position
 	
-	var VerletPhysicsClass = preload("res://physics/verlet/verlet_physics.gd")
+	var VerletPhysicsClass = preload("res://src/entities/player/verlet_physics.gd")
 	verlet = VerletPhysicsClass.new()
 	
 	# 初始化質點
