@@ -99,15 +99,12 @@ func _process_chase(delta: float) -> void:
 	
 	if nav_agent.is_navigation_finished():
 		velocity = velocity.move_toward(Vector2.ZERO, 200.0 * delta)
-		print("Zombie: nav finished. Pos: ", global_position)
 		return
 		
 	var next_path_pos = nav_agent.get_next_path_position()
 	var dir = global_position.direction_to(next_path_pos)
 	
 	velocity = dir * move_speed
-	
-	print("Zombie Chase: Pos: ", global_position, " NextPath: ", next_path_pos, " Vel: ", velocity, " IsNavFinished: ", nav_agent.is_navigation_finished())
 	
 	# Look towards moving direction or player directly if close
 	drawer.target_facing_angle = global_position.direction_to(target_player.global_position).angle()

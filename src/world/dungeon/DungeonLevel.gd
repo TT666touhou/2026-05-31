@@ -64,6 +64,9 @@ func generate_floor(seed: int = map_seed) -> void:
 	dungeon_renderer.show_debug_rooms = show_debug
 	dungeon_renderer.render(gen)
 	
+	# 2.5. 建立尋路網格 (Navigation Mesh)
+	_setup_navigation()
+	
 	# 3. 放置玩家
 	_spawn_player()
 	
@@ -147,6 +150,11 @@ func _clear_entities() -> void:
 	player_fov      = null
 	enemy_instances.clear()
 	prop_instances.clear()
+	
+	var nav = get_node_or_null("NavigationRegion2D")
+	if nav:
+		nav.queue_free()
+
 
 # ── 相機設定 ────────────────────────────────────────────
 func _setup_camera() -> void:
@@ -224,3 +232,31 @@ func _spawn_furniture() -> void:
 			# 隨機小角度旋轉，顯得凌亂自然
 			prop.rotation = randf_range(-0.3, 0.3)
 			prop_instances.append(prop)
+
+# ── 尋路網格動態建立 ──────────────────────────────────────
+func _setup_navigation() -> void:
+	var nav_region = get_node_or_null("NavigationRegion2D")
+	if nav_region:
+		nav_region.queue_free()
+		await get_tree().process_frame
+		
+	nav_region = NavigationRegion2D.new()
+	nav_region.name = "NavigationRegion2D"
+	add_child(nav_region)
+	
+	var nav_poly = NavigationPolygon.new()
+	
+	# 將所有地板方塊作為 outline 加入
+	for y in gen.map_height:
+		for x in gen.map_width:
+			if gen.is_floor(x, y):
+				# 使用無邊距，以便相鄰地板自動 union 合併
+				var p0 = Vector2(x * tile_size, y * tile_size)
+				var p1 = Vector2((x + 1) * tile_size, y * tile_size)
+				var p2 = Vector2((x + 1) * tile_size, (y + 1) * tile_size)
+				var p3 = Vector2(x * tile_size, (y + 1) * tile_size)
+				nav_poly.add_outline(PackedVector2Array([p0, p1, p2, p3]))
+				
+	nav_poly.make_polygons_from_outlines()
+	nav_region.navigation_polygon = nav_poly
+

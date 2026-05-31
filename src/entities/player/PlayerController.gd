@@ -198,14 +198,18 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	
 	# 對剛體施加推力 (真實物理感)
-	for i in get_slide_collision_count():
-		var c = get_slide_collision(i)
-		var collider = c.get_collider()
-		if collider is RigidBody2D:
-			# 施加在碰撞點上的衝量 (這樣推邊緣會有槓桿效應轉得比較快)
-			var push_force = 800.0
-			var offset = c.get_position() - collider.global_position
-			collider.apply_impulse(-c.get_normal() * push_force, offset)
+	if dash_timer <= 0.0:
+		for i in get_slide_collision_count():
+			var c = get_slide_collision(i)
+			var collider = c.get_collider()
+			if collider is RigidBody2D:
+				var push_dir = -c.get_normal()
+				# 僅當玩家速度朝向物體時施加推力
+				if velocity.dot(push_dir) > 0.0:
+					var push_force = 1200.0 # 調整後的推力係數
+					var offset = c.get_position() - collider.global_position
+					# 使用 delta 縮放，使推力平滑且不受幀率影響，並防止極端衝量
+					collider.apply_impulse(push_dir * push_force * delta, offset)
 	
 	var mouse_pos = get_global_mouse_position()
 	current_aim_direction = (mouse_pos - global_position).normalized()
