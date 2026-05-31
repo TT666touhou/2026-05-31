@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://src/world/vision/ProceduralLight.gd" id="7_procedural"]
 [ext_resource type="Texture2D" path="res://src/world/vision/combined_flashlight.png" id="7_combined"]
 [ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="10_tracker"]
+[ext_resource type="Script" path="res://src/entities/player/PlayerFOV.gd" id="11_fov"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 12.0
@@ -51,8 +52,8 @@ script = ExtResource("5_stamina")
 script = ExtResource("6_mana")
 
 [node name="VisionLight" type="PointLight2D" parent="."]
+script = ExtResource("11_fov")
 range_item_cull_mask = 3
-shadow_item_cull_mask = 3
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0

@@ -27,6 +27,9 @@ func _ready() -> void:
 	linear_damp = 8.0
 	angular_damp = 8.0
 	
+	# 設定 Light Mask: 2 (第二層)，使其不接收自身陰影，但仍能被照亮
+	light_mask = 2
+	
 	# 設定碰撞層 (layer 256: Props, mask 1: World, 2: Player, 4: Enemy, 256: Props)
 	collision_layer = 256
 	collision_mask = 1 | 2 | 4 | 256
@@ -60,7 +63,6 @@ func _setup_occluder() -> void:
 		return
 	var poly = OccluderPolygon2D.new()
 	poly.closed = true
-	poly.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
 	var hx = size.x / 2.0
 	var hy = size.y / 2.0
 	# 稍微往內縮 1 像素，防止與碰撞盒摩擦卡死光影
@@ -73,6 +75,8 @@ func _setup_occluder() -> void:
 		Vector2(-hx, hy)
 	])
 	occluder.occluder = poly
+	# 讓遮擋體只在第 1 層投影陰影 (地板與牆壁所在層)
+	occluder.occluder_light_mask = 1
 
 func _draw() -> void:
 	var hx = size.x / 2.0

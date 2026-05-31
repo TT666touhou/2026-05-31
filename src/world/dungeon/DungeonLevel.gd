@@ -153,6 +153,9 @@ func _update_enemy_visibility() -> void:
 	var cone_half_rad: float  = deg_to_rad(vision_cone_angle * 0.5)
 	var cone_radius_sq: float = vision_radius * vision_radius
 	
+	# 取得 2D 物理世界空間狀態用於射線檢測
+	var space_state = get_world_2d().direct_space_state
+	
 	# 額外的小型圓形區域（玩家周圍極近距離始終可見，防止敵人「穿牆」消失）
 	const ALWAYS_VISIBLE_RADIUS_SQ: float = 48.0 * 48.0
 	
@@ -176,6 +179,14 @@ func _update_enemy_visibility() -> void:
 			var cone_dir_angle: float = cone_dir.angle()
 			var angle_diff: float     = abs(angle_difference(angle_to_enemy, cone_dir_angle))
 			visible = angle_diff <= cone_half_rad
+			
+		# 射線遮擋檢測：即使在視野內，若隔著牆壁也應不可見
+		if visible and dist_sq >= ALWAYS_VISIBLE_RADIUS_SQ:
+			var query = PhysicsRayQueryParameters2D.create(player_pos, enemy.global_position, 1)
+			query.exclude = [player_instance.get_rid()]
+			var res = space_state.intersect_ray(query)
+			if res:
+				visible = false
 		
 		# 遍歷敵人的所有視覺子節點控制可見性
 		_set_entity_visual_visible(enemy, visible)
@@ -198,6 +209,14 @@ func _update_enemy_visibility() -> void:
 			var cone_dir_angle: float = cone_dir.angle()
 			var angle_diff: float     = abs(angle_difference(angle_to_prop, cone_dir_angle))
 			visible = angle_diff <= cone_half_rad
+			
+		# 射線遮擋檢測
+		if visible and dist_sq >= ALWAYS_VISIBLE_RADIUS_SQ:
+			var query = PhysicsRayQueryParameters2D.create(player_pos, prop.global_position, 1)
+			query.exclude = [player_instance.get_rid()]
+			var res = space_state.intersect_ray(query)
+			if res:
+				visible = false
 			
 		prop.visible = visible
 

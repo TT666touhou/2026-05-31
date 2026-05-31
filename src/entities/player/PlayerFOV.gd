@@ -36,6 +36,10 @@ func _ready() -> void:
 	color  = light_color
 	energy = 1.0
 	
+	# 分層光照設定：照亮第 1、2 層，但只在第 1 層投影陰影，防止家具自身黑化
+	range_item_cull_mask = 3
+	shadow_item_cull_mask = 1
+	
 	# 啟用陰影（牆壁的 LightOccluder2D 會截斷光線）
 	shadow_enabled = true
 	shadow_filter  = PointLight2D.SHADOW_FILTER_PCF5
