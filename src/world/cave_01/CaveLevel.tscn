@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://dgw881e6ebldu"]
+[gd_scene format=3 uid="uid://dgw881e6ebldu"]
 
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/FloorSegment.tscn" id="1_floor"]
 [ext_resource type="Script" uid="uid://dx3aow33fwb3e" path="res://src/world/cave_01/cave_level.gd" id="1_script"]
@@ -12,8 +12,7 @@
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBookshelf.tscn" id="12_shelf"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropWorkbench.tscn" id="13_bench"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropDebris.tscn" id="14_debris"]
-[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBones.tscn" id="15_bones"]
-[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBones.tscn" id="15_bones"][ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodDoor.tscn" id="6_wooddoor"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/StoneDoor.tscn" id="7_stonedoor"]
 [ext_resource type="PackedScene" path="res://src/entities/zombie/Zombie.tscn" id="8_zombie"]
