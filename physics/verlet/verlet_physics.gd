@@ -1,4 +1,4 @@
-﻿class_name VerletPhysics
+class_name VerletPhysics
 extends RefCounted
 
 class VPoint:
