@@ -1,2 +1,0 @@
-WARNING: res://src/world/props/PropBookshelf.tscn:4 - ext_resource, invalid UID: uid://shelfrex - using text path instead: res://assets/textures/prop_bookshelf.png
-   at: load (scene/resources/resource_format_text.cpp:500)
