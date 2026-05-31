@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://wallseg"]
 
 [ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WallSegment.gd" id="1_wall"]
-[ext_resource type="Texture2D" uid="uid://7jrkc2ty6ip0" path="res://assets/textures/stone_wall.png" id="2_wall_tex"]
+[ext_resource type="Texture2D" uid="uid://ckbcmnitwl2k6" path="res://assets/textures/wall_stone.png" id="2_wall_tex"]
 
 [node name="WallSegment" type="StaticBody2D"]
 light_mask = 3

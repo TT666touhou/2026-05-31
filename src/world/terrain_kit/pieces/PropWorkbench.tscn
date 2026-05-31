@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://propworkbench"]
+
+[ext_resource type="Texture2D" uid="uid://cscqj08tqa6ps" path="res://assets/textures/prop_workbench.png" id="1_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bench"]
+size = Vector2(56, 28)
+
+[node name="PropWorkbench" type="StaticBody2D"]
+collision_layer = 2
+collision_mask = 0
+z_index = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_bench")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 3
+texture = ExtResource("1_tex")
+scale = Vector2(0.25, 0.25)

@@ -54,17 +54,21 @@ func _update_visuals() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var w = float(grid_size.x) * GRID_CELL_SIZE
-	var h = float(grid_size.y) * GRID_CELL_SIZE
+	var w := float(grid_size.x) * GRID_CELL_SIZE
+	var h := float(grid_size.y) * GRID_CELL_SIZE
 
 	if wall_texture:
-		# Non-uniform tiling:
-		#   X: tile 80 game px wide (good detail at zoom=3)
-		#   Y: tile exactly as tall as wall (= h) so no brick cutoff
-		var tile_w := 80.0
-		var tile_h: float = h  # wall height = one full tile height → complete bricks
-		var sc_x := tile_w / float(wall_texture.get_width())
-		var sc_y := tile_h / float(wall_texture.get_height())
+		# Use wall THICKNESS (min dimension) to compute Y scale so that one full row of
+		# bricks exactly spans the wall thickness, regardless of wall orientation.
+		# For 2-grid walls: thick = 20 game px, tex_h = 64px → sc_y = 20/64 = 0.3125
+		# sc_x targets ~80 game px per tile width → sc_x = 80/256 = 0.3125
+		# Both equal → uniform tiling, no brick distortion on horizontal or vertical walls.
+		var thick := float(min(grid_size.x, grid_size.y)) * GRID_CELL_SIZE
+		var sc_x := 80.0 / float(wall_texture.get_width())
+		var sc_y := thick / float(wall_texture.get_height())
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(sc_x, sc_y))
 		draw_texture_rect(wall_texture, Rect2(0.0, 0.0, w / sc_x, h / sc_y), true)
 		draw_set_transform(Vector2.ZERO)
+	else:
+		# Fallback: solid near-black rectangle (Darkwood wall color)
+		draw_rect(Rect2(0.0, 0.0, w, h), Color(0.067, 0.063, 0.047, 1.0))

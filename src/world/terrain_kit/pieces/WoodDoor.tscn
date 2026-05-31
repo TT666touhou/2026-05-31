@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/world/terrain_kit/pieces/WoodDoor.gd" id="1_script"]
 [ext_resource type="Script" path="res://src/world/terrain_kit/pieces/DoorVisuals.gd" id="2_visuals"]
 [ext_resource type="Script" path="res://src/components/InteractableComponent.gd" id="3_interact"]
-[ext_resource type="Texture2D" uid="uid://ru2p1g5xpmg0" path="res://assets/textures/wood_door.png" id="4_wood_tex"]
+[ext_resource type="Texture2D" uid="uid://dxd71dsrjmffi" path="res://assets/textures/wood_door.png" id="4_wood_tex"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_door"]
 size = Vector2(12, 40)
