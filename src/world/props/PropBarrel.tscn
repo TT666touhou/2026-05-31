@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://barrel12345"]
+
+[ext_resource type="Script" path="res://src/world/props/PropBase.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://barreltex" path="res://assets/textures/prop_barrel.png" id="2_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 30.0
+
+[node name="PropBarrel" type="StaticBody2D"]
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")

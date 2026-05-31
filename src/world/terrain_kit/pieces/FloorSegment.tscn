@@ -1,9 +1,0 @@
-[gd_scene load_steps=3 format=3 uid="uid://floorseg"]
-
-[ext_resource type="Script" path="res://src/world/terrain_kit/pieces/FloorSegment.gd" id="1_floor"]
-[ext_resource type="Texture2D" uid="uid://bf48sdaee1bfv" path="res://assets/textures/stone_floor.png" id="2_floor_tex"]
-
-[node name="FloorSegment" type="Node2D"]
-z_index = -10
-script = ExtResource("1_floor")
-floor_texture = ExtResource("2_floor_tex")

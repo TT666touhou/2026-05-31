@@ -1,4 +1,20 @@
-[gd_scene load_steps=10 format=3 uid="uid://cfy5b3m7qk2n3"]
+import os
+
+vignette_shader = """shader_type canvas_item;
+uniform float vignette_intensity = 0.8;
+uniform float vignette_opacity : hint_range(0.0, 1.0) = 0.9;
+uniform vec4 vignette_rgb : source_color = vec4(0.0, 0.0, 0.0, 1.0);
+
+void fragment() {
+	vec2 uv = UV;
+	uv -= 0.5;
+	float dist = length(uv);
+	float vignette = smoothstep(0.3, vignette_intensity, dist);
+	COLOR = vec4(vignette_rgb.rgb, vignette * vignette_opacity);
+}
+"""
+
+cave_content = """[gd_scene load_steps=10 format=3 uid="uid://cfy5b3m7qk2n3"]
 
 [ext_resource type="Script" path="res://src/world/cave_01/cave_level.gd" id="1_cave"]
 [ext_resource type="PackedScene" uid="uid://df7j1k2l3m4n5" path="res://src/entities/player/Player.tscn" id="2_player"]
@@ -51,3 +67,20 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+"""
+
+def build():
+    atmo_dir = r"C:\Users\88698\Documents\2026.05.24\src\world\atmosphere"
+    os.makedirs(atmo_dir, exist_ok=True)
+    
+    with open(os.path.join(atmo_dir, "vignette.gdshader"), 'w') as f:
+        f.write(vignette_shader)
+        
+    cave_path = r"C:\Users\88698\Documents\2026.05.24\src\world\cave_01\CaveLevel.tscn"
+    with open(cave_path, 'w', encoding='utf-8') as f:
+        f.write(cave_content)
+        
+    print("Built Atmosphere and updated CaveLevel.")
+
+if __name__ == "__main__":
+    build()
