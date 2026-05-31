@@ -8,24 +8,14 @@ extends Node2D
 # ── 繪製常數 ────────────────────────────────────────────
 const TILE_SIZE := 64
 
-# ── 顏色定義 ────────────────────────────────────────────
-# 數學校準：CanvasModulate=0.22，視野外亮度 = base × 0.22
-#            視野內亮度 = base × light_energy(1.4) × light_color
-# 目標：視野外 ≈ 10-15% 亮度（可見輪廓），視野內 ≈ 60-80%（暖琥珀色）
-
-# 地板：#5A4E40 感（泥灰棕）
-const COLOR_FLOOR_BASE   := Color(0.58, 0.50, 0.40, 1.0)
-const COLOR_FLOOR_VAR1   := Color(0.50, 0.44, 0.36, 1.0)   # 稍暗變體
-const COLOR_FLOOR_VAR2   := Color(0.64, 0.56, 0.45, 1.0)   # 稍亮變體
-
-# 牆壁：更深，強化牆壁與地板對比
-const COLOR_WALL_BASE    := Color(0.28, 0.24, 0.20, 1.0)   # 深石牆（視野外幾乎看不見）
-const COLOR_WALL_TOP     := Color(0.35, 0.30, 0.25, 1.0)   # 牆壁頂面（較亮）
-const COLOR_WALL_EDGE    := Color(0.12, 0.10, 0.08, 1.0)   # 牆壁陰影邊（最深）
-
-# 細節線條
-const COLOR_CRACK        := Color(0.20, 0.16, 0.12, 0.8)   # 裂縫（相對地板深）
-const COLOR_GROUT        := Color(0.32, 0.28, 0.22, 1.0)   # 石板接縫
+# 顏色定義（參考考察文件的 Darkwood 色調）
+const COLOR_FLOOR_BASE   := Color(0.28, 0.24, 0.20, 1.0)   # 提亮：× CanvasModulate 後仍可見
+const COLOR_FLOOR_VAR1   := Color(0.24, 0.20, 0.17, 1.0)   # 地板變體1
+const COLOR_FLOOR_VAR2   := Color(0.33, 0.28, 0.23, 1.0)   # 地板變體2（較亮）
+const COLOR_WALL_BASE    := Color(0.16, 0.14, 0.12, 1.0)   # 牆壁主色
+const COLOR_WALL_EDGE    := Color(0.10, 0.09, 0.07, 1.0)   # 牆壁陰影邊緣
+const COLOR_CRACK        := Color(0.08, 0.07, 0.05, 0.6)   # 裂縫線
+const COLOR_GROUT        := Color(0.12, 0.10, 0.08, 1.0)   # 地板縫隙
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
@@ -161,25 +151,20 @@ func _draw_walls() -> void:
 			
 			var world_pos = Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			
-			# 牆壁主體（頂智角度看到的頂面）
-			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_TOP)
+			# 牆壁底色
+			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
 			
-			# 底總陰影（牆壁下半段較暗，強化協格局限感）
-			draw_rect(
-				Rect2(world_pos + Vector2(0, TILE_SIZE / 2), Vector2(TILE_SIZE, TILE_SIZE / 2)),
-				COLOR_WALL_BASE
-			)
-			
-			# 如果下方是地板：畫前面陰影邊（牆壁面對玩家的那一面）
+			# 牆壁邊緣投影（使牆壁有立體感）
+			# 如果下方是地板，畫一條陰影邊
 			if gen.is_floor(x, y + 1):
 				draw_rect(
-					Rect2(world_pos + Vector2(0, TILE_SIZE - 6), Vector2(TILE_SIZE, 6)),
+					Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)),
 					COLOR_WALL_EDGE
 				)
-			# 如果右方是地板：畫右側陰影
+			# 如果右方是地板，畫右側陰影
 			if gen.is_floor(x + 1, y):
 				draw_rect(
-					Rect2(world_pos + Vector2(TILE_SIZE - 4, 0), Vector2(4, TILE_SIZE)),
+					Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)),
 					COLOR_WALL_EDGE
 				)
 

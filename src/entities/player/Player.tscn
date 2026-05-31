@@ -55,18 +55,18 @@ range_item_cull_mask = 3
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
-energy = 0.8
+energy = 1.0
+color = Color(1.0, 0.72, 0.35, 1.0)
 texture = ExtResource("7_combined")
 
 [node name="FogLight" type="PointLight2D" parent="."]
 range_item_cull_mask = 1
-shadow_enabled = true
-shadow_filter = 0
-energy = 0.15
-color = Color(0.55, 0.6, 0.65, 1)
+shadow_enabled = false
+energy = 0.30
+color = Color(0.38, 0.30, 0.20, 1.0)
 script = ExtResource("7_procedural")
 ambient_radius = 900.0
-ambient_blur = 150.0
+ambient_blur = 200.0
 cone_radius = 0.0
 cone_blur = 0.0
 cone_angle = 0.0
