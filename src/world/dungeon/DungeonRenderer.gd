@@ -8,16 +8,17 @@ extends Node2D
 # ── 繪製常數 ────────────────────────────────────────────
 const TILE_SIZE := 64
 
-# 顏色定義（參考考察文件的 Darkwood 色調）
-const COLOR_FLOOR_BASE   := Color(0.16, 0.14, 0.12, 1.0)   # 深棕灰地板
-const COLOR_FLOOR_VAR1   := Color(0.14, 0.12, 0.10, 1.0)   # 地板變體1（稍暗）
-const COLOR_FLOOR_VAR2   := Color(0.18, 0.16, 0.14, 1.0)   # 地板變體2（稍亮）
-const COLOR_WALL_TOP     := Color(0.11, 0.10, 0.09, 1.0)   # 牆壁頂部（稍亮，體積感）
-const COLOR_WALL_SIDE    := Color(0.05, 0.04, 0.03, 1.0)   # 牆壁側面（深色，厚度感）
-const COLOR_CRACK        := Color(0.05, 0.04, 0.03, 0.6)   # 裂縫線
-const COLOR_GROUT        := Color(0.06, 0.05, 0.05, 1.0)   # 地板縫隙（石材接縫）
-const COLOR_AO_1         := Color(0.0, 0.0, 0.0, 0.35)     # 環境光遮蔽（近）
-const COLOR_AO_2         := Color(0.0, 0.0, 0.0, 0.15)     # 環境光遮蔽（遠）
+# 顏色定義（Darkwood 考察：視野外應是脫飽和灰調，非純黑）
+# 這些是 PointLight2D 照亮後的「光照內」顏色。光照外 Godot 自動根據 CanvasModulate 暗化。
+const COLOR_FLOOR_BASE   := Color(0.42, 0.38, 0.34, 1.0)   # 中棕灰地板（石材質感）
+const COLOR_FLOOR_VAR1   := Color(0.36, 0.32, 0.28, 1.0)   # 地板變體1（稍暗）
+const COLOR_FLOOR_VAR2   := Color(0.50, 0.46, 0.42, 1.0)   # 地板變體2（稍亮）
+const COLOR_WALL_BASE    := Color(0.22, 0.19, 0.16, 1.0)   # 石牆（比地板暗，仍可辨認）
+const COLOR_WALL_TOP     := Color(0.30, 0.27, 0.24, 1.0)   # 牆壁頂面受光側
+const COLOR_WALL_EDGE    := Color(0.14, 0.12, 0.10, 1.0)   # 牆壁陰影邊緣
+const COLOR_CRACK        := Color(0.20, 0.16, 0.12, 0.8)   # 裂縫線
+const COLOR_GROUT        := Color(0.30, 0.27, 0.24, 1.0)   # 地板縫隙（石材接縫）
+const COLOR_MOSS         := Color(0.22, 0.30, 0.18, 0.45)  # 牆角苔蘚
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
@@ -35,6 +36,8 @@ var show_debug_rooms: bool = false
 
 # 碰撞層（牆壁的 StaticBody2D 集合）
 var wall_bodies: Array[StaticBody2D] = []
+# 光線遮擋體集合
+var light_occluders: Array[LightOccluder2D] = []
 
 # ── 入口 ────────────────────────────────────────────────
 func render(generator: DungeonGenerator) -> void:
@@ -48,6 +51,10 @@ func _clear_walls() -> void:
 		if is_instance_valid(body):
 			body.queue_free()
 	wall_bodies.clear()
+	for occ in light_occluders:
+		if is_instance_valid(occ):
+			occ.queue_free()
+	light_occluders.clear()
 
 # ── 建立牆壁碰撞體 ──────────────────────────────────────
 # 用合批的方式建立：連續水平牆合併成一個長矩形
@@ -67,6 +74,7 @@ func _build_wall_colliders() -> void:
 				start_x = -1
 
 func _create_wall_body(tile_x: int, tile_y: int, w: int, h: int) -> void:
+	# ── 碰撞體 ────────────────────────────────────────────
 	var body = StaticBody2D.new()
 	body.collision_layer = 1  # World layer
 	body.collision_mask  = 0
@@ -81,37 +89,24 @@ func _create_wall_body(tile_x: int, tile_y: int, w: int, h: int) -> void:
 	body.position = Vector2(tile_x * TILE_SIZE, tile_y * TILE_SIZE)
 	add_child(body)
 	wall_bodies.append(body)
-
-# ── 建立光影遮擋體 (Occluders) 給 MaskViewport 用 ─────────
-func build_occluders(parent_node: Node) -> void:
-	if gen == null:
-		return
 	
-	for y in gen.map_height:
-		var start_x: int = -1
-		for x in range(gen.map_width + 1):
-			var is_w = x < gen.map_width and gen.is_wall(x, y)
-			if is_w and start_x == -1:
-				start_x = x
-			elif not is_w and start_x != -1:
-				var w = x - start_x
-				var occ = LightOccluder2D.new()
-				var poly = OccluderPolygon2D.new()
-				
-				# 建立符合牆壁大小的矩形多邊形
-				var pts = PackedVector2Array([
-					Vector2(0, 0),
-					Vector2(w * TILE_SIZE, 0),
-					Vector2(w * TILE_SIZE, TILE_SIZE),
-					Vector2(0, TILE_SIZE)
-				])
-				poly.polygon = pts
-				poly.closed = true
-				occ.occluder = poly
-				occ.position = Vector2(start_x * TILE_SIZE, y * TILE_SIZE)
-				parent_node.add_child(occ)
-				
-				start_x = -1
+	# ── 光線遮擋體（讓 PointLight2D 的光線被牆壁截斷）────
+	var occ = LightOccluder2D.new()
+	var poly = OccluderPolygon2D.new()
+	poly.closed = true
+	var px = float(tile_x * TILE_SIZE)
+	var py = float(tile_y * TILE_SIZE)
+	var pw = float(w * TILE_SIZE)
+	var ph = float(TILE_SIZE)
+	poly.polygon = PackedVector2Array([
+		Vector2(px,      py),
+		Vector2(px + pw, py),
+		Vector2(px + pw, py + ph),
+		Vector2(px,      py + ph)
+	])
+	occ.occluder = poly
+	add_child(occ)
+	light_occluders.append(occ)
 
 # ── _draw 主繪製 ────────────────────────────────────────
 func _draw() -> void:
@@ -175,7 +170,7 @@ func _draw_crack(world_pos: Vector2, local_rng: RandomNumberGenerator) -> void:
 	var end_pt  = Vector2(crack_x + cos(angle) * length, crack_y + sin(angle) * length)
 	draw_line(Vector2(crack_x, crack_y), end_pt, COLOR_CRACK, 1.0)
 
-# ── 牆壁繪製與 AO ─────────────────────────────────────────
+# ── 牆壁繪製 ────────────────────────────────────────────
 func _draw_walls() -> void:
 	for y in gen.map_height:
 		for x in gen.map_width:
@@ -184,36 +179,43 @@ func _draw_walls() -> void:
 			
 			var world_pos = Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			
-			# 牆壁頂部 (立體感)
-			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE - 12)), COLOR_WALL_TOP)
+			# 牆壁底色
+			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
 			
-			# 牆壁側面 (厚度感，下方)
-			draw_rect(Rect2(world_pos + Vector2(0, TILE_SIZE - 12), Vector2(TILE_SIZE, 12)), COLOR_WALL_SIDE)
-			
-			# ── 環境光遮蔽 (AO) ──
-			# 如果下方是地板，在地板上畫漸層 AO
+			# 牆壁頂面（面向玩家的「蓋子」，稍亮）
 			if gen.is_floor(x, y + 1):
-				var ao_pos = world_pos + Vector2(0, TILE_SIZE)
-				draw_rect(Rect2(ao_pos, Vector2(TILE_SIZE, 6)), COLOR_AO_1)
-				draw_rect(Rect2(ao_pos + Vector2(0, 6), Vector2(TILE_SIZE, 6)), COLOR_AO_2)
-			
-			# 如果上方是地板，在地板上畫漸層 AO
-			if gen.is_floor(x, y - 1):
-				var ao_pos = world_pos - Vector2(0, 12)
-				draw_rect(Rect2(ao_pos + Vector2(0, 6), Vector2(TILE_SIZE, 6)), COLOR_AO_1)
-				draw_rect(Rect2(ao_pos, Vector2(TILE_SIZE, 6)), COLOR_AO_2)
-			
-			# 如果右方是地板
+				# 下邊鄰接地板：這面牆玩家可以看到「正面」
+				draw_rect(
+					Rect2(world_pos, Vector2(TILE_SIZE, 6)),
+					COLOR_WALL_TOP
+				)
+				# 底部陰影投影到地板
+				draw_rect(
+					Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)),
+					COLOR_WALL_EDGE
+				)
+			# 右側面向地板：畫陰影
 			if gen.is_floor(x + 1, y):
-				var ao_pos = world_pos + Vector2(TILE_SIZE, 0)
-				draw_rect(Rect2(ao_pos, Vector2(6, TILE_SIZE)), COLOR_AO_1)
-				draw_rect(Rect2(ao_pos + Vector2(6, 0), Vector2(6, TILE_SIZE)), COLOR_AO_2)
-				
-			# 如果左方是地板
+				draw_rect(
+					Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)),
+					COLOR_WALL_EDGE
+				)
+			# 左側面向地板：同樣陰影
 			if gen.is_floor(x - 1, y):
-				var ao_pos = world_pos - Vector2(12, 0)
-				draw_rect(Rect2(ao_pos + Vector2(6, 0), Vector2(6, TILE_SIZE)), COLOR_AO_1)
-				draw_rect(Rect2(ao_pos, Vector2(6, TILE_SIZE)), COLOR_AO_2)
+				draw_rect(
+					Rect2(world_pos, Vector2(3, TILE_SIZE)),
+					COLOR_WALL_EDGE
+				)
+			# 偶爾在牆壁底部畫苔蘚
+			var rng_m = RandomNumberGenerator.new()
+			rng_m.seed = x * 7331 + y * 2713
+			if rng_m.randf() > 0.78 and gen.is_floor(x, y + 1):
+				var moss_w = rng_m.randi_range(8, 28)
+				var moss_x = rng_m.randi_range(0, TILE_SIZE - moss_w)
+				draw_rect(
+					Rect2(world_pos + Vector2(moss_x, TILE_SIZE - 8), Vector2(moss_w, 4)),
+					COLOR_MOSS
+				)
 
 # ── DEBUG：房間類型標記 ─────────────────────────────────
 func _draw_debug_rooms() -> void:

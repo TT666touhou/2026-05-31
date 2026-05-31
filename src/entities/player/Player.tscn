@@ -50,7 +50,26 @@ script = ExtResource("5_stamina")
 [node name="ManaComponent" type="Node" parent="." unique_id=736086774]
 script = ExtResource("6_mana")
 
+[node name="VisionLight" type="PointLight2D" parent="."]
+range_item_cull_mask = 3
+shadow_enabled = true
+shadow_filter = 1
+shadow_filter_smooth = 1.0
+energy = 0.8
+texture = ExtResource("7_combined")
 
+[node name="FogLight" type="PointLight2D" parent="."]
+range_item_cull_mask = 1
+shadow_enabled = true
+shadow_filter = 0
+energy = 0.15
+color = Color(0.55, 0.6, 0.65, 1)
+script = ExtResource("7_procedural")
+ambient_radius = 900.0
+ambient_blur = 150.0
+cone_radius = 0.0
+cone_blur = 0.0
+cone_angle = 0.0
 
 [node name="VisionTracker" type="Node" parent="."]
 script = ExtResource("10_tracker")

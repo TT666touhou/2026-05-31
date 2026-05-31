@@ -1,18 +1,14 @@
 # DungeonLevel.gd
 # 地下城主場景控制器
-# 負責：生成地圖 → 渲染 → 放置玩家 → 放置敵人 → 管理 FOV
+# 負責：生成地圖 → 渲染 → 放置玩家 → 放置敵人 → 管理 FOV → 敵人視野隱形
 
 extends Node2D
 
 # ── 節點引用 ────────────────────────────────────────────
 @onready var dungeon_renderer : DungeonRenderer = $DungeonRenderer
 @onready var entities_layer   : Node2D           = $EntitiesLayer
-@onready var camera           : Camera2D         = $MainCamera
-@onready var mask_viewport    : SubViewport      = $MaskViewport
-@onready var mask_camera      : Camera2D         = $MaskViewport/MaskCamera
-@onready var vision_light     : PointLight2D     = $MaskViewport/VisionLight
-@onready var occluder_container: Node2D          = $MaskViewport/OccluderContainer
-@onready var vision_rect      : ColorRect        = $PostProcessLayer/VisionRect
+@onready var canvas_modulate  : CanvasModulate   = $CanvasModulate
+@onready var camera           : Camera2D         = $Camera
 
 # 場景 preload
 const PLAYER_SCENE  = preload("res://src/entities/player/Player.tscn")
@@ -20,37 +16,33 @@ const ZOMBIE_SCENE  = preload("res://src/entities/zombie/Zombie.tscn")
 const DUMMY_SCENE   = preload("res://src/entities/dummy/Dummy.tscn")
 
 # ── 設定 ────────────────────────────────────────────────
-@export var map_seed      : int  = 0          # 0 = 隨機
-@export var map_width     : int  = 80
-@export var map_height    : int  = 60
-@export var tile_size     : int  = 64
-@export var zombie_per_room: int = 2
-@export var show_debug    : bool = false
+@export var map_seed       : int   = 0          # 0 = 隨機
+@export var map_width      : int   = 80
+@export var map_height     : int   = 60
+@export var tile_size      : int   = 64
+@export var zombie_per_room: int   = 2
+@export var show_debug     : bool  = false
+
+## 視野錐半徑（像素）
+@export var vision_radius  : float = 320.0
+## 視野錐開口角度（度）
+@export var vision_cone_angle: float = 105.0
 
 # ── 狀態 ────────────────────────────────────────────────
 var gen: DungeonGenerator
 var player_instance: CharacterBody2D
+var player_fov: PlayerFOV
 var current_floor: int = 1
+
+# 敵人列表（用於每幀視野更新）
+var enemy_instances: Array[CharacterBody2D] = []
 
 # ── 生命週期 ────────────────────────────────────────────
 func _ready() -> void:
-	# 初始化視野光罩貼圖
-	vision_light.texture = LightTextureGenerator.generate_radial(256)
-	vision_light.texture_scale = 3.5 # 調整視野半徑
-	
-	# 將 MaskViewport 的輸出傳遞給後製 Shader
-	vision_rect.material.set_shader_parameter("vision_mask", mask_viewport.get_texture())
-	
 	generate_floor()
 
 func _process(_delta: float) -> void:
-	# 同步相機
-	if is_instance_valid(camera) and is_instance_valid(mask_camera):
-		mask_camera.global_transform = camera.global_transform
-	
-	# 同步光照位置
-	if is_instance_valid(player_instance) and is_instance_valid(vision_light):
-		vision_light.global_position = player_instance.global_position
+	_update_enemy_visibility()
 
 func _unhandled_input(event: InputEvent) -> void:
 	# DEBUG：按 R 重新生成地圖
@@ -60,22 +52,15 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # ── 地圖生成主流程 ──────────────────────────────────────
 func generate_floor(seed: int = map_seed) -> void:
-	# 清除舊的遮擋體
-	for child in occluder_container.get_children():
-		child.queue_free()
-	
 	# 1. 生成地圖數據
 	gen = DungeonGenerator.new()
 	gen.map_width   = map_width
 	gen.map_height  = map_height
 	gen.generate(seed)
 	
-	# 2. 渲染地圖（程序繪製）
+	# 2. 渲染地圖（程序繪製 + LightOccluder2D）
 	dungeon_renderer.show_debug_rooms = show_debug
 	dungeon_renderer.render(gen)
-	
-	# 生成光影遮擋體到 MaskViewport
-	dungeon_renderer.build_occluders(occluder_container)
 	
 	# 3. 放置玩家
 	_spawn_player()
@@ -90,6 +75,7 @@ func generate_floor(seed: int = map_seed) -> void:
 func _spawn_player() -> void:
 	if player_instance and is_instance_valid(player_instance):
 		player_instance.queue_free()
+	player_fov = null
 	
 	var start = gen.start_room
 	if start == null and gen.rooms.size() > 0:
@@ -103,6 +89,13 @@ func _spawn_player() -> void:
 	entities_layer.add_child(player_instance)
 	player_instance.position = _room_center_world(start)
 	
+	# 找 PlayerFOV 並設定視野參數
+	player_fov = player_instance.get_node_or_null("VisionLight") as PlayerFOV
+	if player_fov:
+		player_fov.view_radius  = vision_radius
+		player_fov.cone_angle   = vision_cone_angle
+		player_fov.follow_mouse = true
+	
 	# 相機跟隨玩家
 	if camera:
 		camera.reparent(player_instance)
@@ -110,6 +103,8 @@ func _spawn_player() -> void:
 
 # ── 放置敵人 ────────────────────────────────────────────
 func _spawn_enemies() -> void:
+	enemy_instances.clear()
+	
 	for rd in gen.rooms:
 		if rd.type == "start":
 			continue
@@ -137,19 +132,69 @@ func _spawn_zombie_in_room(rd: DungeonGenerator.RoomData) -> void:
 	var rx = rd.rect.position.x * tile_size + margin + rng.randf_range(0, (rd.rect.size.x - 2) * tile_size - margin)
 	var ry = rd.rect.position.y * tile_size + margin + rng.randf_range(0, (rd.rect.size.y - 2) * tile_size - margin)
 	zombie.position = Vector2(rx, ry)
+	enemy_instances.append(zombie)
+
+# ── 敵人視野可見性更新（每幀）─────────────────────────
+# Darkwood 核心機制：敵人在視野錐外完全隱形
+func _update_enemy_visibility() -> void:
+	if player_instance == null or not is_instance_valid(player_instance):
+		return
+	if player_fov == null or not is_instance_valid(player_fov):
+		return
+	
+	var player_pos: Vector2   = player_instance.global_position
+	var cone_dir: Vector2     = Vector2.RIGHT.rotated(player_fov.rotation)
+	var cone_half_rad: float  = deg_to_rad(vision_cone_angle * 0.5)
+	var cone_radius_sq: float = vision_radius * vision_radius
+	
+	# 額外的小型圓形區域（玩家周圍極近距離始終可見，防止敵人「穿牆」消失）
+	const ALWAYS_VISIBLE_RADIUS_SQ: float = 48.0 * 48.0
+	
+	for enemy in enemy_instances:
+		if not is_instance_valid(enemy):
+			continue
+		
+		var to_enemy: Vector2 = enemy.global_position - player_pos
+		var dist_sq: float    = to_enemy.length_squared()
+		
+		var visible: bool
+		if dist_sq < ALWAYS_VISIBLE_RADIUS_SQ:
+			# 極近距離：始終可見
+			visible = true
+		elif dist_sq > cone_radius_sq:
+			# 超出光錐範圍：隱形
+			visible = false
+		else:
+			# 在範圍內：檢查是否在扇形角度內
+			var angle_to_enemy: float = to_enemy.normalized().angle()
+			var cone_dir_angle: float = cone_dir.angle()
+			var angle_diff: float     = abs(angle_difference(angle_to_enemy, cone_dir_angle))
+			visible = angle_diff <= cone_half_rad
+		
+		# 遍歷敵人的所有視覺子節點控制可見性
+		_set_entity_visual_visible(enemy, visible)
+
+func _set_entity_visual_visible(entity: Node, visible: bool) -> void:
+	# 方法1：若敵人有 ProceduralDrawer 或 DrawNode，控制其 visible
+	for child in entity.get_children():
+		if child is Node2D and not child is CollisionShape2D:
+			child.visible = visible
+	# 方法2：直接控制整個實體（但保留碰撞體）
+	# 注意：不能直接 entity.visible = false，因為那會影響碰撞
 
 # ── 清除所有實體 ────────────────────────────────────────
 func _clear_entities() -> void:
 	for child in entities_layer.get_children():
 		child.queue_free()
 	player_instance = null
+	player_fov      = null
+	enemy_instances.clear()
 
 # ── 相機設定 ────────────────────────────────────────────
 func _setup_camera() -> void:
 	if camera == null:
 		return
 	
-	# 地圖邊界
 	var map_world_w = gen.map_width  * tile_size
 	var map_world_h = gen.map_height * tile_size
 	
