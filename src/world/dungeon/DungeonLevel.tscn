@@ -1,0 +1,31 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://src/world/dungeon/DungeonLevel.gd" id="1_level"]
+[ext_resource type="Script" path="res://src/world/dungeon/DungeonRenderer.gd" id="2_renderer"]
+[ext_resource type="Script" path="res://src/systems/combat/CombatFX.gd" id="3_combatfx"]
+
+[node name="DungeonLevel" type="Node2D"]
+script = ExtResource("1_level")
+map_width = 80
+map_height = 60
+tile_size = 64
+zombie_per_room = 2
+show_debug = false
+
+[node name="DungeonRenderer" type="Node2D" parent="."]
+script = ExtResource("2_renderer")
+z_index = -10
+
+[node name="EntitiesLayer" type="Node2D" parent="."]
+y_sort_enabled = true
+z_index = 0
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color(0.06, 0.06, 0.08, 1)
+
+[node name="Camera" type="Camera2D" parent="."]
+zoom = Vector2(3, 3)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+drag_horizontal_enabled = false
+drag_vertical_enabled = false

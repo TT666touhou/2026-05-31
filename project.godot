@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Stick Delver"
-run/main_scene="res://src/world/cave_01/CaveLevel.tscn"
+run/main_scene="res://src/world/dungeon/DungeonLevel.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
 
