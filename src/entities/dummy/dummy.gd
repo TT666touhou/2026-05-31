@@ -21,13 +21,9 @@ func _physics_process(delta: float) -> void:
 	# Add simple gravity so it stays on the ground if in a platformer, or just friction for top-down
 	velocity = velocity.move_toward(Vector2.ZERO, 800 * delta)
 	move_and_slide()
-	_update_visibility()
 
-func _update_visibility() -> void:
-	if not _vision_light or not _vision_light.has_method("is_in_vision"):
-		return
-	var in_vision: bool = _vision_light.is_in_vision(global_position, self)
-	drawer.visible = in_vision
+
+
 
 func _on_health_changed(old_val: float, new_val: float) -> void:
 	var dmg = old_val - new_val

@@ -62,7 +62,7 @@ func _physics_process(delta: float) -> void:
 		velocity = knockback_velocity
 			
 	move_and_slide()
-	_update_visibility()
+
 	
 	# Push rigid bodies (like unlocked doors)
 	for i in get_slide_collision_count():
@@ -131,12 +131,7 @@ func _process_attack(_delta: float) -> void:
 	drawer.attack_target = target_player.global_position
 	drawer.target_facing_angle = global_position.direction_to(target_player.global_position).angle()
 
-func _update_visibility() -> void:
-	if not _vision_light or not _vision_light.has_method("is_in_vision"):
-		return
-	var in_vision: bool = _vision_light.is_in_vision(global_position, self)
-	drawer.visible = in_vision
-	$UI.visible = in_vision
+
 
 func _on_health_changed(_old_health: float, new_health: float) -> void:
 	health_bar.value = new_health

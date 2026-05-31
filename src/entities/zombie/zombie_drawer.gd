@@ -46,6 +46,9 @@ var body_lines = [
 ]
 
 func _ready() -> void:
+	# 設定 Light Mask 為 2，使其不接收自身陰影，且能平滑漸進照亮
+	light_mask = 2
+	
 	character_body = get_parent() as CharacterBody2D
 	var base_pos = character_body.global_position
 	

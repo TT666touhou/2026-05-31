@@ -105,6 +105,7 @@ func _create_wall_body(tile_x: int, tile_y: int, w: int, h: int) -> void:
 		Vector2(px,      py + ph)
 	])
 	occ.occluder = poly
+	occ.occluder_light_mask = 3
 	add_child(occ)
 	light_occluders.append(occ)
 

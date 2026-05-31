@@ -44,7 +44,6 @@ func _ready() -> void:
 	generate_floor()
 
 func _process(delta: float) -> void:
-	_update_enemy_visibility()
 	_update_camera_look_ahead(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -139,94 +138,6 @@ func _spawn_zombie_in_room(rd: DungeonGenerator.RoomData) -> void:
 	var ry = rd.rect.position.y * tile_size + margin + rng.randf_range(0, (rd.rect.size.y - 2) * tile_size - margin)
 	zombie.position = Vector2(rx, ry)
 	enemy_instances.append(zombie)
-
-# ── 敵人視野可見性更新（每幀）─────────────────────────
-# Darkwood 核心機制：敵人在視野錐外完全隱形
-func _update_enemy_visibility() -> void:
-	if player_instance == null or not is_instance_valid(player_instance):
-		return
-	if player_fov == null or not is_instance_valid(player_fov):
-		return
-	
-	var player_pos: Vector2   = player_instance.global_position
-	var cone_dir: Vector2     = Vector2.RIGHT.rotated(player_fov.rotation)
-	var cone_half_rad: float  = deg_to_rad(vision_cone_angle * 0.5)
-	var cone_radius_sq: float = vision_radius * vision_radius
-	
-	# 取得 2D 物理世界空間狀態用於射線檢測
-	var space_state = get_world_2d().direct_space_state
-	
-	# 額外的小型圓形區域（玩家周圍極近距離始終可見，防止敵人「穿牆」消失）
-	const ALWAYS_VISIBLE_RADIUS_SQ: float = 48.0 * 48.0
-	
-	for enemy in enemy_instances:
-		if not is_instance_valid(enemy):
-			continue
-		
-		var to_enemy: Vector2 = enemy.global_position - player_pos
-		var dist_sq: float    = to_enemy.length_squared()
-		
-		var visible: bool
-		if dist_sq < ALWAYS_VISIBLE_RADIUS_SQ:
-			# 極近距離：始終可見
-			visible = true
-		elif dist_sq > cone_radius_sq:
-			# 超出光錐範圍：隱形
-			visible = false
-		else:
-			# 在範圍內：檢查是否在扇形角度內
-			var angle_to_enemy: float = to_enemy.normalized().angle()
-			var cone_dir_angle: float = cone_dir.angle()
-			var angle_diff: float     = abs(angle_difference(angle_to_enemy, cone_dir_angle))
-			visible = angle_diff <= cone_half_rad
-			
-		# 射線遮擋檢測：即使在視野內，若隔著牆壁也應不可見
-		if visible and dist_sq >= ALWAYS_VISIBLE_RADIUS_SQ:
-			var query = PhysicsRayQueryParameters2D.create(player_pos, enemy.global_position, 1)
-			query.exclude = [player_instance.get_rid()]
-			var res = space_state.intersect_ray(query)
-			if res:
-				visible = false
-		
-		# 遍歷敵人的所有視覺子節點控制可見性
-		_set_entity_visual_visible(enemy, visible)
-		
-	# 遍歷家具控制可見性
-	for prop in prop_instances:
-		if not is_instance_valid(prop):
-			continue
-			
-		var to_prop: Vector2 = prop.global_position - player_pos
-		var dist_sq: float    = to_prop.length_squared()
-		
-		var visible: bool
-		if dist_sq < ALWAYS_VISIBLE_RADIUS_SQ:
-			visible = true
-		elif dist_sq > cone_radius_sq:
-			visible = false
-		else:
-			var angle_to_prop: float = to_prop.normalized().angle()
-			var cone_dir_angle: float = cone_dir.angle()
-			var angle_diff: float     = abs(angle_difference(angle_to_prop, cone_dir_angle))
-			visible = angle_diff <= cone_half_rad
-			
-		# 射線遮擋檢測
-		if visible and dist_sq >= ALWAYS_VISIBLE_RADIUS_SQ:
-			var query = PhysicsRayQueryParameters2D.create(player_pos, prop.global_position, 1)
-			query.exclude = [player_instance.get_rid()]
-			var res = space_state.intersect_ray(query)
-			if res:
-				visible = false
-			
-		prop.visible = visible
-
-func _set_entity_visual_visible(entity: Node, visible: bool) -> void:
-	# 方法1：若敵人有 ProceduralDrawer 或 DrawNode，控制其 visible
-	for child in entity.get_children():
-		if child is Node2D and not child is CollisionShape2D:
-			child.visible = visible
-	# 方法2：直接控制整個實體（但保留碰撞體）
-	# 注意：不能直接 entity.visible = false，因為那會影響碰撞
 
 # ── 清除所有實體 ────────────────────────────────────────
 func _clear_entities() -> void:
