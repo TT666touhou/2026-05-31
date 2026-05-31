@@ -14,6 +14,7 @@ extends Node2D
 const PLAYER_SCENE  = preload("res://src/entities/player/Player.tscn")
 const ZOMBIE_SCENE  = preload("res://src/entities/zombie/Zombie.tscn")
 const DUMMY_SCENE   = preload("res://src/entities/dummy/Dummy.tscn")
+const FURNITURE_SCENE = preload("res://src/entities/props/PropFurniture.tscn")
 
 # ── 設定 ────────────────────────────────────────────────
 @export var map_seed       : int   = 0          # 0 = 隨機
@@ -34,15 +35,17 @@ var player_instance: CharacterBody2D
 var player_fov: PlayerFOV
 var current_floor: int = 1
 
-# 敵人列表（用於每幀視野更新）
+# 敵人與家具列表（用於每幀視野更新）
 var enemy_instances: Array[CharacterBody2D] = []
+var prop_instances: Array[RigidBody2D] = []
 
 # ── 生命週期 ────────────────────────────────────────────
 func _ready() -> void:
 	generate_floor()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	_update_enemy_visibility()
+	_update_camera_look_ahead(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# DEBUG：按 R 重新生成地圖
@@ -67,6 +70,9 @@ func generate_floor(seed: int = map_seed) -> void:
 	
 	# 4. 放置敵人
 	_spawn_enemies()
+	
+	# 4.5. 放置家具
+	_spawn_furniture()
 	
 	# 5. 相機設定
 	_setup_camera()
@@ -173,6 +179,27 @@ func _update_enemy_visibility() -> void:
 		
 		# 遍歷敵人的所有視覺子節點控制可見性
 		_set_entity_visual_visible(enemy, visible)
+		
+	# 遍歷家具控制可見性
+	for prop in prop_instances:
+		if not is_instance_valid(prop):
+			continue
+			
+		var to_prop: Vector2 = prop.global_position - player_pos
+		var dist_sq: float    = to_prop.length_squared()
+		
+		var visible: bool
+		if dist_sq < ALWAYS_VISIBLE_RADIUS_SQ:
+			visible = true
+		elif dist_sq > cone_radius_sq:
+			visible = false
+		else:
+			var angle_to_prop: float = to_prop.normalized().angle()
+			var cone_dir_angle: float = cone_dir.angle()
+			var angle_diff: float     = abs(angle_difference(angle_to_prop, cone_dir_angle))
+			visible = angle_diff <= cone_half_rad
+			
+		prop.visible = visible
 
 func _set_entity_visual_visible(entity: Node, visible: bool) -> void:
 	# 方法1：若敵人有 ProceduralDrawer 或 DrawNode，控制其 visible
@@ -189,6 +216,7 @@ func _clear_entities() -> void:
 	player_instance = null
 	player_fov      = null
 	enemy_instances.clear()
+	prop_instances.clear()
 
 # ── 相機設定 ────────────────────────────────────────────
 func _setup_camera() -> void:
@@ -209,3 +237,60 @@ func _room_center_world(rd: DungeonGenerator.RoomData) -> Vector2:
 		(rd.rect.position.x + rd.rect.size.x / 2.0) * tile_size,
 		(rd.rect.position.y + rd.rect.size.y / 2.0) * tile_size
 	)
+
+# ── 照相機滑鼠拉伸偏移 (Look-Ahead) ──────────────────────
+func _update_camera_look_ahead(delta: float) -> void:
+	if player_instance == null or not is_instance_valid(player_instance):
+		return
+	if camera == null or not is_instance_valid(camera):
+		return
+		
+	# 取得滑鼠與玩家之間的向量
+	var mouse_pos = get_global_mouse_position()
+	var to_mouse = mouse_pos - player_instance.global_position
+	
+	# 設定最大偏移距離（例如 100 像素，在 2.2x 縮放下很合適）
+	var max_offset = 120.0
+	var target_offset = to_mouse.limit_length(max_offset) * 0.45 # 讓視角往滑鼠方向偏移
+	
+	# 平滑插值相機位置
+	camera.position = camera.position.lerp(target_offset, delta * 4.0)
+
+# ── 放置家具 ────────────────────────────────────────────
+func _spawn_furniture() -> void:
+	for rd in gen.rooms:
+		# 每個房間隨機生成 1-3 個家具
+		var num_furniture = randi_range(1, 3)
+		if rd.type == "start":
+			# 出生房間放 1 個箱子給玩家測試
+			num_furniture = 1
+			
+		for i in num_furniture:
+			var prop = FURNITURE_SCENE.instantiate() as PropFurniture
+			entities_layer.add_child(prop)
+			
+			# 決定家具類型與尺寸
+			var roll = randf()
+			var p_type: PropFurniture.PropType
+			var p_size: Vector2
+			
+			if roll < 0.40:
+				p_type = PropFurniture.PropType.CRATE
+				p_size = Vector2(40, 40)
+			elif roll < 0.75:
+				p_type = PropFurniture.PropType.TABLE
+				p_size = Vector2(56, 36)
+			else:
+				p_type = PropFurniture.PropType.WARDROBE
+				p_size = Vector2(64, 28)
+				
+			prop.setup(p_type, p_size)
+			
+			# 擺在房間隨機位置（留 1.5 格邊距防穿牆）
+			var margin = tile_size * 1.5
+			var rx = rd.rect.position.x * tile_size + margin + randf() * ((rd.rect.size.x - 3) * tile_size)
+			var ry = rd.rect.position.y * tile_size + margin + randf() * ((rd.rect.size.y - 3) * tile_size)
+			prop.position = Vector2(rx, ry)
+			# 隨機小角度旋轉，顯得凌亂自然
+			prop.rotation = randf_range(-0.3, 0.3)
+			prop_instances.append(prop)

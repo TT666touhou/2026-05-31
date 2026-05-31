@@ -11,10 +11,10 @@
 [ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="10_tracker"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
-radius = 1.0
+radius = 12.0
 
 [sub_resource type="CircleShape2D" id="hurt_shape"]
-radius = 12.0
+radius = 20.0
 
 [node name="Player" type="CharacterBody2D" unique_id=2129014968]
 z_index = 10
@@ -29,7 +29,7 @@ shape = SubResource("body_shape")
 script = ExtResource("2_drawer")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1350196785]
-zoom = Vector2(3.0, 3.0)
+zoom = Vector2(2.2, 2.2)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
 

@@ -55,18 +55,18 @@ func _ready() -> void:
 		
 		if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
 			p.drag = 0.95
-			p.radius = 5.0
+			p.radius = 9.0
 		elif i == J.HEAD:
 			p.drag = 0.90
-			p.radius = 8.0
+			p.radius = 14.0
 		else:
 			p.drag = 0.90
-			p.radius = 5.0
+			p.radius = 9.0
 			
-	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 10.0)
-	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 10.0)
-	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 10.0)
-	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, 10.0)
+	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 18.0)
+	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 18.0)
+	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 18.0)
+	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, 18.0)
 	
 	# 開啟肢體線段碰撞，讓手在揮動時不會穿模過牆角
 	verlet.sticks[s1].collide_terrain = true
@@ -75,9 +75,9 @@ func _ready() -> void:
 	verlet.sticks[s4].collide_terrain = true
 	
 	verlet.add_motor(J.CENTER, func(): return character_body.global_position, 400.0)
-	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(4, 0).rotated(facing_angle), 300.0)
-	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -10).rotated(facing_angle), 400.0)
-	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, 10).rotated(facing_angle), 400.0)
+	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(7, 0).rotated(facing_angle), 300.0)
+	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -18).rotated(facing_angle), 400.0)
+	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, 18).rotated(facing_angle), 400.0)
 	
 	base_points_count = verlet.points.size()
 	base_sticks_count = verlet.sticks.size()
@@ -95,7 +95,7 @@ func _ready() -> void:
 		for line_pair in body_lines:
 			var cshape = CollisionShape2D.new()
 			var cap = CapsuleShape2D.new()
-			cap.radius = 5.0
+			cap.radius = 9.0
 			cshape.shape = cap
 			cshape.debug_color = Color(0, 1, 1, 0.42) # Cyan for hurtboxes
 			_hurtbox_node.add_child(cshape)
@@ -103,7 +103,7 @@ func _ready() -> void:
 			
 		_head_shape = CollisionShape2D.new()
 		var circ = CircleShape2D.new()
-		circ.radius = 8.0
+		circ.radius = 14.0
 		_head_shape.shape = circ
 		_head_shape.debug_color = Color(0, 1, 1, 0.42)
 		_hurtbox_node.add_child(_head_shape)
@@ -169,14 +169,14 @@ func _physics_process(delta: float) -> void:
 		verlet.points[J.L_SHOULDER].accumulated_force += Vector2(shoulder_swing, 0).rotated(facing_angle)
 		verlet.points[J.R_SHOULDER].accumulated_force += Vector2(-shoulder_swing, 0).rotated(facing_angle)
 	
-	var l_outward = Vector2(0, -25.0).rotated(facing_angle)
-	var r_outward = Vector2(0, 25.0).rotated(facing_angle)
+	var l_outward = Vector2(0, -45.0).rotated(facing_angle)
+	var r_outward = Vector2(0, 45.0).rotated(facing_angle)
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
 
 	var aim_dir = Vector2.RIGHT.rotated(facing_angle)
-	var left_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(-PI/2) * 8.0
-	var right_target = character_body.global_position + aim_dir * 12.0 + aim_dir.rotated(PI/2) * 8.0
+	var left_target = character_body.global_position + aim_dir * 22.0 + aim_dir.rotated(-PI/2) * 14.0
+	var right_target = character_body.global_position + aim_dir * 22.0 + aim_dir.rotated(PI/2) * 14.0
 	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 375.0
 	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 375.0
 	
@@ -220,22 +220,22 @@ func _draw() -> void:
 			continue
 		var pA = (verlet.points[stick.pA].pos - global_position)
 		var pB = (verlet.points[stick.pB].pos - global_position)
-		draw_line(pA, pB, body_color, 2.0)
+		draw_line(pA, pB, body_color, 4.0)
 		
 	# 畫頭部 (空心方形或圓形)
 	var head_pos = (verlet.points[J.HEAD].pos - global_position)
 	
 	# 可以旋轉畫出的頭部以配合面向
 	draw_set_transform(head_pos, facing_angle, Vector2.ONE)
-	var local_rect = Rect2(Vector2(-5, -5), Vector2(10, 10))
+	var local_rect = Rect2(Vector2(-9, -9), Vector2(18, 18))
 	
 	# Compute a darker inner color for the face interior (like black for player, dark brown for dummy)
 	var inner_color = body_color.darkened(0.8)
 	draw_rect(local_rect, inner_color, true) # 內部
-	draw_rect(local_rect, body_color, false, 2.0)
+	draw_rect(local_rect, body_color, false, 4.0)
 	
 	# 畫眼睛
-	draw_rect(Rect2(Vector2(1, -3), Vector2(2, 2)), eye_color, true)
-	draw_rect(Rect2(Vector2(1, 1), Vector2(2, 2)), eye_color, true)
+	draw_rect(Rect2(Vector2(2, -5), Vector2(3, 3)), eye_color, true)
+	draw_rect(Rect2(Vector2(2, 2), Vector2(3, 3)), eye_color, true)
 	
 	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)

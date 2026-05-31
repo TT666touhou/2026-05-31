@@ -10,15 +10,15 @@ const TILE_SIZE := 64
 
 # 顏色定義（Darkwood 考察：視野外應是脫飽和灰調，非純黑）
 # 這些是 PointLight2D 照亮後的「光照內」顏色。光照外 Godot 自動根據 CanvasModulate 暗化。
-const COLOR_FLOOR_BASE   := Color(0.42, 0.38, 0.34, 1.0)   # 中棕灰地板（石材質感）
-const COLOR_FLOOR_VAR1   := Color(0.36, 0.32, 0.28, 1.0)   # 地板變體1（稍暗）
-const COLOR_FLOOR_VAR2   := Color(0.50, 0.46, 0.42, 1.0)   # 地板變體2（稍亮）
-const COLOR_WALL_BASE    := Color(0.22, 0.19, 0.16, 1.0)   # 石牆（比地板暗，仍可辨認）
-const COLOR_WALL_TOP     := Color(0.30, 0.27, 0.24, 1.0)   # 牆壁頂面受光側
-const COLOR_WALL_EDGE    := Color(0.14, 0.12, 0.10, 1.0)   # 牆壁陰影邊緣
-const COLOR_CRACK        := Color(0.20, 0.16, 0.12, 0.8)   # 裂縫線
-const COLOR_GROUT        := Color(0.30, 0.27, 0.24, 1.0)   # 地板縫隙（石材接縫）
-const COLOR_MOSS         := Color(0.22, 0.30, 0.18, 0.45)  # 牆角苔蘚
+const COLOR_FLOOR_BASE   := Color(0.22, 0.18, 0.15, 1.0)   # 腐木板底色
+const COLOR_FLOOR_VAR1   := Color(0.18, 0.14, 0.12, 1.0)   # 暗褐色腐木板
+const COLOR_FLOOR_VAR2   := Color(0.26, 0.22, 0.18, 1.0)   # 稍亮腐木板
+const COLOR_WALL_BASE    := Color(0.12, 0.10, 0.08, 1.0)   # 厚石牆底層
+const COLOR_WALL_TOP     := Color(0.16, 0.14, 0.12, 1.0)   # 牆壁頂部面
+const COLOR_WALL_EDGE    := Color(0.06, 0.05, 0.04, 1.0)   # 牆壁最暗部
+const COLOR_CRACK        := Color(0.08, 0.06, 0.05, 0.7)   # 地板裂紋/木紋縫隙
+const COLOR_GROUT        := Color(0.14, 0.11, 0.09, 0.6)   # 木板縫隙線
+const COLOR_MOSS         := Color(0.15, 0.20, 0.12, 0.35)  # 牆角發霉苔蘚
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
@@ -145,32 +145,39 @@ func _draw_floors() -> void:
 			# 底色
 			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), col)
 			
-			# 石材接縫線（每格右邊和下邊）
-			draw_line(
-				world_pos + Vector2(TILE_SIZE - 1, 0),
-				world_pos + Vector2(TILE_SIZE - 1, TILE_SIZE),
-				COLOR_GROUT, 1.0
-			)
-			draw_line(
-				world_pos + Vector2(0, TILE_SIZE - 1),
-				world_pos + Vector2(TILE_SIZE, TILE_SIZE - 1),
-				COLOR_GROUT, 1.0
-			)
+			# ── 畫木質地板條紋（4條板，歪斜不整齊的腐木風） ──
+			var plank_h = TILE_SIZE / 4.0
+			for i in range(1, 4):
+				var offset_start = rng_local.randf_range(-1.5, 1.5)
+				var offset_end = rng_local.randf_range(-1.5, 1.5)
+				draw_line(
+					world_pos + Vector2(0, i * plank_h + offset_start),
+					world_pos + Vector2(TILE_SIZE, i * plank_h + offset_end),
+					COLOR_GROUT, 1.5
+				)
 			
-			# 偶發裂縫（約 8% 的格子有）
-			if roll > 0.92:
+			# ── 隨機發霉與泥污污漬 ──
+			if roll > 0.65:
+				var num_spots = rng_local.randi_range(1, 3)
+				for s in num_spots:
+					var spot_pos = world_pos + Vector2(rng_local.randf_range(8, TILE_SIZE-8), rng_local.randf_range(8, TILE_SIZE-8))
+					var spot_rad = rng_local.randf_range(3.0, 9.0)
+					draw_circle(spot_pos, spot_rad, Color(0.06, 0.05, 0.04, 0.35))
+			
+			# 偶發裂縫與木板刮痕
+			if roll > 0.90:
 				_draw_crack(world_pos, rng_local)
 
 # ── 隨機裂縫細節 ────────────────────────────────────────
 func _draw_crack(world_pos: Vector2, local_rng: RandomNumberGenerator) -> void:
 	var crack_x = world_pos.x + local_rng.randi_range(10, 54)
 	var crack_y = world_pos.y + local_rng.randi_range(10, 54)
-	var length  = local_rng.randi_range(6, 18)
+	var length  = local_rng.randi_range(8, 22)
 	var angle   = local_rng.randf() * TAU
 	var end_pt  = Vector2(crack_x + cos(angle) * length, crack_y + sin(angle) * length)
-	draw_line(Vector2(crack_x, crack_y), end_pt, COLOR_CRACK, 1.0)
+	draw_line(Vector2(crack_x, crack_y), end_pt, COLOR_CRACK, 1.5)
 
-# ── 牆壁繪製 ────────────────────────────────────────────
+# ── 牆壁與 AO 陰影繪製 ──────────────────────────────────
 func _draw_walls() -> void:
 	for y in gen.map_height:
 		for x in gen.map_width:
@@ -179,38 +186,59 @@ func _draw_walls() -> void:
 			
 			var world_pos = Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			
-			# 牆壁底色
+			# ── 繪製環境光遮蔽 (AO) 陰影到相鄰地板上 ──
+			# 向南鄰接地板
+			if gen.is_floor(x, y + 1):
+				draw_rect(Rect2(world_pos.x, world_pos.y + TILE_SIZE, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.45))
+				draw_rect(Rect2(world_pos.x, world_pos.y + TILE_SIZE + 6, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.30))
+				draw_rect(Rect2(world_pos.x, world_pos.y + TILE_SIZE + 12, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.15))
+			# 向北鄰接地板
+			if gen.is_floor(x, y - 1):
+				draw_rect(Rect2(world_pos.x, world_pos.y - 6, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.45))
+				draw_rect(Rect2(world_pos.x, world_pos.y - 12, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.30))
+				draw_rect(Rect2(world_pos.x, world_pos.y - 18, TILE_SIZE, 6), Color(0.0, 0.0, 0.0, 0.15))
+			# 向東鄰接地板
+			if gen.is_floor(x + 1, y):
+				draw_rect(Rect2(world_pos.x + TILE_SIZE, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.45))
+				draw_rect(Rect2(world_pos.x + TILE_SIZE + 6, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.30))
+				draw_rect(Rect2(world_pos.x + TILE_SIZE + 12, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.15))
+			# 向西鄰接地板
+			if gen.is_floor(x - 1, y):
+				draw_rect(Rect2(world_pos.x - 6, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.45))
+				draw_rect(Rect2(world_pos.x - 12, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.30))
+				draw_rect(Rect2(world_pos.x - 18, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.15))
+			
+			# ── 牆壁本體底色 ──
 			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
 			
-			# 牆壁頂面（面向玩家的「蓋子」，稍亮）
+			# 牆壁頂面（面向玩家的「蓋子」，稍微粗糙點綴）
 			if gen.is_floor(x, y + 1):
-				# 下邊鄰接地板：這面牆玩家可以看到「正面」
+				# 下邊鄰接地板：畫亮部頂面
 				draw_rect(
 					Rect2(world_pos, Vector2(TILE_SIZE, 6)),
 					COLOR_WALL_TOP
 				)
-				# 底部陰影投影到地板
+				# 牆體陰影邊緣
 				draw_rect(
 					Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)),
 					COLOR_WALL_EDGE
 				)
-			# 右側面向地板：畫陰影
 			if gen.is_floor(x + 1, y):
 				draw_rect(
 					Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)),
 					COLOR_WALL_EDGE
 				)
-			# 左側面向地板：同樣陰影
 			if gen.is_floor(x - 1, y):
 				draw_rect(
 					Rect2(world_pos, Vector2(3, TILE_SIZE)),
 					COLOR_WALL_EDGE
 				)
-			# 偶爾在牆壁底部畫苔蘚
+				
+			# 偶爾在牆壁底部畫青苔/發霉
 			var rng_m = RandomNumberGenerator.new()
 			rng_m.seed = x * 7331 + y * 2713
-			if rng_m.randf() > 0.78 and gen.is_floor(x, y + 1):
-				var moss_w = rng_m.randi_range(8, 28)
+			if rng_m.randf() > 0.75 and gen.is_floor(x, y + 1):
+				var moss_w = rng_m.randi_range(8, 32)
 				var moss_x = rng_m.randi_range(0, TILE_SIZE - moss_w)
 				draw_rect(
 					Rect2(world_pos + Vector2(moss_x, TILE_SIZE - 8), Vector2(moss_w, 4)),

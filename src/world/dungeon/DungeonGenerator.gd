@@ -35,10 +35,10 @@ class RoomData:
 # ── 生成參數 ────────────────────────────────────────────
 var map_width:  int = 80   # 地圖總寬（格）
 var map_height: int = 60   # 地圖總高（格）
-var min_room_size: int = 7    # 房間最小尺寸（格）
-var max_room_size: int = 16   # 房間最大尺寸（格）
-var min_split_size: int = 12  # BSP 節點最小可切割尺寸
-var corridor_width: int = 2   # 走廊寬度（格）
+var min_room_size: int = 5    # 房間最小尺寸（格）
+var max_room_size: int = 8    # 房間最大尺寸（格）
+var min_split_size: int = 8   # BSP 節點最小可切割尺寸
+var corridor_width: int = 1   # 走廊寬度（格）
 
 # ── 輸出資料 ────────────────────────────────────────────
 var tile_map: Array = []      # [y][x] = TILE_FLOOR / TILE_WALL / -1

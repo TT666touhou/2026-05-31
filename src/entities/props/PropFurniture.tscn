@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3 uid="uid://prop_furniture_uuid"]
+
+[ext_resource type="Script" path="res://src/entities/props/PropFurniture.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_coll"]
+size = Vector2(48, 48)
+
+[node name="PropFurniture" type="RigidBody2D"]
+collision_layer = 256
+collision_mask = 263
+mass = 3.0
+gravity_scale = 0.0
+linear_damp = 8.0
+angular_damp = 8.0
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_coll")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
