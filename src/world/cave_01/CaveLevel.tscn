@@ -1,30 +1,21 @@
-[gd_scene format=3 uid="uid://dgw881e6ebldu"]
+﻿[gd_scene format=3 uid="uid://dgw881e6ebldu"]
 
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/FloorSegment.tscn" id="1_floor"]
 [ext_resource type="Script" uid="uid://dx3aow33fwb3e" path="res://src/world/cave_01/cave_level.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WallSegment.tscn" id="2_wall"]
 [ext_resource type="PackedScene" uid="uid://cpy5e0qi7s67u" path="res://src/entities/player/Player.tscn" id="3_player"]
 [ext_resource type="PackedScene" uid="uid://b5h26xvua0pmo" path="res://src/entities/dummy/Dummy.tscn" id="4_dummy"]
-[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
+
+[ext_resource type="Script" path="res://src/world/terrain_kit/AtmosphereLayer.gd" id="9_atmo"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBarrel.tscn" id="10_barrel"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropCrate.tscn" id="11_crate"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBookshelf.tscn" id="12_shelf"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropWorkbench.tscn" id="13_bench"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropDebris.tscn" id="14_debris"]
+[ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/PropBones.tscn" id="15_bones"][ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodTable.tscn" id="5_table"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/WoodDoor.tscn" id="6_wooddoor"]
 [ext_resource type="PackedScene" path="res://src/world/terrain_kit/pieces/StoneDoor.tscn" id="7_stonedoor"]
 [ext_resource type="PackedScene" path="res://src/entities/zombie/Zombie.tscn" id="8_zombie"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ukvv7"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ogf40"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_ucvpp"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_8h2go"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_6hi5b"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_lvio7"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5x3ho"]
-
-[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_7xs81"]
 
 [sub_resource type="Image" id="Image_ukvv7"]
 data = {
@@ -50,7 +41,7 @@ offset_bottom = 2000.0
 color = Color(0.12, 0.1, 0.08, 1)
 
 [node name="CanvasModulate" type="CanvasModulate" parent="." unique_id=129525780]
-color = Color(0, 0, 0, 1)
+color = Color(0.82, 0.78, 0.72, 1)
 
 [node name="FloorSegment" parent="." unique_id=431544939 instance=ExtResource("1_floor")]
 light_mask = 3
@@ -58,29 +49,24 @@ position = Vector2(-400, -300)
 grid_size = Vector2i(80, 60)
 
 [node name="Wall_Top" parent="." unique_id=1771225771 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_ukvv7")
 position = Vector2(-410, -310)
-grid_size = Vector2i(82, 1)
+grid_size = Vector2i(82, 2)
 
 [node name="Wall_Bottom" parent="." unique_id=834574710 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_ogf40")
 position = Vector2(-410, 300)
-grid_size = Vector2i(82, 1)
+grid_size = Vector2i(82, 2)
 
 [node name="Wall_Left" parent="." unique_id=457124250 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_ucvpp")
 position = Vector2(-410, -300)
-grid_size = Vector2i(1, 60)
+grid_size = Vector2i(2, 60)
 
 [node name="Wall_Right_Top" parent="." unique_id=1099311339 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_8h2go")
 position = Vector2(400, -300)
-grid_size = Vector2i(1, 28)
+grid_size = Vector2i(2, 28)
 
 [node name="Wall_Right_Bottom" parent="." unique_id=399806186 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_6hi5b")
 position = Vector2(400, 20)
-grid_size = Vector2i(1, 28)
+grid_size = Vector2i(2, 28)
 
 [node name="FloorSegment2" parent="." unique_id=40423305 instance=ExtResource("1_floor")]
 light_mask = 3
@@ -88,19 +74,16 @@ position = Vector2(400, -200)
 grid_size = Vector2i(60, 40)
 
 [node name="Wall_East_Top" parent="." unique_id=168223016 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_lvio7")
 position = Vector2(410, -210)
-grid_size = Vector2i(60, 1)
+grid_size = Vector2i(60, 2)
 
 [node name="Wall_East_Bottom" parent="." unique_id=176825631 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_5x3ho")
 position = Vector2(410, 200)
-grid_size = Vector2i(60, 1)
+grid_size = Vector2i(60, 2)
 
 [node name="Wall_East_Right" parent="." unique_id=790377685 instance=ExtResource("2_wall")]
-material = SubResource("CanvasItemMaterial_7xs81")
 position = Vector2(1000, -200)
-grid_size = Vector2i(1, 40)
+grid_size = Vector2i(2, 40)
 
 [node name="Player" parent="." unique_id=2033603969 instance=ExtResource("3_player")]
 
@@ -131,4 +114,43 @@ position = Vector2(405, -20)
 [node name="StoneDoor" parent="." unique_id=574986816 instance=ExtResource("7_stonedoor")]
 position = Vector2(200, 150)
 
+
+[node name="AtmosphereLayer" type="CanvasLayer" parent="."]
+script = ExtResource("9_atmo")
+
+[node name="PropBarrel_1" parent="." unique_id=600000001 instance=ExtResource("10_barrel")]
+position = Vector2(-300, -150)
+
+[node name="PropBarrel_2" parent="." unique_id=600000002 instance=ExtResource("10_barrel")]
+position = Vector2(-150, 200)
+
+[node name="PropCrate_1" parent="." unique_id=600000003 instance=ExtResource("11_crate")]
+position = Vector2(150, -200)
+
+[node name="PropCrate_2" parent="." unique_id=600000004 instance=ExtResource("11_crate")]
+position = Vector2(-100, 250)
+
+[node name="PropBookshelf_1" parent="." unique_id=600000005 instance=ExtResource("12_shelf")]
+position = Vector2(-370, -200)
+
+[node name="PropBookshelf_2" parent="." unique_id=600000006 instance=ExtResource("12_shelf")]
+position = Vector2(350, 100)
+
+[node name="PropWorkbench_1" parent="." unique_id=600000007 instance=ExtResource("13_bench")]
+position = Vector2(600, -100)
+
+[node name="PropDebris_1" parent="." unique_id=600000008 instance=ExtResource("14_debris")]
+position = Vector2(-250, 100)
+
+[node name="PropDebris_2" parent="." unique_id=600000009 instance=ExtResource("14_debris")]
+position = Vector2(700, 150)
+
+[node name="PropBones_1" parent="." unique_id=600000010 instance=ExtResource("15_bones")]
+position = Vector2(50, -180)
+
+[node name="PropBones_2" parent="." unique_id=600000011 instance=ExtResource("15_bones")]
+position = Vector2(800, 50)
+
+[node name="PropBones_3" parent="." unique_id=600000012 instance=ExtResource("15_bones")]
+position = Vector2(-200, -100)
 [editable path="Player"]
