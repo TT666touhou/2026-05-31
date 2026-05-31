@@ -7,7 +7,8 @@
 [ext_resource type="Script" uid="uid://dj0pt3qfwke6y" path="res://src/components/StaminaComponent.gd" id="5_stamina"]
 [ext_resource type="Script" uid="uid://dhvi5a0itdn0i" path="res://src/components/ManaComponent.gd" id="6_mana"]
 [ext_resource type="Script" path="res://src/world/vision/ProceduralLight.gd" id="7_procedural"]
-[ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="8_tracker"]
+[ext_resource type="Texture2D" path="res://src/world/vision/combined_flashlight.png" id="7_combined"]
+[ext_resource type="Script" path="res://src/systems/vision/VisionTracker.gd" id="10_tracker"]
 
 [sub_resource type="CircleShape2D" id="body_shape"]
 radius = 1.0
@@ -55,19 +56,21 @@ shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0
 energy = 0.8
-script = ExtResource("7_procedural")
+texture = ExtResource("7_combined")
 
 [node name="FogLight" type="PointLight2D" parent="."]
 range_item_cull_mask = 1
-shadow_enabled = false
-energy = 1.5
-color = Color(0.8, 0.85, 0.9, 1)
+shadow_enabled = true
+shadow_filter = 0
+energy = 0.15
+color = Color(0.55, 0.6, 0.65, 1)
 script = ExtResource("7_procedural")
-ambient_radius = 700.0
+ambient_radius = 900.0
 ambient_blur = 150.0
 cone_radius = 0.0
 cone_blur = 0.0
 cone_angle = 0.0
 
 [node name="VisionTracker" type="Node" parent="."]
-script = ExtResource("8_tracker")
+script = ExtResource("10_tracker")
+

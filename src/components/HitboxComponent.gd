@@ -74,12 +74,13 @@ func _physics_process(_delta: float) -> void:
 				hit_landed.emit(target)
 				
 				# Trigger Combat Juice!
-				if CombatFX:
-					CombatFX.apply_hitstop()
+				var combat_fx = get_tree().root.get_node_or_null("CombatFX")
+				if combat_fx:
+					combat_fx.apply_hitstop()
 					if screen_shake_intensity > 0:
-						CombatFX.screen_shake(screen_shake_intensity, screen_shake_duration)
+						combat_fx.screen_shake(screen_shake_intensity, screen_shake_duration)
 					var hit_dir = (area.global_position - global_position).normalized()
-					CombatFX.spawn_hit_spark(global_position + hit_dir * 10.0, hit_dir)
+					combat_fx.spawn_hit_spark(global_position + hit_dir * 10.0, hit_dir)
 					
 	# Clean up hit_targets so we can hit them again if they leave and re-enter
 	for target in hit_targets.duplicate():

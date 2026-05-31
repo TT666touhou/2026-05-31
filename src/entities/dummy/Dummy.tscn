@@ -15,6 +15,7 @@ collision_mask = 257
 script = ExtResource("1_script")
 
 [node name="ProceduralDrawer" type="Node2D" parent="." unique_id=844170135]
+light_mask = 2
 script = ExtResource("5_drawer")
 body_color = Color(0.55, 0.27, 0.07, 1)
 eye_color = Color(1, 0.84, 0, 1)

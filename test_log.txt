@@ -1,0 +1,5 @@
+--- STARTING SCENE TEST ---
+Successfully loaded CaveLevel.tscn
+Successfully instantiated CaveLevel
+Added to SceneTree root.
+--- SCENE TEST PASSED ---

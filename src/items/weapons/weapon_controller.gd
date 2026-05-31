@@ -131,7 +131,8 @@ func _physics_process(delta: float) -> void:
 		var center_old = (pA_old + pB_old) * 0.5
 		var blade_vel = (center_current - center_old)
 		if blade_vel.length_squared() > 1.0:
-			hitbox.knockback_direction_override = blade_vel.normalized()
+			if "knockback_direction_override" in hitbox:
+				hitbox.set("knockback_direction_override", blade_vel.normalized())
 	
 	match current_state:
 		State.IDLE:

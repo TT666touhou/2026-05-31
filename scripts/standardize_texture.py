@@ -7,15 +7,15 @@ def build_darkwood_lut():
     # Define keypoints in BGR format
     # Darkwood has very muted, desaturated, dark tones.
     # We map Luma (0-255) to these BGR values.
-    # Luma 0 -> #0a0a0a
-    # Luma 85 -> #1e1c18 (B=24, G=28, R=30)
-    # Luma 170 -> #2d271d (B=29, G=39, R=45)
-    # Luma 255 -> #4b463e (B=62, G=70, R=75)
+    # Luma 0 -> #050505
+    # Luma 85 -> #1f1f1a
+    # Luma 170 -> #3d352b
+    # Luma 255 -> #7a6c58
     
     luma_points = [0, 85, 170, 255]
-    b_points = [10, 24, 29, 62]
-    g_points = [10, 28, 39, 70]
-    r_points = [10, 30, 45, 75]
+    b_points = [5, 26, 43, 88]
+    g_points = [5, 31, 53, 108]
+    r_points = [5, 31, 61, 122]
     
     lut = np.zeros((256, 1, 3), dtype=np.uint8)
     for i in range(256):
@@ -27,7 +27,7 @@ def build_darkwood_lut():
         lut[i, 0, 2] = int(r)
     return lut
 
-def add_noise(img, intensity=10):
+def add_noise(img, intensity=3):
     noise = np.random.normal(0, intensity, img.shape).astype(np.float32)
     noisy_img = cv2.add(img.astype(np.float32), noise)
     return np.clip(noisy_img, 0, 255).astype(np.uint8)
@@ -89,7 +89,7 @@ def process_image(input_path, output_path, img_type):
     mapped = cv2.LUT(gray3, lut)
     
     # 3. Add global uniform noise
-    noisy = add_noise(mapped, intensity=8)
+    noisy = add_noise(mapped, intensity=3)
     
     # 4. Vignette (only for props, not seamless tiles)
     if img_type == 'prop':
