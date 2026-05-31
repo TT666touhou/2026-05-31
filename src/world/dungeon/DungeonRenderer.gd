@@ -8,14 +8,16 @@ extends Node2D
 # ── 繪製常數 ────────────────────────────────────────────
 const TILE_SIZE := 64
 
-# 顏色定義（參考考察文件的 Darkwood 色調）
-const COLOR_FLOOR_BASE   := Color(0.16, 0.14, 0.12, 1.0)   # 深棕灰地板
-const COLOR_FLOOR_VAR1   := Color(0.14, 0.12, 0.10, 1.0)   # 地板變體1（稍暗）
-const COLOR_FLOOR_VAR2   := Color(0.18, 0.16, 0.14, 1.0)   # 地板變體2（稍亮）
-const COLOR_WALL_BASE    := Color(0.09, 0.08, 0.07, 1.0)   # 深石牆
+# 顏色定義（根據 Darkwood 真實截圖像素分析 + 光源暖橙色互動後的結果）
+# 光源是暖橙色 Color(1.0,0.73,0.62)，視野內地板會被暖化
+# 所以地板本身設為中性偏暖棕，被光照後呈現正確的 Darkwood 土褐感
+const COLOR_FLOOR_BASE   := Color(0.22, 0.17, 0.13, 1.0)   # 暖棕灰地板（腐木褐調）
+const COLOR_FLOOR_VAR1   := Color(0.18, 0.14, 0.11, 1.0)   # 地板變體1（深棕）
+const COLOR_FLOOR_VAR2   := Color(0.25, 0.20, 0.16, 1.0)   # 地板變體2（亮棕）
+const COLOR_WALL_BASE    := Color(0.10, 0.08, 0.07, 1.0)   # 深石牆（泥灰調）
 const COLOR_WALL_EDGE    := Color(0.06, 0.05, 0.04, 1.0)   # 牆壁陰影邊緣
-const COLOR_CRACK        := Color(0.05, 0.04, 0.03, 0.6)   # 裂縫線
-const COLOR_GROUT        := Color(0.06, 0.05, 0.05, 1.0)   # 地板縫隙（石材接縫）
+const COLOR_CRACK        := Color(0.04, 0.03, 0.02, 0.7)   # 裂縫線
+const COLOR_GROUT        := Color(0.08, 0.06, 0.05, 1.0)   # 地板縫隙（石材接縫）
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
