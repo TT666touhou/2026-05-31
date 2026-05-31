@@ -3,6 +3,27 @@ extends Node2D
 @export var body_color: Color = Color.WHITE
 @export var eye_color: Color = Color.WHITE
 
+# ─── 骨架規格 (Skeletal Dimension Parameters - Scaled Dynamically) ───
+@export_group("Skeletal Settings")
+@export var base_joint_radius: float = 9.0
+@export var base_head_radius: float = 14.0
+@export var base_arm_length: float = 18.0
+@export var base_head_offset: float = 7.0
+@export var base_shoulder_width: float = 18.0
+
+@export_group("Guard & Action Stance")
+@export var base_hand_forward: float = 22.0
+@export var base_hand_spread: float = 14.0
+@export var base_elbow_outward: float = 45.0
+@export var base_shoulder_swing: float = 37.5
+
+@export_group("Visual Settings")
+@export var base_line_width: float = 4.0
+@export var base_head_rect_size: float = 18.0
+@export var base_eye_offset_x: float = 2.0
+@export var base_eye_offset_y: float = 5.0
+@export var base_eye_size: float = 3.0
+
 enum J {
 	CENTER, HEAD,
 	L_SHOULDER, L_ELBOW, L_HAND,
@@ -17,6 +38,8 @@ var facing_angle: float = 0.0
 var walk_blend: float = 0.0
 
 var override_mouse_pos = null # For testing
+
+var scale_factor: float = 1.0
 
 var base_points_count: int = 0
 var base_sticks_count: int = 0
@@ -44,6 +67,9 @@ func _ready() -> void:
 	light_mask = 2
 	
 	character_body = get_parent() as CharacterBody2D
+	if character_body:
+		scale_factor = character_body.scale.x
+		
 	var base_pos = character_body.global_position
 	
 	var VerletPhysicsClass = preload("res://physics/verlet/verlet_physics.gd")
@@ -58,18 +84,18 @@ func _ready() -> void:
 		
 		if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
 			p.drag = 0.95
-			p.radius = 9.0
+			p.radius = base_joint_radius * scale_factor
 		elif i == J.HEAD:
 			p.drag = 0.90
-			p.radius = 14.0
+			p.radius = base_head_radius * scale_factor
 		else:
 			p.drag = 0.90
-			p.radius = 9.0
+			p.radius = base_joint_radius * scale_factor
 			
-	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 18.0)
-	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 18.0)
-	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, 18.0)
-	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, 18.0)
+	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, base_arm_length * scale_factor)
+	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, base_arm_length * scale_factor)
+	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, base_arm_length * scale_factor)
+	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, base_arm_length * scale_factor)
 	
 	# 開啟肢體線段碰撞，讓手在揮動時不會穿模過牆角
 	verlet.sticks[s1].collide_terrain = true
@@ -78,9 +104,9 @@ func _ready() -> void:
 	verlet.sticks[s4].collide_terrain = true
 	
 	verlet.add_motor(J.CENTER, func(): return character_body.global_position, 400.0)
-	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(7, 0).rotated(facing_angle), 300.0)
-	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -18).rotated(facing_angle), 400.0)
-	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, 18).rotated(facing_angle), 400.0)
+	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(base_head_offset * scale_factor, 0).rotated(facing_angle), 300.0)
+	verlet.add_motor(J.L_SHOULDER, func(): return character_body.global_position + Vector2(0, -base_shoulder_width * scale_factor).rotated(facing_angle), 400.0)
+	verlet.add_motor(J.R_SHOULDER, func(): return character_body.global_position + Vector2(0, base_shoulder_width * scale_factor).rotated(facing_angle), 400.0)
 	
 	base_points_count = verlet.points.size()
 	base_sticks_count = verlet.sticks.size()
@@ -98,7 +124,7 @@ func _ready() -> void:
 		for line_pair in body_lines:
 			var cshape = CollisionShape2D.new()
 			var cap = CapsuleShape2D.new()
-			cap.radius = 9.0
+			cap.radius = base_joint_radius * scale_factor
 			cshape.shape = cap
 			cshape.debug_color = Color(0, 1, 1, 0.42) # Cyan for hurtboxes
 			_hurtbox_node.add_child(cshape)
@@ -106,7 +132,7 @@ func _ready() -> void:
 			
 		_head_shape = CollisionShape2D.new()
 		var circ = CircleShape2D.new()
-		circ.radius = 14.0
+		circ.radius = base_head_radius * scale_factor
 		_head_shape.shape = circ
 		_head_shape.debug_color = Color(0, 1, 1, 0.42)
 		_hurtbox_node.add_child(_head_shape)
@@ -168,20 +194,20 @@ func _physics_process(delta: float) -> void:
 		
 	if walk_blend > 0:
 		var phase = Time.get_ticks_msec() / 150.0
-		var shoulder_swing = sin(phase) * 37.5 * walk_blend
+		var shoulder_swing = sin(phase) * base_shoulder_swing * walk_blend * scale_factor
 		verlet.points[J.L_SHOULDER].accumulated_force += Vector2(shoulder_swing, 0).rotated(facing_angle)
 		verlet.points[J.R_SHOULDER].accumulated_force += Vector2(-shoulder_swing, 0).rotated(facing_angle)
 	
-	var l_outward = Vector2(0, -45.0).rotated(facing_angle)
-	var r_outward = Vector2(0, 45.0).rotated(facing_angle)
+	var l_outward = Vector2(0, -base_elbow_outward * scale_factor).rotated(facing_angle)
+	var r_outward = Vector2(0, base_elbow_outward * scale_factor).rotated(facing_angle)
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
 
 	var aim_dir = Vector2.RIGHT.rotated(facing_angle)
-	var left_target = character_body.global_position + aim_dir * 22.0 + aim_dir.rotated(-PI/2) * 14.0
-	var right_target = character_body.global_position + aim_dir * 22.0 + aim_dir.rotated(PI/2) * 14.0
-	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 375.0
-	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 375.0
+	var left_target = character_body.global_position + aim_dir * base_hand_forward * scale_factor + aim_dir.rotated(-PI/2) * base_hand_spread * scale_factor
+	var right_target = character_body.global_position + aim_dir * base_hand_forward * scale_factor + aim_dir.rotated(PI/2) * base_hand_spread * scale_factor
+	verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 375.0 * scale_factor
+	verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 375.0 * scale_factor
 	
 	# 防卡死機制：呼叫共用模組，過遠暫時關閉碰撞
 	verlet.enforce_anti_stuck(character_body.global_position)
@@ -223,22 +249,27 @@ func _draw() -> void:
 			continue
 		var pA = (verlet.points[stick.pA].pos - global_position)
 		var pB = (verlet.points[stick.pB].pos - global_position)
-		draw_line(pA, pB, body_color, 4.0)
+		draw_line(pA, pB, body_color, base_line_width * scale_factor)
 		
 	# 畫頭部 (空心方形或圓形)
 	var head_pos = (verlet.points[J.HEAD].pos - global_position)
 	
 	# 可以旋轉畫出的頭部以配合面向
 	draw_set_transform(head_pos, facing_angle, Vector2.ONE)
-	var local_rect = Rect2(Vector2(-9, -9), Vector2(18, 18))
+	
+	var half_size = base_head_rect_size * 0.5 * scale_factor
+	var local_rect = Rect2(Vector2(-half_size, -half_size), Vector2(base_head_rect_size * scale_factor, base_head_rect_size * scale_factor))
 	
 	# Compute a darker inner color for the face interior (like black for player, dark brown for dummy)
 	var inner_color = body_color.darkened(0.8)
 	draw_rect(local_rect, inner_color, true) # 內部
-	draw_rect(local_rect, body_color, false, 4.0)
+	draw_rect(local_rect, body_color, false, base_line_width * scale_factor)
 	
 	# 畫眼睛
-	draw_rect(Rect2(Vector2(2, -5), Vector2(3, 3)), eye_color, true)
-	draw_rect(Rect2(Vector2(2, 2), Vector2(3, 3)), eye_color, true)
+	var ex = base_eye_offset_x * scale_factor
+	var ey = base_eye_offset_y * scale_factor
+	var es = base_eye_size * scale_factor
+	draw_rect(Rect2(Vector2(ex, -ey), Vector2(es, es)), eye_color, true)
+	draw_rect(Rect2(Vector2(ex, ey - es), Vector2(es, es)), eye_color, true)
 	
 	draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)

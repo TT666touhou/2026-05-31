@@ -3,9 +3,23 @@ class_name WeaponController
 
 enum State { IDLE, WINDUP, ATTACK, RECOVER }
 
+@export_group("Timing Settings")
 @export var windup_time: float = 0.30
 @export var attack_time: float = 0.30
 @export var recover_time: float = 0.6
+
+@export_group("Double-Hand Anchors (Scaled Dynamically)")
+@export var base_left_hand_to_hilt: float = 10.0
+@export var base_left_hand_to_tip: float = 18.0
+
+@export_group("Physical Force Strengths (Scaled Dynamically)")
+@export var base_idle_tip_force: float = 5000.0
+@export var base_idle_hilt_force: float = 2000.0
+@export var base_windup_tip_force: float = 6000.0
+@export var base_windup_hilt_force: float = 2000.0
+@export var base_attack_tip_force: float = 19000.0
+@export var base_attack_hilt_force: float = 7500.0
+@export var base_recover_tip_force: float = 2500.0
 
 var current_state: State = State.IDLE
 var state_timer: float = 0.0
@@ -20,8 +34,6 @@ var owner_core_pos: Vector2 = Vector2.ZERO
 
 var motor_id: int = -1
 var physics
-
-
 
 func _ready() -> void:
 	weapon_rig = get_parent() as VerletRig
@@ -41,9 +53,7 @@ func _ready() -> void:
 func _on_hitbox_hit_landed(_target: Node2D) -> void:
 	if tip_index != -1 and physics and physics.points.size() > tip_index:
 		# Apply heavy physical drag / resistance to the sword tip
-		# By artificially modifying old_pos, we reduce its velocity instantly (Verlet integration)
 		var vel = physics.points[tip_index].pos - physics.points[tip_index].old_pos
-		# Retain only 10% of the momentum, mimicking thick resistance (cutting through flesh)
 		physics.points[tip_index].old_pos = physics.points[tip_index].pos - vel * 0.1
 
 func equip(verlet, l_hand_idx: int, r_hand_idx: int, _facing_dir: float) -> void:
@@ -54,10 +64,15 @@ func equip(verlet, l_hand_idx: int, r_hand_idx: int, _facing_dir: float) -> void
 		base_index = main_hand_pivot.physics_index
 		tip_index = weapon_rig.line_point_map[weapon_rig.get_node("Blade")][1]
 		
-		# 綁定雙手
+		# 動態取得玩家縮放比例
+		var scale_factor: float = 1.0
+		if weapon_rig.get_parent() and "scale_factor" in weapon_rig.get_parent():
+			scale_factor = weapon_rig.get_parent().scale_factor
+			
+		# 綁定雙手限制
 		physics.add_stick(r_hand_idx, base_index, 0.0, 1.0, false)
-		physics.add_stick(l_hand_idx, base_index, 10.0, 1.0, false)
-		physics.add_stick(l_hand_idx, tip_index, 18.0, 1.0, false)
+		physics.add_stick(l_hand_idx, base_index, base_left_hand_to_hilt * scale_factor, 1.0, false)
+		physics.add_stick(l_hand_idx, tip_index, base_left_hand_to_tip * scale_factor, 1.0, false)
 		
 		# 設定劍尖物理屬性
 		physics.points[tip_index].drag = 0.95
@@ -120,7 +135,6 @@ func _physics_process(delta: float) -> void:
 		hitbox.global_position = (pA + pB) * 0.5
 		hitbox.global_rotation = (pB - pA).angle() + PI/2.0
 		
-		
 		var shape = hitbox.get_node_or_null("CollisionShape2D")
 		if shape:
 			shape.debug_color = Color(1, 0.1, 0.1, 0.6) # Very visible Red Hitbox
@@ -134,12 +148,17 @@ func _physics_process(delta: float) -> void:
 			if "knockback_direction_override" in hitbox:
 				hitbox.set("knockback_direction_override", blade_vel.normalized())
 	
+	# 動態取得玩家縮放比例
+	var scale_factor: float = 1.0
+	if weapon_rig.get_parent() and "scale_factor" in weapon_rig.get_parent():
+		scale_factor = weapon_rig.get_parent().scale_factor
+		
 	match current_state:
 		State.IDLE:
 			# 閒置：劍尖隨時指向滑鼠，給予拉力 (增強穩定度)
-			physics.points[tip_index].accumulated_force += current_aim_dir * 5000.0
+			physics.points[tip_index].accumulated_force += current_aim_dir * base_idle_tip_force * scale_factor
 			# 給劍柄一個反向抗力，增加穩定度
-			physics.points[base_index].accumulated_force -= current_aim_dir * 2000.0
+			physics.points[base_index].accumulated_force -= current_aim_dir * base_idle_hilt_force * scale_factor
 			
 		State.WINDUP:
 			# 蓄力：將劍高舉並收到側邊準備大範圍揮砍 (連擊時左右互換)
@@ -147,8 +166,8 @@ func _physics_process(delta: float) -> void:
 			var combo_mult = 1.0 if combo_step == 0 else -1.0
 			
 			var windup_dir = (-locked_aim_dir * 0.5 + normal_dir * 1.5 * combo_mult).normalized()
-			physics.points[tip_index].accumulated_force += windup_dir * 6000.0
-			physics.points[base_index].accumulated_force -= locked_aim_dir * 2000.0
+			physics.points[tip_index].accumulated_force += windup_dir * base_windup_tip_force * scale_factor
+			physics.points[base_index].accumulated_force -= locked_aim_dir * base_windup_hilt_force * scale_factor
 			
 			if state_timer >= windup_time:
 				_change_state(State.ATTACK)
@@ -166,14 +185,14 @@ func _physics_process(delta: float) -> void:
 			
 			var attack_dir = (locked_aim_dir * forward_thrust + sweep_normal).normalized()
 			
-			physics.points[tip_index].accumulated_force += attack_dir * 19000.0
-			physics.points[base_index].accumulated_force += locked_aim_dir * 7500.0
+			physics.points[tip_index].accumulated_force += attack_dir * base_attack_tip_force * scale_factor
+			physics.points[base_index].accumulated_force += locked_aim_dir * base_attack_hilt_force * scale_factor
 			
 			if state_timer >= attack_time:
 				_change_state(State.RECOVER)
 				
 		State.RECOVER:
 			# 攻擊結束後的收招，平滑拉回待命姿態
-			physics.points[tip_index].accumulated_force += current_aim_dir * 2500.0
+			physics.points[tip_index].accumulated_force += current_aim_dir * base_recover_tip_force * scale_factor
 			if state_timer >= recover_time:
 				_change_state(State.IDLE)

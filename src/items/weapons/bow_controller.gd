@@ -1,6 +1,12 @@
 extends Node
 class_name BowController
 
+@export_group("Physical Forces (Scaled Dynamically)")
+@export var base_min_tension: float = 3000.0
+@export var base_max_tension: float = 15000.0
+@export var base_hold_force: float = 3000.0
+@export var base_align_torque: float = 8000.0
+
 var weapon_rig: VerletRig
 var physics: VerletPhysics
 
@@ -14,8 +20,6 @@ var is_pulling: bool = false
 var pull_vector: Vector2 = Vector2.ZERO
 var charge_time: float = 0.0
 var max_charge_time: float = 1.0
-
-
 
 func _ready() -> void:
 	weapon_rig = get_parent() as VerletRig
@@ -99,10 +103,15 @@ func _physics_process(_delta: float) -> void:
 	
 	var active_aim_dir = aim_dir
 	
+	# 動態取得玩家縮放比例
+	var scale_factor: float = 1.0
+	if weapon_rig.get_parent() and "scale_factor" in weapon_rig.get_parent():
+		scale_factor = weapon_rig.get_parent().scale_factor
+		
 	if is_pulling:
 		charge_time = min(charge_time + _delta, max_charge_time)
 		var charge_ratio = charge_time / max_charge_time
-		var tension_force = lerp(3000.0, 15000.0, charge_ratio)
+		var tension_force = lerp(base_min_tension, base_max_tension, charge_ratio) * scale_factor
 		
 		# Sway effect: wobbles more the longer it's drawn
 		var sway_magnitude = lerp(0.0, 0.25, charge_ratio) # Max sway ~14 degrees
@@ -114,12 +123,12 @@ func _physics_process(_delta: float) -> void:
 		physics.points[string_center].accumulated_force += pull_vector * tension_force
 		physics.points[bow_center].accumulated_force += active_aim_dir * tension_force
 		# Base holding force to keep it in front of the body
-		physics.points[bow_center].accumulated_force += active_aim_dir * 3000.0
+		physics.points[bow_center].accumulated_force += active_aim_dir * base_hold_force * scale_factor
 	else:
 		pull_vector = Vector2.ZERO
 		charge_time = 0.0
 		# Idle holding
-		physics.points[bow_center].accumulated_force += active_aim_dir * 3000.0
+		physics.points[bow_center].accumulated_force += active_aim_dir * base_hold_force * scale_factor
 		
 	# -- Enhanced Turning Performance (Apply torque to the tips) --
 	if bow_body_indices.size() >= 3:
@@ -129,6 +138,5 @@ func _physics_process(_delta: float) -> void:
 		var bow_normal = Vector2(-active_aim_dir.y, active_aim_dir.x)
 		
 		# Force the tips to align perpendicularly to the active aim direction
-		# This solves the sluggish turning by directly rotating the bow's arms
-		physics.points[top_tip].accumulated_force += -bow_normal * 8000.0
-		physics.points[bottom_tip].accumulated_force += bow_normal * 8000.0
+		physics.points[top_tip].accumulated_force += -bow_normal * base_align_torque * scale_factor
+		physics.points[bottom_tip].accumulated_force += bow_normal * base_align_torque * scale_factor
