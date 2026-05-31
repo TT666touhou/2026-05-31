@@ -28,6 +28,9 @@ var _target_angle:  float  = 0.0
 var _current_angle: float  = 0.0
 const ROTATE_SPEED: float  = 10.0  # 旋轉跟隨速度（弧度/秒），避免生硬跳轉
 
+# 輔助家具光照通道 (Layer 3)
+var _furniture_light: PointLight2D = null
+
 # ─── Lifecycle ───────────────────────────────────────────────────────────────
 func _ready() -> void:
 	# ★ CRITICAL: MIX mode reveals terrain color through CanvasModulate dark overlay.
@@ -36,7 +39,7 @@ func _ready() -> void:
 	color  = light_color
 	energy = 1.0
 	
-	# 分層光照設定：照亮第 1、2 層，並且在 1、2 層均投影陰影 (由牆壁遮擋 Layer 2)
+	# 主光照設定：照亮第 1、2 層 (地表與角色)，並在第 1、2 層投影陰影
 	range_item_cull_mask = 3
 	shadow_item_cull_mask = 3
 	
@@ -45,7 +48,29 @@ func _ready() -> void:
 	shadow_filter  = PointLight2D.SHADOW_FILTER_PCF5
 	shadow_color   = Color(0.0, 0.0, 0.0, 1.0)  # 陰影完全黑
 	
+	# 動態建立輔助家具通道
+	_setup_furniture_light()
+	
 	_rebuild_texture()
+
+func _setup_furniture_light() -> void:
+	if _furniture_light != null:
+		return
+	_furniture_light = PointLight2D.new()
+	_furniture_light.name = "FurnitureLight"
+	add_child(_furniture_light)
+	
+	# 家具光照通道專有設定：只照亮 Layer 3，且只在 Layer 3 投影陰影 (只會被牆壁 occluder 阻擋)
+	_furniture_light.range_item_cull_mask = 4
+	_furniture_light.shadow_item_cull_mask = 4
+	
+	# 其他屬性完全與主光照同步
+	_furniture_light.blend_mode = blend_mode
+	_furniture_light.color = color
+	_furniture_light.energy = energy
+	_furniture_light.shadow_enabled = shadow_enabled
+	_furniture_light.shadow_filter = shadow_filter
+	_furniture_light.shadow_color = shadow_color
 
 func _process(delta: float) -> void:
 	_update_direction(delta)
@@ -80,9 +105,19 @@ func _rebuild_texture() -> void:
 		texture = LightTextureGenerator.generate_radial(256)
 	else:
 		texture = LightTextureGenerator.generate_cone(256, cone_angle, 0.25)
+	
+	# 同步貼圖給家具光照通道
+	if _furniture_light:
+		_furniture_light.texture = texture
+		
 	_apply_radius()
 
 func _apply_radius() -> void:
 	if not is_inside_tree():
 		return
 	texture_scale = view_radius / 128.0
+	
+	# 同步縮放給家具光照通道
+	if _furniture_light:
+		_furniture_light.texture_scale = texture_scale
+

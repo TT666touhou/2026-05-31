@@ -27,8 +27,8 @@ func _ready() -> void:
 	linear_damp = 8.0
 	angular_damp = 8.0
 	
-	# 設定 Light Mask: 2 (第二層)，使其不接收自身陰影，但仍能被照亮
-	light_mask = 2
+	# 設定 Light Mask: 4 (第三層 家具層)，使其不接收自身陰影，但仍能被照亮
+	light_mask = 4
 	
 	# 設定碰撞層 (layer 256: Props, mask 1: World, 2: Player, 4: Enemy, 256: Props)
 	collision_layer = 256
@@ -75,8 +75,8 @@ func _setup_occluder() -> void:
 		Vector2(-hx, hy)
 	])
 	occluder.occluder = poly
-	# 讓遮擋體只在第 1 層投影陰影 (地板與牆壁所在層)
-	occluder.occluder_light_mask = 1
+	# 讓遮擋體在第 1 層 (地板) 與第 2 層 (角色) 投影陰影，但不在第 3 層 (自身) 投影
+	occluder.occluder_light_mask = 3
 
 func _draw() -> void:
 	var hx = size.x / 2.0
