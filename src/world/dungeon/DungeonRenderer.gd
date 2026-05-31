@@ -9,13 +9,15 @@ extends Node2D
 const TILE_SIZE := 64
 
 # 顏色定義（參考考察文件的 Darkwood 色調）
-const COLOR_FLOOR_BASE   := Color(0.28, 0.24, 0.20, 1.0)   # 提亮：× CanvasModulate 後仍可見
-const COLOR_FLOOR_VAR1   := Color(0.24, 0.20, 0.17, 1.0)   # 地板變體1
-const COLOR_FLOOR_VAR2   := Color(0.33, 0.28, 0.23, 1.0)   # 地板變體2（較亮）
-const COLOR_WALL_BASE    := Color(0.16, 0.14, 0.12, 1.0)   # 牆壁主色
-const COLOR_WALL_EDGE    := Color(0.10, 0.09, 0.07, 1.0)   # 牆壁陰影邊緣
-const COLOR_CRACK        := Color(0.08, 0.07, 0.05, 0.6)   # 裂縫線
-const COLOR_GROUT        := Color(0.12, 0.10, 0.08, 1.0)   # 地板縫隙
+const COLOR_FLOOR_BASE   := Color(0.16, 0.14, 0.12, 1.0)   # 深棕灰地板
+const COLOR_FLOOR_VAR1   := Color(0.14, 0.12, 0.10, 1.0)   # 地板變體1（稍暗）
+const COLOR_FLOOR_VAR2   := Color(0.18, 0.16, 0.14, 1.0)   # 地板變體2（稍亮）
+const COLOR_WALL_TOP     := Color(0.11, 0.10, 0.09, 1.0)   # 牆壁頂部（稍亮，體積感）
+const COLOR_WALL_SIDE    := Color(0.05, 0.04, 0.03, 1.0)   # 牆壁側面（深色，厚度感）
+const COLOR_CRACK        := Color(0.05, 0.04, 0.03, 0.6)   # 裂縫線
+const COLOR_GROUT        := Color(0.06, 0.05, 0.05, 1.0)   # 地板縫隙（石材接縫）
+const COLOR_AO_1         := Color(0.0, 0.0, 0.0, 0.35)     # 環境光遮蔽（近）
+const COLOR_AO_2         := Color(0.0, 0.0, 0.0, 0.15)     # 環境光遮蔽（遠）
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
@@ -80,6 +82,37 @@ func _create_wall_body(tile_x: int, tile_y: int, w: int, h: int) -> void:
 	add_child(body)
 	wall_bodies.append(body)
 
+# ── 建立光影遮擋體 (Occluders) 給 MaskViewport 用 ─────────
+func build_occluders(parent_node: Node) -> void:
+	if gen == null:
+		return
+	
+	for y in gen.map_height:
+		var start_x: int = -1
+		for x in range(gen.map_width + 1):
+			var is_w = x < gen.map_width and gen.is_wall(x, y)
+			if is_w and start_x == -1:
+				start_x = x
+			elif not is_w and start_x != -1:
+				var w = x - start_x
+				var occ = LightOccluder2D.new()
+				var poly = OccluderPolygon2D.new()
+				
+				# 建立符合牆壁大小的矩形多邊形
+				var pts = PackedVector2Array([
+					Vector2(0, 0),
+					Vector2(w * TILE_SIZE, 0),
+					Vector2(w * TILE_SIZE, TILE_SIZE),
+					Vector2(0, TILE_SIZE)
+				])
+				poly.polygon = pts
+				poly.closed = true
+				occ.occluder = poly
+				occ.position = Vector2(start_x * TILE_SIZE, y * TILE_SIZE)
+				parent_node.add_child(occ)
+				
+				start_x = -1
+
 # ── _draw 主繪製 ────────────────────────────────────────
 func _draw() -> void:
 	if gen == null:
@@ -142,7 +175,7 @@ func _draw_crack(world_pos: Vector2, local_rng: RandomNumberGenerator) -> void:
 	var end_pt  = Vector2(crack_x + cos(angle) * length, crack_y + sin(angle) * length)
 	draw_line(Vector2(crack_x, crack_y), end_pt, COLOR_CRACK, 1.0)
 
-# ── 牆壁繪製 ────────────────────────────────────────────
+# ── 牆壁繪製與 AO ─────────────────────────────────────────
 func _draw_walls() -> void:
 	for y in gen.map_height:
 		for x in gen.map_width:
@@ -151,22 +184,36 @@ func _draw_walls() -> void:
 			
 			var world_pos = Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			
-			# 牆壁底色
-			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
+			# 牆壁頂部 (立體感)
+			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE - 12)), COLOR_WALL_TOP)
 			
-			# 牆壁邊緣投影（使牆壁有立體感）
-			# 如果下方是地板，畫一條陰影邊
+			# 牆壁側面 (厚度感，下方)
+			draw_rect(Rect2(world_pos + Vector2(0, TILE_SIZE - 12), Vector2(TILE_SIZE, 12)), COLOR_WALL_SIDE)
+			
+			# ── 環境光遮蔽 (AO) ──
+			# 如果下方是地板，在地板上畫漸層 AO
 			if gen.is_floor(x, y + 1):
-				draw_rect(
-					Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)),
-					COLOR_WALL_EDGE
-				)
-			# 如果右方是地板，畫右側陰影
+				var ao_pos = world_pos + Vector2(0, TILE_SIZE)
+				draw_rect(Rect2(ao_pos, Vector2(TILE_SIZE, 6)), COLOR_AO_1)
+				draw_rect(Rect2(ao_pos + Vector2(0, 6), Vector2(TILE_SIZE, 6)), COLOR_AO_2)
+			
+			# 如果上方是地板，在地板上畫漸層 AO
+			if gen.is_floor(x, y - 1):
+				var ao_pos = world_pos - Vector2(0, 12)
+				draw_rect(Rect2(ao_pos + Vector2(0, 6), Vector2(TILE_SIZE, 6)), COLOR_AO_1)
+				draw_rect(Rect2(ao_pos, Vector2(TILE_SIZE, 6)), COLOR_AO_2)
+			
+			# 如果右方是地板
 			if gen.is_floor(x + 1, y):
-				draw_rect(
-					Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)),
-					COLOR_WALL_EDGE
-				)
+				var ao_pos = world_pos + Vector2(TILE_SIZE, 0)
+				draw_rect(Rect2(ao_pos, Vector2(6, TILE_SIZE)), COLOR_AO_1)
+				draw_rect(Rect2(ao_pos + Vector2(6, 0), Vector2(6, TILE_SIZE)), COLOR_AO_2)
+				
+			# 如果左方是地板
+			if gen.is_floor(x - 1, y):
+				var ao_pos = world_pos - Vector2(12, 0)
+				draw_rect(Rect2(ao_pos + Vector2(6, 0), Vector2(6, TILE_SIZE)), COLOR_AO_1)
+				draw_rect(Rect2(ao_pos, Vector2(6, TILE_SIZE)), COLOR_AO_2)
 
 # ── DEBUG：房間類型標記 ─────────────────────────────────
 func _draw_debug_rooms() -> void:

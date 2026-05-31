@@ -26,7 +26,7 @@ func _ready() -> void:
 	# Enable shadow casting so walls block the light
 	shadow_enabled = true
 	shadow_filter  = PointLight2D.SHADOW_FILTER_PCF5   # Less expensive than PCF13
-	shadow_color   = Color(0.04, 0.03, 0.06, 0.85)        # 深暨紫黑，略透
+	shadow_color   = Color(0.0, 0.0, 0.0, 0.9)        # Near-black shadow
 
 func _apply_radius() -> void:
 	if not is_inside_tree():

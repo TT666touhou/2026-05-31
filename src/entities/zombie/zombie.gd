@@ -37,11 +37,10 @@ func _ready() -> void:
 	call_deferred("_setup_nav")
 
 func _setup_nav() -> void:
-	# Find player and cache VisionLight reference
+	# Find player
 	var players = get_tree().get_nodes_in_group("player")
 	if players.size() > 0:
 		target_player = players[0]
-		_vision_light = target_player.get_node_or_null("VisionLight")
 
 func _physics_process(delta: float) -> void:
 	if current_state == State.DEAD:
@@ -132,9 +131,24 @@ func _process_attack(_delta: float) -> void:
 	drawer.target_facing_angle = global_position.direction_to(target_player.global_position).angle()
 
 func _update_visibility() -> void:
-	if not _vision_light or not _vision_light.has_method("is_in_vision"):
+	if not target_player:
 		return
-	var in_vision: bool = _vision_light.is_in_vision(global_position, self)
+		
+	var in_vision: bool = false
+	var dist = global_position.distance_to(target_player.global_position)
+	
+	# 相機跟隨玩家，視野半徑約為 450
+	if dist <= 450.0:
+		# 射線檢測，確認是否有牆壁阻擋
+		var space_state = get_world_2d().direct_space_state
+		var query = PhysicsRayQueryParameters2D.create(target_player.global_position, global_position)
+		query.exclude = [self, target_player]
+		query.collision_mask = 1 # 只檢查地形 (World Layer 1)
+		
+		var result = space_state.intersect_ray(query)
+		if result.is_empty():
+			in_vision = true
+			
 	drawer.visible = in_vision
 	$UI.visible = in_vision
 

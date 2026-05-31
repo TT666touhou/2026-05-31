@@ -7,8 +7,12 @@ extends Node2D
 # ── 節點引用 ────────────────────────────────────────────
 @onready var dungeon_renderer : DungeonRenderer = $DungeonRenderer
 @onready var entities_layer   : Node2D           = $EntitiesLayer
-@onready var canvas_modulate  : CanvasModulate   = $CanvasModulate
-@onready var camera           : Camera2D         = $Camera
+@onready var camera           : Camera2D         = $MainCamera
+@onready var mask_viewport    : SubViewport      = $MaskViewport
+@onready var mask_camera      : Camera2D         = $MaskViewport/MaskCamera
+@onready var vision_light     : PointLight2D     = $MaskViewport/VisionLight
+@onready var occluder_container: Node2D          = $MaskViewport/OccluderContainer
+@onready var vision_rect      : ColorRect        = $PostProcessLayer/VisionRect
 
 # 場景 preload
 const PLAYER_SCENE  = preload("res://src/entities/player/Player.tscn")
@@ -30,7 +34,23 @@ var current_floor: int = 1
 
 # ── 生命週期 ────────────────────────────────────────────
 func _ready() -> void:
+	# 初始化視野光罩貼圖
+	vision_light.texture = LightTextureGenerator.generate_radial(256)
+	vision_light.texture_scale = 3.5 # 調整視野半徑
+	
+	# 將 MaskViewport 的輸出傳遞給後製 Shader
+	vision_rect.material.set_shader_parameter("vision_mask", mask_viewport.get_texture())
+	
 	generate_floor()
+
+func _process(_delta: float) -> void:
+	# 同步相機
+	if is_instance_valid(camera) and is_instance_valid(mask_camera):
+		mask_camera.global_transform = camera.global_transform
+	
+	# 同步光照位置
+	if is_instance_valid(player_instance) and is_instance_valid(vision_light):
+		vision_light.global_position = player_instance.global_position
 
 func _unhandled_input(event: InputEvent) -> void:
 	# DEBUG：按 R 重新生成地圖
@@ -40,6 +60,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 # ── 地圖生成主流程 ──────────────────────────────────────
 func generate_floor(seed: int = map_seed) -> void:
+	# 清除舊的遮擋體
+	for child in occluder_container.get_children():
+		child.queue_free()
+	
 	# 1. 生成地圖數據
 	gen = DungeonGenerator.new()
 	gen.map_width   = map_width
@@ -49,6 +73,9 @@ func generate_floor(seed: int = map_seed) -> void:
 	# 2. 渲染地圖（程序繪製）
 	dungeon_renderer.show_debug_rooms = show_debug
 	dungeon_renderer.render(gen)
+	
+	# 生成光影遮擋體到 MaskViewport
+	dungeon_renderer.build_occluders(occluder_container)
 	
 	# 3. 放置玩家
 	_spawn_player()
