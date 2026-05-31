@@ -21,7 +21,8 @@ y_sort_enabled = true
 z_index = 0
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
-color = Color(0.074, 0.073, 0.072, 1)
+# Darkwood 視野外亮度：約22%，帶冷藍偏移（非全黑！）
+color = Color(0.22, 0.20, 0.25, 1)
 
 [node name="Camera" type="Camera2D" parent="."]
 zoom = Vector2(3, 3)
