@@ -1,6 +1,0 @@
-[gd_scene format=3]
-
-[node name="Root" type="Node2D" unique_id=1776348986]
-
-[node name="Layer" type="TileMapLayer" parent="." unique_id=801287247]
-tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)

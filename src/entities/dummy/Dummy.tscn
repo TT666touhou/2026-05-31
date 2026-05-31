@@ -1,33 +1,22 @@
 [gd_scene format=3 uid="uid://b5h26xvua0pmo"]
 
-[ext_resource type="Script" uid="uid://pf4aim574gsc" path="res://src/entities/dummy/dummy.gd" id="1_script"]
-[ext_resource type="Script" uid="uid://bvx7rsf8fti03" path="res://src/components/HealthComponent.gd" id="3_health"]
-[ext_resource type="Script" uid="uid://butcqsl6em474" path="res://src/components/HurtboxComponent.gd" id="4_hurtbox"]
-[ext_resource type="Script" uid="uid://c7tukklqabgv7" path="res://src/entities/dummy/dummy_drawer.gd" id="5_drawer"]
+[ext_resource type="Script" path="res://src/entities/dummy/dummy.gd" id="1_script"]
+[ext_resource type="Script" path="res://src/entities/dummy/dummy_drawer.gd" id="2_drawer"]
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_hurtbox"]
-radius = 14.0
-height = 54.0
+[sub_resource type="CapsuleShape2D" id="body_shape"]
+radius = 6.0
+height = 24.0
 
 [node name="Dummy" type="CharacterBody2D" unique_id=445724433]
 collision_layer = 4
-collision_mask = 257
+collision_mask = 1
 script = ExtResource("1_script")
 
-[node name="ProceduralDrawer" type="Node2D" parent="." unique_id=844170135]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("body_shape")
+
+[node name="ProceduralDrawer" type="Node2D" parent="."]
 light_mask = 2
-script = ExtResource("5_drawer")
+script = ExtResource("2_drawer")
 body_color = Color(0.55, 0.27, 0.07, 1)
 eye_color = Color(1, 0.84, 0, 1)
-
-[node name="HealthComponent" type="Node" parent="." unique_id=1170550995]
-script = ExtResource("3_health")
-max_health = 1000.0
-
-[node name="HurtboxComponent" type="Area2D" parent="." unique_id=392297205]
-collision_layer = 16
-collision_mask = 32
-script = ExtResource("4_hurtbox")
-
-[node name="HurtboxShape" type="CollisionShape2D" parent="HurtboxComponent" unique_id=1424943241]
-shape = SubResource("CapsuleShape2D_hurtbox")
