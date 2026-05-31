@@ -52,6 +52,7 @@ script = ExtResource("6_mana")
 
 [node name="VisionLight" type="PointLight2D" parent="."]
 range_item_cull_mask = 3
+shadow_item_cull_mask = 3
 shadow_enabled = true
 shadow_filter = 1
 shadow_filter_smooth = 1.0

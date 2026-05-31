@@ -60,6 +60,7 @@ func _setup_occluder() -> void:
 		return
 	var poly = OccluderPolygon2D.new()
 	poly.closed = true
+	poly.cull_mode = OccluderPolygon2D.CULL_CLOCKWISE
 	var hx = size.x / 2.0
 	var hy = size.y / 2.0
 	# 稍微往內縮 1 像素，防止與碰撞盒摩擦卡死光影
