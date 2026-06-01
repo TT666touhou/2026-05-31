@@ -45,13 +45,29 @@ func _run_tests() -> void:
 			else:
 				print("  PASS: NavigationPolygon is optimized.")
 
-	# Test 2: Check Wall Light Mask and Occluder Mask
+	# Test 2: Check Wall Light Mask and Occluder Mask (TileMapLayer/Renderer)
 	print("[TEST 2] Testing Wall Light Mask and Occluder Mask...")
+	var tilemap_layer = dungeon.get_node_or_null("TileMapLayer")
 	var dungeon_renderer = dungeon.get_node_or_null("DungeonRenderer")
-	if not dungeon_renderer:
-		print("  FAIL: DungeonRenderer not found!")
-		success = false
-	else:
+	
+	if tilemap_layer:
+		print("  Found TileMapLayer, validating its TileSet setup...")
+		var tset = tilemap_layer.tile_set
+		if not tset:
+			print("  FAIL: TileMapLayer does not have a TileSet assigned!")
+			success = false
+		else:
+			if tset.get_physics_layers_count() == 0:
+				print("  FAIL: TileSet does not have a physics layer!")
+				success = false
+			else:
+				print("  PASS: TileSet physics layer is configured.")
+			if tset.get_occlusion_layers_count() == 0:
+				print("  FAIL: TileSet does not have an occlusion layer!")
+				success = false
+			else:
+				print("  PASS: TileSet occlusion layer is configured.")
+	elif dungeon_renderer:
 		var wall_renderer = dungeon_renderer.get_node_or_null("WallRenderer")
 		if not wall_renderer:
 			print("  FAIL: WallRenderer child node not found in DungeonRenderer!")
@@ -73,6 +89,9 @@ func _run_tests() -> void:
 				print("  PASS: LightOccluder2D occluder_light_mask is correct (7).")
 		else:
 			print("  WARNING: No occluders generated to test!")
+	else:
+		print("  FAIL: Neither TileMapLayer nor DungeonRenderer found!")
+		success = false
 			
 		# Test 2.5: Check Darkwood LOS and Fog of War Shading Configuration
 		print("[TEST 2.5] Testing Darkwood LOS and Fog of War Shading...")

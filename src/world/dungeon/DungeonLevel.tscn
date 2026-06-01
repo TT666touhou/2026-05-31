@@ -1,57 +1,31 @@
-[gd_scene load_steps=5 format=3 uid="uid://dungeon_level_uuid"]
+[gd_scene format=4]
 
 [ext_resource type="Script" path="res://src/world/dungeon/DungeonLevel.gd" id="1_level"]
-[ext_resource type="Script" path="res://src/world/dungeon/DungeonRenderer.gd" id="2_renderer"]
-[ext_resource type="Shader" path="res://src/world/dungeon/vision_mask.gdshader" id="3_shader"]
+[ext_resource type="PackedScene" path="res://src/entities/player/Player.tscn" id="2_v0ryu"]
+[ext_resource type="Script" path="res://src/entities/player/PlayerController.gd" id="3_ay0ve"]
+[ext_resource type="TileSet" path="res://src/world/dungeon/dungeon_tileset.tres" id="7_d3h83"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_overlay"]
-shader = ExtResource("3_shader")
-shader_parameter/darkness_outside = 0.85
-shader_parameter/saturation_outside = 0.02
-shader_parameter/brightness_dark = 0.20
-shader_parameter/brightness_lit = 0.38
-shader_parameter/outside_tint = Color(0.015, 0.02, 0.015, 0)
-shader_parameter/grain_strength = 0.08
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_vamhi"]
+vertices = PackedVector2Array(336, 336, 880, 336, 880, 880, 336, 880)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(336, 336, 880, 336, 880, 880, 336, 880)])
 
-[node name="DungeonLevel" type="Node2D"]
+[node name="DungeonLevel" type="Node2D" unique_id=1533602985]
 script = ExtResource("1_level")
-map_width = 80
-map_height = 60
-tile_size = 64
-zombie_per_room = 2
-show_debug = false
-vision_radius = 320.0
-vision_cone_angle = 105.0
 
-[node name="DungeonRenderer" type="Node2D" parent="."]
-script = ExtResource("2_renderer")
-z_index = -10
-
-[node name="EntitiesLayer" type="Node2D" parent="."]
+[node name="EntitiesLayer" type="Node2D" parent="." unique_id=1998234148]
 y_sort_enabled = true
-z_index = 0
 
-[node name="CanvasModulate" type="CanvasModulate" parent="."]
-color = Color(0, 0, 0, 1)
+[node name="Player" type="CharacterBody2D" parent="EntitiesLayer" unique_id=2129014968 instance=ExtResource("2_v0ryu")]
+z_index = 10
+position = Vector2(608, 608)
+collision_layer = 2
+collision_mask = 261
+script = ExtResource("3_ay0ve")
 
-[node name="Camera" type="Camera2D" parent="."]
-zoom = Vector2(3, 3)
-position_smoothing_enabled = true
-position_smoothing_speed = 8.0
-drag_horizontal_enabled = false
-drag_vertical_enabled = false
+[node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=793521916]
+tile_map_data = PackedByteArray("AAAFAAUAAAACAA0AAAAGAAUAAAACAA0AAAAHAAUAAAACAA0AAAAIAAUAAAACAA0AAAAJAAUAAAACAA0AAAAKAAUAAAACAA0AAAALAAUAAAACAA0AAAAMAAUAAAACAA0AAAANAAUAAAACAA0AAAAFAAYAAAACAA0AAAAGAAYAAAACAA0AAAAHAAYAAAACAA0AAAAIAAYAAAACAA0AAAAJAAYAAAACAA0AAAAKAAYAAAACAA0AAAALAAYAAAACAA0AAAAMAAYAAAACAA0AAAANAAYAAAACAA0AAAAFAAcAAAACAA0AAAAGAAcAAAACAA0AAAAHAAcAAAACAA0AAAAIAAcAAAACAA0AAAAJAAcAAAACAA0AAAAKAAcAAAACAA0AAAALAAcAAAACAA0AAAAMAAcAAAACAA0AAAANAAcAAAACAA0AAAAFAAgAAAACAA0AAAAGAAgAAAACAA0AAAAHAAgAAAACAA0AAAAIAAgAAAACAA0AAAAJAAgAAAACAA0AAAAKAAgAAAACAA0AAAALAAgAAAACAA0AAAAMAAgAAAACAA0AAAANAAgAAAACAA0AAAAFAAkAAAACAA0AAAAGAAkAAAACAA0AAAAHAAkAAAACAA0AAAAIAAkAAAACAA0AAAAJAAkAAAACAA0AAAAKAAkAAAACAA0AAAALAAkAAAACAA0AAAAMAAkAAAACAA0AAAANAAkAAAACAA0AAAAFAAoAAAACAA0AAAAGAAoAAAACAA0AAAAHAAoAAAACAA0AAAAIAAoAAAACAA0AAAAJAAoAAAACAA0AAAAKAAoAAAACAA0AAAALAAoAAAACAA0AAAAMAAoAAAACAA0AAAANAAoAAAACAA0AAAAFAAsAAAACAA0AAAAGAAsAAAACAA0AAAAHAAsAAAACAA0AAAAIAAsAAAACAA0AAAAJAAsAAAACAA0AAAAKAAsAAAACAA0AAAALAAsAAAACAA0AAAAMAAsAAAACAA0AAAANAAsAAAACAA0AAAAFAAwAAAACAA0AAAAGAAwAAAACAA0AAAAHAAwAAAACAA0AAAAIAAwAAAACAA0AAAAJAAwAAAACAA0AAAAKAAwAAAACAA0AAAALAAwAAAACAA0AAAAMAAwAAAACAA0AAAANAAwAAAACAA0AAAAFAA0AAAACAA0AAAAGAA0AAAACAA0AAAAHAA0AAAACAA0AAAAIAA0AAAACAA0AAAAJAA0AAAACAA0AAAAKAA0AAAACAA0AAAALAA0AAAACAA0AAAAMAA0AAAACAA0AAAANAA0AAAACAA0AAAAEAAQAAAAQABMAAAAOAAQAAAASABMAAAAEAA4AAAAQABUAAAAOAA4AAAASABUAAAAFAAQAAAARABMAAAAFAA4AAAARABUAAAAGAAQAAAARABMAAAAGAA4AAAARABUAAAAHAAQAAAARABMAAAAHAA4AAAARABUAAAAIAAQAAAARABMAAAAIAA4AAAARABUAAAAJAAQAAAARABMAAAAJAA4AAAARABUAAAAKAAQAAAARABMAAAAKAA4AAAARABUAAAALAAQAAAARABMAAAALAA4AAAARABUAAAAMAAQAAAARABMAAAAMAA4AAAARABUAAAANAAQAAAARABMAAAANAA4AAAARABUAAAAEAAUAAAAQABQAAAAOAAUAAAASABQAAAAEAAYAAAAQABQAAAAOAAYAAAASABQAAAAEAAcAAAAQABQAAAAOAAcAAAASABQAAAAEAAgAAAAQABQAAAAOAAgAAAASABQAAAAEAAkAAAAQABQAAAAOAAkAAAASABQAAAAEAAoAAAAQABQAAAAOAAoAAAASABQAAAAEAAsAAAAQABQAAAAOAAsAAAASABQAAAAEAAwAAAAQABQAAAAOAAwAAAASABQAAAAEAA0AAAAQABQAAAAOAA0AAAASABQAAAA=")
+tile_set = ExtResource("7_d3h83")
 
-[node name="PostProcessLayer" type="CanvasLayer" parent="."]
-layer = 15
-
-[node name="BackBufferCopy" type="BackBufferCopy" parent="PostProcessLayer"]
-copy_mode = 2
-
-[node name="ShaderOverlay" type="ColorRect" parent="PostProcessLayer/BackBufferCopy"]
-material = SubResource("ShaderMaterial_overlay")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="." unique_id=992152652]
+navigation_polygon = SubResource("NavigationPolygon_vamhi")

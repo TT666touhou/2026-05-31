@@ -5,10 +5,10 @@
 extends Node2D
 
 # ── 節點引用 ────────────────────────────────────────────
-@onready var dungeon_renderer : DungeonRenderer = $DungeonRenderer
+var dungeon_renderer : DungeonRenderer = null
 @onready var entities_layer   : Node2D           = $EntitiesLayer
-@onready var canvas_modulate  : CanvasModulate   = $CanvasModulate
-@onready var camera           : Camera2D         = $Camera
+var canvas_modulate  : CanvasModulate   = null
+var camera           : Camera2D         = null
 
 # 場景 preload
 const PLAYER_SCENE  = preload("res://src/entities/player/Player.tscn")
@@ -42,7 +42,33 @@ var prop_instances: Array[RigidBody2D] = []
 # ── 生命週期 ────────────────────────────────────────────
 func _ready() -> void:
 	RenderingServer.set_default_clear_color(Color.BLACK)
-	generate_floor()
+	dungeon_renderer = get_node_or_null("DungeonRenderer") as DungeonRenderer
+	camera = get_node_or_null("Camera") as Camera2D
+	canvas_modulate = get_node_or_null("CanvasModulate") as CanvasModulate
+	
+	# 如果場景中已經有靜態配置的玩家，則直接讀取，不執行任何腳本動態生成或配置地形
+	var static_player = entities_layer.get_node_or_null("Player")
+	if static_player:
+		player_instance = static_player
+		player_fov = player_instance.get_node_or_null("VisionLight") as PlayerFOV
+		if player_fov:
+			player_fov.view_radius  = vision_radius
+			player_fov.cone_angle   = vision_cone_angle
+			player_fov.follow_mouse = true
+			
+		# 獲取玩家自帶的相機，維持 Look-Ahead 功能正常運作
+		camera = player_instance.get_node_or_null("Camera2D") as Camera2D
+		
+		# 載入所有場景內靜態擺放的殭屍
+		enemy_instances.clear()
+		for child in entities_layer.get_children():
+			if child.is_in_group("zombies"):
+				enemy_instances.append(child)
+				
+		print("DungeonLevel: 偵測到靜態場景配置，已啟用固定地圖且無動態生成腳本運作。")
+	else:
+		# 測試/驗證套件降級回溯：若為空白場景則以動態腳本生成（例如在自動化測試 validation.gd 中）
+		generate_floor()
 
 func _process(delta: float) -> void:
 	_update_camera_look_ahead(delta)
@@ -50,8 +76,19 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# DEBUG：按 R 重新生成地圖
 	if event is InputEventKey and event.pressed and event.keycode == KEY_R:
-		_clear_entities()
-		generate_floor()
+		# 如果是靜態配置則重置場景狀態即可，若是動態生成則重造
+		var static_player = entities_layer.get_node_or_null("Player")
+		if static_player:
+			# 重置實體位置到初始配置
+			static_player.position = Vector2(9 * 64 + 32, 9 * 64 + 32)
+			var static_zombie = entities_layer.get_node_or_null("Zombie")
+			if static_zombie:
+				static_zombie.position = Vector2(7 * 64 + 32, 7 * 64 + 32)
+				static_zombie.current_state = static_zombie.State.IDLE
+				static_zombie.velocity = Vector2.ZERO
+		else:
+			_clear_entities()
+			generate_floor()
 
 # ── 地圖生成主流程 ──────────────────────────────────────
 func generate_floor(p_seed: int = map_seed) -> void:
@@ -62,8 +99,9 @@ func generate_floor(p_seed: int = map_seed) -> void:
 	gen.generate(p_seed)
 	
 	# 2. 渲染地圖（程序繪製 + LightOccluder2D）
-	dungeon_renderer.show_debug_rooms = show_debug
-	dungeon_renderer.render(gen)
+	if dungeon_renderer:
+		dungeon_renderer.show_debug_rooms = show_debug
+		dungeon_renderer.render(gen)
 	
 	# 2.5. 建立尋路網格 (Navigation Mesh)
 	_setup_navigation()
@@ -288,4 +326,3 @@ func _setup_navigation() -> void:
 		
 	nav_poly.make_polygons_from_outlines()
 	nav_region.navigation_polygon = nav_poly
-

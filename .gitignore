@@ -5,3 +5,6 @@
 # Ignore log files
 *.log
 test_out*.txt
+extracted_requests.txt
+recent_logs.txt
+scratch/
