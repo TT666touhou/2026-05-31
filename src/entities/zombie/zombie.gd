@@ -33,6 +33,13 @@ func _ready() -> void:
 	health_bar.value = health_comp.current_health
 	health_bar.hide()
 	
+	# Apply LIGHT_ONLY material to the UI node to hide it in the dark
+	var mat = CanvasItemMaterial.new()
+	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_LIGHT_ONLY
+	$UI.material = mat
+	
+	add_to_group("zombies")
+	
 	# Wait for first physics frame so nav server is synced
 	call_deferred("_setup_nav")
 
@@ -60,7 +67,18 @@ func _physics_process(delta: float) -> void:
 		knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 1500.0 * delta)
 		# Override velocity to act as stun/knockback
 		velocity = knockback_velocity
+		move_and_slide()
+		return
 			
+	# Apply soft separation force from other active zombies to prevent stacking
+	var separation = Vector2.ZERO
+	for other in get_tree().get_nodes_in_group("zombies"):
+		if other != self and is_instance_valid(other) and other.current_state != State.DEAD:
+			var dist = global_position.distance_to(other.global_position)
+			if dist < 24.0 and dist > 0.1:
+				separation += (global_position - other.global_position).normalized() * (24.0 - dist) * 5.0
+	velocity += separation
+	
 	move_and_slide()
 
 	

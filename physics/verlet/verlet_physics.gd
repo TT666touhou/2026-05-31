@@ -162,7 +162,7 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 		else:
 			p.pos += intended_motion
 
-	# 2. 距離約束求解 (Constraints Resolution with Swept Circle)
+	# 2. 距離約束求解 (Constraints Resolution - Pure Mathematical Relaxation for Performance)
 	for iter in range(10):
 		for stick in sticks:
 			var pA = points[stick.pA]
@@ -176,28 +176,10 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 			var offset = delta_pos * diff * 0.5 * stick.stiffness
 			
 			if not pA.locked:
-				if space_state != null and pA.collide_terrain and stick.collide_terrain:
-					_query_shape.radius = pA.radius
-					_query_params.shape_rid = _query_shape.get_rid()
-					_query_params.transform = Transform2D(0, pA.pos)
-					_query_params.motion = offset
-					var fractions = space_state.cast_motion(_query_params)
-					if fractions.size() == 2:
-						pA.pos += offset * fractions[0]
-				else:
-					pA.pos += offset
+				pA.pos += offset
 					
 			if not pB.locked:
-				if space_state != null and pB.collide_terrain and stick.collide_terrain:
-					_query_shape.radius = pB.radius
-					_query_params.shape_rid = _query_shape.get_rid()
-					_query_params.transform = Transform2D(0, pB.pos)
-					_query_params.motion = -offset
-					var fractions = space_state.cast_motion(_query_params)
-					if fractions.size() == 2:
-						pB.pos -= offset * fractions[0]
-				else:
-					pB.pos -= offset
+				pB.pos -= offset
 				
 		for af in anti_flips:
 			var pA = points[af.pA]
@@ -213,21 +195,7 @@ func simulate(delta: float, space_state: PhysicsDirectSpaceState2D = null, colli
 				var push_offset = push_dir * 5.0
 				
 				if not pA.locked:
-					if space_state != null and pA.collide_terrain:
-						_query_shape.radius = pA.radius
-						_query_params.shape_rid = _query_shape.get_rid()
-						_query_params.transform = Transform2D(0, pA.pos)
-						_query_params.motion = push_offset
-						var fractions = space_state.cast_motion(_query_params)
-						if fractions.size() == 2: pA.pos += push_offset * fractions[0]
-					else: pA.pos += push_offset
+					pA.pos += push_offset
 					
 				if not pC.locked:
-					if space_state != null and pC.collide_terrain:
-						_query_shape.radius = pC.radius
-						_query_params.shape_rid = _query_shape.get_rid()
-						_query_params.transform = Transform2D(0, pC.pos)
-						_query_params.motion = -push_offset
-						var fractions = space_state.cast_motion(_query_params)
-						if fractions.size() == 2: pC.pos -= push_offset * fractions[0]
-					else: pC.pos -= push_offset
+					pC.pos -= push_offset

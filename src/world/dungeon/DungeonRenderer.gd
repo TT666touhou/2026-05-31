@@ -10,15 +10,15 @@ const TILE_SIZE := 64
 
 # 顏色定義（Darkwood 考察：視野外應是脫飽和灰調，非純黑）
 # 這些是 PointLight2D 照亮後的「光照內」顏色。光照外 Godot 自動根據 CanvasModulate 暗化。
-const COLOR_FLOOR_BASE   := Color(0.22, 0.18, 0.15, 1.0)   # 腐木板底色
-const COLOR_FLOOR_VAR1   := Color(0.18, 0.14, 0.12, 1.0)   # 暗褐色腐木板
-const COLOR_FLOOR_VAR2   := Color(0.26, 0.22, 0.18, 1.0)   # 稍亮腐木板
-const COLOR_WALL_BASE    := Color(0.12, 0.10, 0.08, 1.0)   # 厚石牆底層
-const COLOR_WALL_TOP     := Color(0.16, 0.14, 0.12, 1.0)   # 牆壁頂部面
-const COLOR_WALL_EDGE    := Color(0.06, 0.05, 0.04, 1.0)   # 牆壁最暗部
-const COLOR_CRACK        := Color(0.08, 0.06, 0.05, 0.7)   # 地板裂紋/木紋縫隙
-const COLOR_GROUT        := Color(0.14, 0.11, 0.09, 0.6)   # 木板縫隙線
-const COLOR_MOSS         := Color(0.15, 0.20, 0.12, 0.35)  # 牆角發霉苔蘚
+const COLOR_FLOOR_BASE   := Color(0.40, 0.34, 0.28, 1.0)   # 腐木板底色
+const COLOR_FLOOR_VAR1   := Color(0.32, 0.26, 0.20, 1.0)   # 暗褐色腐木板
+const COLOR_FLOOR_VAR2   := Color(0.46, 0.40, 0.34, 1.0)   # 稍亮腐木板
+const COLOR_WALL_BASE    := Color(0.30, 0.26, 0.22, 1.0)   # 厚石牆底層
+const COLOR_WALL_TOP     := Color(0.42, 0.38, 0.34, 1.0)   # 牆壁頂部面
+const COLOR_WALL_EDGE    := Color(0.14, 0.12, 0.10, 1.0)   # 牆壁最暗部
+const COLOR_CRACK        := Color(0.10, 0.08, 0.07, 0.9)   # 地板裂紋/木紋縫隙
+const COLOR_GROUT        := Color(0.16, 0.13, 0.11, 0.8)   # 木板縫隙線
+const COLOR_MOSS         := Color(0.22, 0.28, 0.18, 0.50)  # 牆角發霉苔蘚
 
 # 房間類型顏色點（DEBUG 用，正式版關掉）
 const DEBUG_ROOM_COLORS = {
@@ -39,12 +39,23 @@ var wall_bodies: Array[StaticBody2D] = []
 # 光線遮擋體集合
 var light_occluders: Array[LightOccluder2D] = []
 
+var wall_renderer: Node2D = null
+
+func _ready() -> void:
+	wall_renderer = Node2D.new()
+	wall_renderer.name = "WallRenderer"
+	wall_renderer.light_mask = 8 # Layer 4
+	add_child(wall_renderer)
+	wall_renderer.draw.connect(_draw_walls_layer)
+
 # ── 入口 ────────────────────────────────────────────────
 func render(generator: DungeonGenerator) -> void:
 	gen = generator
 	_clear_walls()
 	_build_wall_colliders()
 	queue_redraw()
+	if wall_renderer:
+		wall_renderer.queue_redraw()
 
 func _clear_walls() -> void:
 	for body in wall_bodies:
@@ -115,7 +126,7 @@ func _draw() -> void:
 		return
 	
 	_draw_floors()
-	_draw_walls()
+	_draw_wall_ao()
 	
 	if show_debug_rooms:
 		_draw_debug_rooms()
@@ -179,7 +190,7 @@ func _draw_crack(world_pos: Vector2, local_rng: RandomNumberGenerator) -> void:
 	draw_line(Vector2(crack_x, crack_y), end_pt, COLOR_CRACK, 1.5)
 
 # ── 牆壁與 AO 陰影繪製 ──────────────────────────────────
-func _draw_walls() -> void:
+func _draw_wall_ao() -> void:
 	for y in gen.map_height:
 		for x in gen.map_width:
 			if not gen.is_wall(x, y):
@@ -208,32 +219,56 @@ func _draw_walls() -> void:
 				draw_rect(Rect2(world_pos.x - 6, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.45))
 				draw_rect(Rect2(world_pos.x - 12, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.30))
 				draw_rect(Rect2(world_pos.x - 18, world_pos.y, 6, TILE_SIZE), Color(0.0, 0.0, 0.0, 0.15))
+
+func _draw_walls_layer() -> void:
+	if gen == null or not wall_renderer:
+		return
+		
+	for y in gen.map_height:
+		for x in gen.map_width:
+			if not gen.is_wall(x, y):
+				continue
+				
+			var world_pos = Vector2(x * TILE_SIZE, y * TILE_SIZE)
 			
 			# ── 牆壁本體底色 ──
-			draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
+			wall_renderer.draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, TILE_SIZE)), COLOR_WALL_BASE)
+			
+			# 畫牆面磚石紋路
+			var wall_rng = RandomNumberGenerator.new()
+			wall_rng.seed = x * 8461 + y * 9733
+			
+			# 畫水平分割縫 (分成 3 層石磚)
+			var brick_h = TILE_SIZE / 3.0
+			for i in range(1, 3):
+				var h_y = world_pos.y + i * brick_h
+				wall_renderer.draw_line(Vector2(world_pos.x, h_y), Vector2(world_pos.x + TILE_SIZE, h_y), COLOR_WALL_EDGE, 1.0)
+				
+			# 畫垂直磚縫
+			for i in range(3):
+				var h_y = world_pos.y + i * brick_h
+				var v_offset = wall_rng.randi_range(12, TILE_SIZE - 12)
+				wall_renderer.draw_line(Vector2(world_pos.x + v_offset, h_y), Vector2(world_pos.x + v_offset, h_y + brick_h), COLOR_WALL_EDGE, 1.0)
+				
+			# 偶爾畫牆壁裂紋
+			if wall_rng.randf() > 0.85:
+				var c_x = world_pos.x + wall_rng.randi_range(10, 54)
+				var c_y = world_pos.y + wall_rng.randi_range(10, 54)
+				var c_len = wall_rng.randi_range(8, 20)
+				var c_ang = wall_rng.randf() * TAU
+				var c_end = Vector2(c_x + cos(c_ang) * c_len, c_y + sin(c_ang) * c_len)
+				wall_renderer.draw_line(Vector2(c_x, c_y), c_end, COLOR_WALL_EDGE, 1.2)
 			
 			# 牆壁頂面（面向玩家的「蓋子」，稍微粗糙點綴）
 			if gen.is_floor(x, y + 1):
 				# 下邊鄰接地板：畫亮部頂面
-				draw_rect(
-					Rect2(world_pos, Vector2(TILE_SIZE, 6)),
-					COLOR_WALL_TOP
-				)
+				wall_renderer.draw_rect(Rect2(world_pos, Vector2(TILE_SIZE, 6)), COLOR_WALL_TOP)
 				# 牆體陰影邊緣
-				draw_rect(
-					Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)),
-					COLOR_WALL_EDGE
-				)
+				wall_renderer.draw_rect(Rect2(world_pos + Vector2(0, TILE_SIZE - 4), Vector2(TILE_SIZE, 4)), COLOR_WALL_EDGE)
 			if gen.is_floor(x + 1, y):
-				draw_rect(
-					Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)),
-					COLOR_WALL_EDGE
-				)
+				wall_renderer.draw_rect(Rect2(world_pos + Vector2(TILE_SIZE - 3, 0), Vector2(3, TILE_SIZE)), COLOR_WALL_EDGE)
 			if gen.is_floor(x - 1, y):
-				draw_rect(
-					Rect2(world_pos, Vector2(3, TILE_SIZE)),
-					COLOR_WALL_EDGE
-				)
+				wall_renderer.draw_rect(Rect2(world_pos, Vector2(3, TILE_SIZE)), COLOR_WALL_EDGE)
 				
 			# 偶爾在牆壁底部畫青苔/發霉
 			var rng_m = RandomNumberGenerator.new()
@@ -241,10 +276,7 @@ func _draw_walls() -> void:
 			if rng_m.randf() > 0.75 and gen.is_floor(x, y + 1):
 				var moss_w = rng_m.randi_range(8, 32)
 				var moss_x = rng_m.randi_range(0, TILE_SIZE - moss_w)
-				draw_rect(
-					Rect2(world_pos + Vector2(moss_x, TILE_SIZE - 8), Vector2(moss_w, 4)),
-					COLOR_MOSS
-				)
+				wall_renderer.draw_rect(Rect2(world_pos + Vector2(moss_x, TILE_SIZE - 8), Vector2(moss_w, 4)), COLOR_MOSS)
 
 # ── DEBUG：房間類型標記 ─────────────────────────────────
 func _draw_debug_rooms() -> void:

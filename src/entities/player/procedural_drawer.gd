@@ -40,6 +40,10 @@ var walk_blend: float = 0.0
 var override_mouse_pos = null # For testing
 
 var scale_factor: float = 1.0
+var _l_arm1_stick: int = -1
+var _l_arm2_stick: int = -1
+var _r_arm1_stick: int = -1
+var _r_arm2_stick: int = -1
 
 var base_points_count: int = 0
 var base_sticks_count: int = 0
@@ -92,16 +96,16 @@ func _ready() -> void:
 			p.drag = 0.90
 			p.radius = base_joint_radius * scale_factor
 			
-	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, base_arm_length * scale_factor)
-	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, base_arm_length * scale_factor)
-	var s3 = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, base_arm_length * scale_factor)
-	var s4 = verlet.add_stick(J.R_ELBOW, J.R_HAND, base_arm_length * scale_factor)
+	_l_arm1_stick = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, base_arm_length * scale_factor)
+	_l_arm2_stick = verlet.add_stick(J.L_ELBOW, J.L_HAND, base_arm_length * scale_factor)
+	_r_arm1_stick = verlet.add_stick(J.R_SHOULDER, J.R_ELBOW, base_arm_length * scale_factor)
+	_r_arm2_stick = verlet.add_stick(J.R_ELBOW, J.R_HAND, base_arm_length * scale_factor)
 	
 	# 開啟肢體線段碰撞，讓手在揮動時不會穿模過牆角
-	verlet.sticks[s1].collide_terrain = true
-	verlet.sticks[s2].collide_terrain = true
-	verlet.sticks[s3].collide_terrain = true
-	verlet.sticks[s4].collide_terrain = true
+	verlet.sticks[_l_arm1_stick].collide_terrain = true
+	verlet.sticks[_l_arm2_stick].collide_terrain = true
+	verlet.sticks[_r_arm1_stick].collide_terrain = true
+	verlet.sticks[_r_arm2_stick].collide_terrain = true
 	
 	verlet.add_motor(J.CENTER, func(): return character_body.global_position, 400.0)
 	verlet.add_motor(J.HEAD, func(): return character_body.global_position + Vector2(base_head_offset * scale_factor, 0).rotated(facing_angle), 300.0)
@@ -169,6 +173,36 @@ func equip(weapon_scene: PackedScene) -> void:
 
 func _physics_process(delta: float) -> void:
 	if not character_body: return
+	
+	if character_body.scale.x != scale_factor:
+		scale_factor = character_body.scale.x
+		# Update arm stick lengths
+		if _l_arm1_stick != -1: verlet.sticks[_l_arm1_stick].length = base_arm_length * scale_factor
+		if _l_arm2_stick != -1: verlet.sticks[_l_arm2_stick].length = base_arm_length * scale_factor
+		if _r_arm1_stick != -1: verlet.sticks[_r_arm1_stick].length = base_arm_length * scale_factor
+		if _r_arm2_stick != -1: verlet.sticks[_r_arm2_stick].length = base_arm_length * scale_factor
+		
+		# Update point radii
+		for i in range(J.COUNT):
+			var p = verlet.points[i]
+			if i in [J.L_HAND, J.R_HAND, J.L_ELBOW, J.R_ELBOW]:
+				p.radius = base_joint_radius * scale_factor
+			elif i == J.HEAD:
+				p.radius = base_head_radius * scale_factor
+			else:
+				p.radius = base_joint_radius * scale_factor
+				
+			# If we have a hurtbox, update its shape radii too!
+			if _hurtbox_node and i < _hurtbox_segments.size():
+				var cshape = _hurtbox_segments[i]
+				if cshape and cshape.shape is CapsuleShape2D:
+					cshape.shape.radius = base_joint_radius * scale_factor
+		if _head_shape and _head_shape.shape is CircleShape2D:
+			_head_shape.shape.radius = base_head_radius * scale_factor
+			
+		# Force re-equip weapon to update weapon verlet points/sticks size
+		if character_body.has_method("_equip_hotbar_slot"):
+			character_body.call_deferred("_equip_hotbar_slot", character_body.active_hotbar_index)
 	
 	var mouse_pos = get_global_mouse_position()
 	if override_mouse_pos != null:

@@ -30,6 +30,9 @@ static func generate_cone(size: int = 256, cone_angle_deg: float = 100.0, soft_e
 	# 光錐朝向右方（正 X 軸），玩家使用 PointLight2D.rotation 調整方向
 	var half_angle: float = deg_to_rad(cone_angle_deg * 0.5)
 	
+	var rng = RandomNumberGenerator.new()
+	rng.seed = 42 # Stable seed for static texture generation
+	
 	for y: int in size:
 		for x: int in size:
 			var offset: Vector2 = Vector2(x, y) - center
@@ -50,10 +53,21 @@ static func generate_cone(size: int = 256, cone_angle_deg: float = 100.0, soft_e
 			var dist_t: float     = clampf(dist / radius, 0.0, 1.0)
 			var dist_alpha: float = 1.0 - smoothstep(0.55, 1.0, dist_t)
 			
+			# 手電筒光學特效 1: 中央聚焦強光區 (Central Hot Spot)
+			var hot_spot: float = 1.0 - smoothstep(0.0, 0.35, dist_t)
+			
+			# 手電筒光學特效 2: 鏡頭同心圓光環效果 (Concentric Rings)
+			var ring: float = 1.0 + 0.08 * sin(dist_t * 22.0)
+			
+			# 手電筒光學特效 3: 鏡面不均勻污漬與高頻噪點 (Lens Dirt & Noise)
+			var p_noise: float = 1.0 + 0.04 * (rng.randf_range(-1.0, 1.0) + sin(x * 1.5) * cos(y * 1.5))
+			
 			# 中心有輕微環境光補償（確保玩家身邊有小圓形亮區）
 			var center_fill: float = 1.0 - smoothstep(0.0, 0.15, dist_t)
 			
-			var final_alpha: float = maxf(angle_alpha * dist_alpha, center_fill * 0.7)
+			var base_light = angle_alpha * dist_alpha * ring * p_noise
+			var final_alpha: float = maxf(base_light + hot_spot * 0.45 * angle_alpha, center_fill * 0.7)
+			
 			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, clampf(final_alpha, 0.0, 1.0)))
 	
 	return ImageTexture.create_from_image(img)

@@ -72,6 +72,11 @@ func shoot_arrow(charge_ratio: float) -> void:
 	var shoot_scene = preload("res://src/items/weapons/arrow.tscn")
 	if shoot_scene:
 		var arrow = shoot_scene.instantiate()
+		var scale_factor = 1.0
+		if weapon_rig.get_parent() and "scale_factor" in weapon_rig.get_parent():
+			scale_factor = weapon_rig.get_parent().scale_factor
+		arrow.scale = Vector2(scale_factor, scale_factor)
+		
 		weapon_rig.get_tree().current_scene.add_child(arrow)
 		var center_pos = physics.points[bow_body_indices[1]].pos
 		arrow.global_position = center_pos

@@ -24,7 +24,7 @@ bg_color = Color(0.8, 0.2, 0.2, 1.0)
 
 [node name="Zombie" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 257
+collision_mask = 263
 script = ExtResource("1_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

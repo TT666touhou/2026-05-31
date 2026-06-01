@@ -4,3 +4,4 @@
 
 # Ignore log files
 *.log
+test_out*.txt

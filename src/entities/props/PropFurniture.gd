@@ -26,6 +26,7 @@ func _ready() -> void:
 	gravity_scale = 0.0
 	linear_damp = 8.0
 	angular_damp = 8.0
+	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 	
 	# 設定 Light Mask: 4 (第三層 家具層)，使其不接收自身陰影，但仍能被照亮
 	light_mask = 4

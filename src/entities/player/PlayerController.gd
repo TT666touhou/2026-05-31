@@ -184,32 +184,41 @@ func _physics_process(delta: float) -> void:
 			input_dir = input_dir.normalized()
 			
 		var is_shift = Input.is_key_pressed(KEY_SHIFT)
+		var started_dash = false
 		if Input.is_action_just_pressed("dash") or (is_shift and not _was_shift_pressed):
 			if input_dir != Vector2.ZERO:
 				if not stamina or stamina.consume(15.0): # Dash costs 15 stamina
 					dash_timer = 0.2
 					current_dash_dir = input_dir
 					velocity = current_dash_dir * dash_speed
+					started_dash = true
 		
 		_was_shift_pressed = is_shift
-				
-		velocity = input_dir * move_speed
+		
+		if not started_dash:
+			velocity = input_dir * move_speed
 		
 	move_and_slide()
 	
 	# 對剛體施加推力 (真實物理感)
-	if dash_timer <= 0.0:
-		for i in get_slide_collision_count():
-			var c = get_slide_collision(i)
-			var collider = c.get_collider()
-			if collider is RigidBody2D:
-				var push_dir = -c.get_normal()
-				# 僅當玩家速度朝向物體時施加推力
-				if velocity.dot(push_dir) > 0.0:
-					var push_force = 1200.0 # 調整後的推力係數
-					var offset = c.get_position() - collider.global_position
-					# 使用 delta 縮放，使推力平滑且不受幀率影響，並防止極端衝量
-					collider.apply_impulse(push_dir * push_force * delta, offset)
+	for i in get_slide_collision_count():
+		var c = get_slide_collision(i)
+		var collider = c.get_collider()
+		if collider is RigidBody2D:
+			var push_dir = -c.get_normal()
+			# 僅當玩家速度朝向物體時施加推力
+			if velocity.dot(push_dir) > 0.0:
+				var force_mult = 1.0
+				if dash_timer > 0.0:
+					force_mult = 1.5 # 衝刺時稍微增強推力以利推開物件，但仍受上限限制
+				var push_force = 1200.0 * force_mult
+				var offset = c.get_position() - collider.global_position
+				
+				# 計算平滑推力，並限制最大衝量防止物體飛出
+				var impulse = push_dir * push_force * delta
+				if impulse.length() > 50.0:
+					impulse = impulse.limit_length(50.0)
+				collider.apply_impulse(impulse, offset)
 	
 	var mouse_pos = get_global_mouse_position()
 	current_aim_direction = (mouse_pos - global_position).normalized()

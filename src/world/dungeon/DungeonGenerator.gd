@@ -26,7 +26,7 @@ class RoomData:
 	var rect: Rect2i
 	var type: String  # "normal", "elite", "treasure", "boss", "shop", "start"
 	var center: Vector2i:
-		get: return rect.position + rect.size / 2
+		get: return rect.position + Vector2i(rect.size.x >> 1, rect.size.y >> 1)
 	
 	func _init(r: Rect2i, t: String = "normal") -> void:
 		rect = r
@@ -53,9 +53,9 @@ func _init() -> void:
 	rng = RandomNumberGenerator.new()
 
 # ── 主入口 ─────────────────────────────────────────────
-func generate(seed: int = 0) -> void:
-	if seed != 0:
-		rng.seed = seed
+func generate(p_seed: int = 0) -> void:
+	if p_seed != 0:
+		rng.seed = p_seed
 	else:
 		rng.randomize()
 	
@@ -172,7 +172,7 @@ func _connect_rooms(node: BSPNode) -> void:
 
 func _get_room_center(node: BSPNode) -> Vector2i:
 	if node.is_leaf:
-		return node.room.position + node.room.size / 2
+		return node.room.position + Vector2i(node.room.size.x >> 1, node.room.size.y >> 1)
 	elif node.left:
 		return _get_room_center(node.left)
 	else:
@@ -180,7 +180,7 @@ func _get_room_center(node: BSPNode) -> Vector2i:
 
 # ── 挖走廊（L 形） ──────────────────────────────────────
 func _carve_corridor(a: Vector2i, b: Vector2i) -> void:
-	var hw = corridor_width / 2  # 走廊半寬
+	var hw = corridor_width >> 1  # 走廊半寬
 	
 	# 水平段（從 a.x 到 b.x，保持 a.y）
 	var x_min = min(a.x, b.x)

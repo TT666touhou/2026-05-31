@@ -8,19 +8,24 @@ extends PointLight2D
 @export var view_radius: float = 320.0:
 	set(v):
 		view_radius = maxf(80.0, v)
-		_apply_radius()
+		if is_node_ready():
+			_apply_radius()
 
 ## 光錐開口角度（度）。100 = 燈籠型，60 = 手電筒型，360 = 全圓
 @export var cone_angle: float = 105.0:
 	set(v):
 		cone_angle = clampf(v, 20.0, 360.0)
-		_rebuild_texture()
+		if is_node_ready():
+			_rebuild_texture()
 
 ## 光源暖色（照明區的染色）
 @export var light_color: Color = Color(1.0, 0.92, 0.76, 1.0)  # 暖橙黃（火炬色）
 
 ## 旋轉來源：跟隨滑鼠（true）或跟隨移動方向（false）
 @export var follow_mouse: bool = true
+
+@export var enable_flicker: bool = true
+var _flicker_time: float = 0.0
 
 # ─── 私有狀態 ────────────────────────────────────────────────────────────────
 var _last_move_dir: Vector2 = Vector2.RIGHT
@@ -39,9 +44,9 @@ func _ready() -> void:
 	color  = light_color
 	energy = 1.0
 	
-	# 主光照設定：照亮第 1、2 層 (地表與角色)，並在第 1、2 層投影陰影
-	range_item_cull_mask = 3
-	shadow_item_cull_mask = 3
+	# 主光照設定：照亮第 1, 2, 3, 4 層，並在第 1, 2, 3 層投影陰影 (排除牆壁 Layer 4 自身投影)
+	range_item_cull_mask = 15
+	shadow_item_cull_mask = 7
 	
 	# 啟用陰影（牆壁的 LightOccluder2D 會截斷光線）
 	shadow_enabled = true
@@ -74,6 +79,25 @@ func _setup_furniture_light() -> void:
 
 func _process(delta: float) -> void:
 	_update_direction(delta)
+	_update_flicker(delta)
+
+func _update_flicker(delta: float) -> void:
+	if not enable_flicker:
+		return
+		
+	_flicker_time += delta * 12.0
+	# 結合多種不同頻率的波形，模擬不規則的手電筒抖動
+	var flicker = sin(_flicker_time) * 0.015 + sin(_flicker_time * 2.3) * 0.01 + sin(_flicker_time * 0.7) * 0.005
+	
+	# 偶爾產生微弱的接觸不良顫抖
+	if randf() < 0.0006:
+		flicker -= 0.18
+		
+	var target_energy = 1.0 + flicker
+	energy = lerp(energy, target_energy, delta * 15.0)
+	
+	if _furniture_light:
+		_furniture_light.energy = energy
 
 # ─── 方向更新 ────────────────────────────────────────────────────────────────
 func _update_direction(delta: float) -> void:
@@ -102,9 +126,9 @@ func set_move_direction(dir: Vector2) -> void:
 func _rebuild_texture() -> void:
 	if cone_angle >= 359.0:
 		# 完整圓形（特殊情況：如室內壁燈）
-		texture = LightTextureGenerator.generate_radial(256)
+		texture = LightTextureGenerator.generate_radial(128)
 	else:
-		texture = LightTextureGenerator.generate_cone(256, cone_angle, 0.25)
+		texture = LightTextureGenerator.generate_cone(128, cone_angle, 0.25)
 	
 	# 同步貼圖給家具光照通道
 	if _furniture_light:

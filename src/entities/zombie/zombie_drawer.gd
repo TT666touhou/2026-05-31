@@ -49,6 +49,11 @@ func _ready() -> void:
 	# 設定 Light Mask 為 2，使其不接收自身陰影，且能平滑漸進照亮
 	light_mask = 2
 	
+	# Setup material for LIGHT_ONLY blending to hide silhouette in the dark
+	var mat = CanvasItemMaterial.new()
+	mat.light_mode = CanvasItemMaterial.LIGHT_MODE_LIGHT_ONLY
+	self.material = mat
+	
 	character_body = get_parent() as CharacterBody2D
 	var base_pos = character_body.global_position
 	
@@ -69,6 +74,10 @@ func _ready() -> void:
 		else:
 			p.drag = 0.90
 			p.radius = 10.0
+			
+		# 關閉核心身體節點的碰撞，避免肩膀或頭部卡進牆角
+		if i in [J.CENTER, J.HEAD, J.L_SHOULDER, J.R_SHOULDER]:
+			p.collide_terrain = false
 			
 	var s1 = verlet.add_stick(J.L_SHOULDER, J.L_ELBOW, 20.0)
 	var s2 = verlet.add_stick(J.L_ELBOW, J.L_HAND, 20.0)
@@ -170,8 +179,10 @@ func _physics_process(delta: float) -> void:
 		verlet.points[J.L_SHOULDER].accumulated_force += Vector2(shoulder_swing, 0).rotated(facing_angle)
 		verlet.points[J.R_SHOULDER].accumulated_force += Vector2(-shoulder_swing, 0).rotated(facing_angle)
 	
-	var l_outward = Vector2(0, -100.0).rotated(facing_angle)
-	var r_outward = Vector2(0, 100.0).rotated(facing_angle)
+	# 根據移動融合（walk_blend）動態收緊手肘，移動時更「流線型」避免卡牆角
+	var elbow_push = lerp(100.0, 30.0, walk_blend)
+	var l_outward = Vector2(0, -elbow_push).rotated(facing_angle)
+	var r_outward = Vector2(0, elbow_push).rotated(facing_angle)
 	verlet.points[J.L_ELBOW].accumulated_force += l_outward
 	verlet.points[J.R_ELBOW].accumulated_force += r_outward
 	
@@ -180,16 +191,17 @@ func _physics_process(delta: float) -> void:
 		verlet.points[J.L_HAND].accumulated_force += (attack_target - verlet.points[J.L_HAND].pos).normalized() * 1200.0
 		verlet.points[J.R_HAND].accumulated_force += (attack_target - verlet.points[J.R_HAND].pos).normalized() * 1200.0
 	else:
-		# Hand constraints to chest (idle stance)
+		# Hand constraints to chest (idle stance) - 走路時手收攏（側向偏移由 24 降到 10）
 		var aim_dir = Vector2.RIGHT.rotated(facing_angle)
-		var left_target = character_body.global_position + aim_dir * 36.0 + aim_dir.rotated(-PI/2) * 24.0
-		var right_target = character_body.global_position + aim_dir * 36.0 + aim_dir.rotated(PI/2) * 24.0
+		var side_offset = lerp(24.0, 10.0, walk_blend)
+		var left_target = character_body.global_position + aim_dir * 36.0 + aim_dir.rotated(-PI/2) * side_offset
+		var right_target = character_body.global_position + aim_dir * 36.0 + aim_dir.rotated(PI/2) * side_offset
 		verlet.points[J.L_HAND].accumulated_force += (left_target - verlet.points[J.L_HAND].pos) * 600.0
 		verlet.points[J.R_HAND].accumulated_force += (right_target - verlet.points[J.R_HAND].pos) * 600.0
 	
 	
-	# 防卡死機制：呼叫共用模組，過遠暫時關閉碰撞
-	verlet.enforce_anti_stuck(character_body.global_position)
+	# 防卡死機制：收緊防卡死閾值，防止肢體過度拉伸
+	verlet.enforce_anti_stuck(character_body.global_position, 55.0, 45.0)
 	
 	# 取得 2D 世界的 space_state 進行地形與所有 Hurtbox 碰撞檢測 (mask 281: World=1, PlayerHitbox=8, EnemyHitbox=16, Props=256)
 	var space_state = character_body.get_world_2d().direct_space_state

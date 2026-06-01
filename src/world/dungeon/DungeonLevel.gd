@@ -41,6 +41,7 @@ var prop_instances: Array[RigidBody2D] = []
 
 # ── 生命週期 ────────────────────────────────────────────
 func _ready() -> void:
+	RenderingServer.set_default_clear_color(Color.BLACK)
 	generate_floor()
 
 func _process(delta: float) -> void:
@@ -53,12 +54,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		generate_floor()
 
 # ── 地圖生成主流程 ──────────────────────────────────────
-func generate_floor(seed: int = map_seed) -> void:
+func generate_floor(p_seed: int = map_seed) -> void:
 	# 1. 生成地圖數據
 	gen = DungeonGenerator.new()
 	gen.map_width   = map_width
 	gen.map_height  = map_height
-	gen.generate(seed)
+	gen.generate(p_seed)
 	
 	# 2. 渲染地圖（程序繪製 + LightOccluder2D）
 	dungeon_renderer.show_debug_rooms = show_debug
@@ -235,28 +236,56 @@ func _spawn_furniture() -> void:
 
 # ── 尋路網格動態建立 ──────────────────────────────────────
 func _setup_navigation() -> void:
-	var nav_region = get_node_or_null("NavigationRegion2D")
-	if nav_region:
-		nav_region.queue_free()
-		await get_tree().process_frame
+	var nav_region = get_node_or_null("NavigationRegion2D") as NavigationRegion2D
+	if not nav_region:
+		nav_region = NavigationRegion2D.new()
+		nav_region.name = "NavigationRegion2D"
+		add_child(nav_region)
 		
-	nav_region = NavigationRegion2D.new()
-	nav_region.name = "NavigationRegion2D"
-	add_child(nav_region)
-	
 	var nav_poly = NavigationPolygon.new()
 	
-	# 將所有地板方塊作為 outline 加入
+	# We will collect all horizontal floor strips, then merge them using Geometry2D.merge_polygons()
+	# to avoid Clipper Convex Partition errors on adjacent/touching outlines.
+	var merged_polygons: Array[PackedVector2Array] = []
+	
 	for y in gen.map_height:
-		for x in gen.map_width:
-			if gen.is_floor(x, y):
-				# 使用無邊距，以便相鄰地板自動 union 合併
-				var p0 = Vector2(x * tile_size, y * tile_size)
-				var p1 = Vector2((x + 1) * tile_size, y * tile_size)
-				var p2 = Vector2((x + 1) * tile_size, (y + 1) * tile_size)
-				var p3 = Vector2(x * tile_size, (y + 1) * tile_size)
-				nav_poly.add_outline(PackedVector2Array([p0, p1, p2, p3]))
+		var start_x: int = -1
+		for x in range(gen.map_width + 1):
+			var is_f = x < gen.map_width and gen.is_floor(x, y)
+			if is_f and start_x == -1:
+				start_x = x
+			elif not is_f and start_x != -1:
+				var p0 = Vector2(start_x * tile_size, y * tile_size)
+				var p1 = Vector2(x * tile_size, y * tile_size)
+				var p2 = Vector2(x * tile_size, (y + 1) * tile_size)
+				var p3 = Vector2(start_x * tile_size, (y + 1) * tile_size)
+				var strip = PackedVector2Array([p0, p1, p2, p3])
+				merged_polygons.append(strip)
+				start_x = -1
 				
+	# Iteratively merge touching/overlapping polygons until no more merges can be made.
+	# This ensures we have a set of completely disjoint polygons.
+	var changed = true
+	while changed:
+		changed = false
+		var i = 0
+		while i < merged_polygons.size():
+			var j = i + 1
+			while j < merged_polygons.size():
+				var union_result = Geometry2D.merge_polygons(merged_polygons[i], merged_polygons[j])
+				if union_result.size() == 1:
+					merged_polygons[i] = union_result[0]
+					merged_polygons.remove_at(j)
+					changed = true
+				else:
+					j += 1
+			i += 1
+				
+	for poly in merged_polygons:
+		var shrunk_polys = Geometry2D.offset_polygon(poly, -16.0)
+		for shrunk in shrunk_polys:
+			nav_poly.add_outline(shrunk)
+		
 	nav_poly.make_polygons_from_outlines()
 	nav_region.navigation_polygon = nav_poly
 

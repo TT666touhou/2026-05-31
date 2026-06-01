@@ -48,8 +48,8 @@ func _physics_process(delta: float) -> void:
 	var player = rig.get_parent()
 	
 	if physics.points.size() > max(l_hand_idx, r_hand_idx):
-		left_hitbox.position = physics.points[l_hand_idx].pos - player.global_position
-		right_hitbox.position = physics.points[r_hand_idx].pos - player.global_position
+		left_hitbox.global_position = physics.points[l_hand_idx].pos
+		right_hitbox.global_position = physics.points[r_hand_idx].pos
 	
 	var mouse_pos = get_global_mouse_position()
 	if "override_mouse_pos" in rig and rig.override_mouse_pos != null:

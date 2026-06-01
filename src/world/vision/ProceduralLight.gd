@@ -2,7 +2,7 @@
 extends PointLight2D
 class_name ProceduralLight
 
-const TEX_RES: int = 512
+const TEX_RES: int = 128
 
 @export_range(0.0, 2000.0) var ambient_radius: float = 100.0:
 	set(v): ambient_radius = v; _queue_update()
@@ -38,7 +38,7 @@ func _update_texture() -> void:
 	var scale_factor = (TEX_RES * 0.5) / max_r
 	self.texture_scale = max_r / (TEX_RES * 0.5)
 	
-	var img = Image.create_empty(TEX_RES, TEX_RES, false, Image.FORMAT_L8)
+	var img = Image.create(TEX_RES, TEX_RES, false, Image.FORMAT_RGBA8)
 	var center = Vector2(TEX_RES * 0.5, TEX_RES * 0.5)
 	
 	# Generate pixels mapping coordinate space to logical distance
@@ -67,9 +67,8 @@ func _update_texture() -> void:
 					cone_val *= max(0.0, 1.0 - ((dist - cone_radius) / cone_blur))
 			
 			var final_val = max(ambient_val, cone_val)
-			if final_val > 0.0:
-				var c = int(clamp(final_val, 0.0, 1.0) * 255.0)
-				img.set_pixel(x, y, Color8(c, c, c, 255))
+			var alpha = clampf(final_val, 0.0, 1.0)
+			img.set_pixel(x, y, Color(1.0, 1.0, 1.0, alpha))
 				
 	if self.texture is ImageTexture and self.texture.get_width() == TEX_RES and self.texture.get_height() == TEX_RES:
 		self.texture.update(img)
