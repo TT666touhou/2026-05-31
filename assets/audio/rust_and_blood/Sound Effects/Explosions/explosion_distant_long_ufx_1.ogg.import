@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bpx71h5a047t1"
+path="res://.godot/imported/explosion_distant_long_ufx_1.ogg-f14fd7dffee79e0a58440b1812161cde.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Explosions/explosion_distant_long_ufx_1.ogg"
+dest_files=["res://.godot/imported/explosion_distant_long_ufx_1.ogg-f14fd7dffee79e0a58440b1812161cde.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

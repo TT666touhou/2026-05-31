@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dtshlika8d2t7"
+path="res://.godot/imported/sfx_drone_mx_6.ogg-313ee9e9e50ba166daec82f6a9d27015.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_drone_mx_6.ogg"
+dest_files=["res://.godot/imported/sfx_drone_mx_6.ogg-313ee9e9e50ba166daec82f6a9d27015.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

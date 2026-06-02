@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bjnm5w317n6l4"
+path="res://.godot/imported/monster_distant_mx_1.ogg-1336de2cd7e354c759bb68ca6d3d59c5.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Monsters/monster_distant_mx_1.ogg"
+dest_files=["res://.godot/imported/monster_distant_mx_1.ogg-1336de2cd7e354c759bb68ca6d3d59c5.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

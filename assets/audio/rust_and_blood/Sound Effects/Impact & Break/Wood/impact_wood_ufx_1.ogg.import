@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cbbxvlbl4nfrl"
+path="res://.godot/imported/impact_wood_ufx_1.ogg-7cdc3140c98ccbeed45351e27ff33cdf.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Impact & Break/Wood/impact_wood_ufx_1.ogg"
+dest_files=["res://.godot/imported/impact_wood_ufx_1.ogg-7cdc3140c98ccbeed45351e27ff33cdf.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://2elcxijllwxy"
+path="res://.godot/imported/electric_shock_mx_1.ogg-2d8aa67dfd0ab37242d44bdd2eb2a692.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Misc/electric_shock_mx_1.ogg"
+dest_files=["res://.godot/imported/electric_shock_mx_1.ogg-2d8aa67dfd0ab37242d44bdd2eb2a692.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

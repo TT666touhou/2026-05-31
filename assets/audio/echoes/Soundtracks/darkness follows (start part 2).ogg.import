@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://crrbh1xddxljh"
+path="res://.godot/imported/darkness follows (start part 2).ogg-09c05ebb3dce3cd84d4db97333b978bf.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/Soundtracks/darkness follows (start part 2).ogg"
+dest_files=["res://.godot/imported/darkness follows (start part 2).ogg-09c05ebb3dce3cd84d4db97333b978bf.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

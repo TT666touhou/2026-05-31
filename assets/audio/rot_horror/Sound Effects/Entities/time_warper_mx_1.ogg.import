@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d0n8snkvt53vm"
+path="res://.godot/imported/time_warper_mx_1.ogg-a7c6d79e19883a439a2e2d51c652d4f1.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Entities/time_warper_mx_1.ogg"
+dest_files=["res://.godot/imported/time_warper_mx_1.ogg-a7c6d79e19883a439a2e2d51c652d4f1.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

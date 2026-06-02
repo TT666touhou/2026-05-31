@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b6y02pbxtospj"
+path="res://.godot/imported/button_mx_1.ogg-2999b15e367520f46237c0ed62a4b90a.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Buttons & Levers/button_mx_1.ogg"
+dest_files=["res://.godot/imported/button_mx_1.ogg-2999b15e367520f46237c0ed62a4b90a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

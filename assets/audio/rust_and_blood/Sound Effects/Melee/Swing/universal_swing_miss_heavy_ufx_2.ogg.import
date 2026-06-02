@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d3i88se3o5byt"
+path="res://.godot/imported/universal_swing_miss_heavy_ufx_2.ogg-6cefa87c82caded3e9e87a27b5204e67.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Swing/universal_swing_miss_heavy_ufx_2.ogg"
+dest_files=["res://.godot/imported/universal_swing_miss_heavy_ufx_2.ogg-6cefa87c82caded3e9e87a27b5204e67.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

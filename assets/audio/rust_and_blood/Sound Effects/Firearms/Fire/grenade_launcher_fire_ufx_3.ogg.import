@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dg5onlou8occm"
+path="res://.godot/imported/grenade_launcher_fire_ufx_3.ogg-d4c34bd0c18daa12d96ec0aba6d08fdd.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/grenade_launcher_fire_ufx_3.ogg"
+dest_files=["res://.godot/imported/grenade_launcher_fire_ufx_3.ogg-d4c34bd0c18daa12d96ec0aba6d08fdd.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

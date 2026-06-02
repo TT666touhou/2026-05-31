@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bb216c2i0ufex"
+path="res://.godot/imported/tones_loop_1.ogg-9f0b3125b272287b66f0a09991ba1f21.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/Loops/tones_loop_1.ogg"
+dest_files=["res://.godot/imported/tones_loop_1.ogg-9f0b3125b272287b66f0a09991ba1f21.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

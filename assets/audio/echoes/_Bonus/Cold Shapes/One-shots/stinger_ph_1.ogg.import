@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dbwmox0katyg6"
+path="res://.godot/imported/stinger_ph_1.ogg-c9c88f53b1702aaa9a572410626bb2eb.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/One-shots/stinger_ph_1.ogg"
+dest_files=["res://.godot/imported/stinger_ph_1.ogg-c9c88f53b1702aaa9a572410626bb2eb.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

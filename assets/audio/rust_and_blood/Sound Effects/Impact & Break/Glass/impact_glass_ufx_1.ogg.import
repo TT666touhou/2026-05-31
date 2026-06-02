@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ddunqidqmsyvg"
+path="res://.godot/imported/impact_glass_ufx_1.ogg-6fda9a8d88fac21075bba1bcb8df00ca.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Impact & Break/Glass/impact_glass_ufx_1.ogg"
+dest_files=["res://.godot/imported/impact_glass_ufx_1.ogg-6fda9a8d88fac21075bba1bcb8df00ca.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

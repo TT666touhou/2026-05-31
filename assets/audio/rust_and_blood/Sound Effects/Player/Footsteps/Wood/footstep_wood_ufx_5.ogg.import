@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bmwo1r1gsqki1"
+path="res://.godot/imported/footstep_wood_ufx_5.ogg-1400bdb26a5ccd632c6b0057ad1cffb5.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Wood/footstep_wood_ufx_5.ogg"
+dest_files=["res://.godot/imported/footstep_wood_ufx_5.ogg-1400bdb26a5ccd632c6b0057ad1cffb5.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

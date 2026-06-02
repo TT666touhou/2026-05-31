@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bsx2lfmhjv23b"
+path="res://.godot/imported/sniper_rifle_fire_ufx_3.ogg-ccdce82b52d1d725c96bfb5a89054017.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/sniper_rifle_fire_ufx_3.ogg"
+dest_files=["res://.godot/imported/sniper_rifle_fire_ufx_3.ogg-ccdce82b52d1d725c96bfb5a89054017.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cd2rp6py685rl"
+path="res://.godot/imported/unknown_entity_distant_mx_7.ogg-cf18d116a177593bac7afb9cae065885.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Entities/unknown_entity_distant_mx_7.ogg"
+dest_files=["res://.godot/imported/unknown_entity_distant_mx_7.ogg-cf18d116a177593bac7afb9cae065885.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

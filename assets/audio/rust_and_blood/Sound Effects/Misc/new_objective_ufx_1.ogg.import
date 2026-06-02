@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cgdrrd23uun85"
+path="res://.godot/imported/new_objective_ufx_1.ogg-a34929218733813e9f859e1dc08cd105.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Misc/new_objective_ufx_1.ogg"
+dest_files=["res://.godot/imported/new_objective_ufx_1.ogg-a34929218733813e9f859e1dc08cd105.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

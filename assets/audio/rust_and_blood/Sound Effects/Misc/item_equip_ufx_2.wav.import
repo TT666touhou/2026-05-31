@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://c7435bg84p6lj"
+path="res://.godot/imported/item_equip_ufx_2.wav-d8c67b12c873ea657364d8474d5a2bc8.sample"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Misc/item_equip_ufx_2.wav"
+dest_files=["res://.godot/imported/item_equip_ufx_2.wav-d8c67b12c873ea657364d8474d5a2bc8.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

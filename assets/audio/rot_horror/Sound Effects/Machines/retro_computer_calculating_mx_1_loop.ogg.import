@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://6epqa6k81wcw"
+path="res://.godot/imported/retro_computer_calculating_mx_1_loop.ogg-5800d1c33a58143cf2bbc451707451da.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Machines/retro_computer_calculating_mx_1_loop.ogg"
+dest_files=["res://.godot/imported/retro_computer_calculating_mx_1_loop.ogg-5800d1c33a58143cf2bbc451707451da.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

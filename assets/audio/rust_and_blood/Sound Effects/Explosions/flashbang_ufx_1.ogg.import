@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://brb2ace0hvyc3"
+path="res://.godot/imported/flashbang_ufx_1.ogg-8f6f2970f36f50928e62fa7a9be1a4ec.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Explosions/flashbang_ufx_1.ogg"
+dest_files=["res://.godot/imported/flashbang_ufx_1.ogg-8f6f2970f36f50928e62fa7a9be1a4ec.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

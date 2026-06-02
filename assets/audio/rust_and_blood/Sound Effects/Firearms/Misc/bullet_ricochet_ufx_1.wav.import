@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://1ia1xgwuq7yn"
+path="res://.godot/imported/bullet_ricochet_ufx_1.wav-3a4ea3eb231e766ca993adac6a667282.sample"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Misc/bullet_ricochet_ufx_1.wav"
+dest_files=["res://.godot/imported/bullet_ricochet_ufx_1.wav-3a4ea3eb231e766ca993adac6a667282.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=2

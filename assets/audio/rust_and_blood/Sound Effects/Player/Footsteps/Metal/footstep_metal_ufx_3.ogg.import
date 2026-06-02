@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dp1kv1sx481s7"
+path="res://.godot/imported/footstep_metal_ufx_3.ogg-f6c9b811afbc3ab9ec5d034c59b6cf26.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Metal/footstep_metal_ufx_3.ogg"
+dest_files=["res://.godot/imported/footstep_metal_ufx_3.ogg-f6c9b811afbc3ab9ec5d034c59b6cf26.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

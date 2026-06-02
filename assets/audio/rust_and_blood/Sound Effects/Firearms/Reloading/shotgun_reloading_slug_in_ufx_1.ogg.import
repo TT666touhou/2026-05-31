@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ctgttx1i5po7q"
+path="res://.godot/imported/shotgun_reloading_slug_in_ufx_1.ogg-229a2a76540f5e505a13d207d0075500.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Reloading/shotgun_reloading_slug_in_ufx_1.ogg"
+dest_files=["res://.godot/imported/shotgun_reloading_slug_in_ufx_1.ogg-229a2a76540f5e505a13d207d0075500.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

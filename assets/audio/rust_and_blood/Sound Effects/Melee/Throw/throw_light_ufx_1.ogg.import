@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dpi8b24t3kdfm"
+path="res://.godot/imported/throw_light_ufx_1.ogg-02f8351c97da6bd9d836350e8d26b43f.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Throw/throw_light_ufx_1.ogg"
+dest_files=["res://.godot/imported/throw_light_ufx_1.ogg-02f8351c97da6bd9d836350e8d26b43f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

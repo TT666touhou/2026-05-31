@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cwfy2le285fkp"
+path="res://.godot/imported/radio_static_mx_1_loop.ogg-086bf7778e6a5461c7252bf6f40b7fcc.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Machines/radio_static_mx_1_loop.ogg"
+dest_files=["res://.godot/imported/radio_static_mx_1_loop.ogg-086bf7778e6a5461c7252bf6f40b7fcc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

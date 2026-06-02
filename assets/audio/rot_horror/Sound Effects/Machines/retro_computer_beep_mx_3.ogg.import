@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bo1vaape5kwvv"
+path="res://.godot/imported/retro_computer_beep_mx_3.ogg-a760e60fab7802187a9033492c3118ef.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Machines/retro_computer_beep_mx_3.ogg"
+dest_files=["res://.godot/imported/retro_computer_beep_mx_3.ogg-a760e60fab7802187a9033492c3118ef.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dvqsjxe8g8rqd"
+path="res://.godot/imported/slash_bloody_heavy_ufx_1.ogg-e201edb70732bf9313f3b6cf7fb50e9e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Hit/slash_bloody_heavy_ufx_1.ogg"
+dest_files=["res://.godot/imported/slash_bloody_heavy_ufx_1.ogg-e201edb70732bf9313f3b6cf7fb50e9e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

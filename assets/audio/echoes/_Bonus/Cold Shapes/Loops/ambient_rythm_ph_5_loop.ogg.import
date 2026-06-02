@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b36f5cwj6l0yc"
+path="res://.godot/imported/ambient_rythm_ph_5_loop.ogg-00fddc139f187ecc84303fa6707f1cec.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/Loops/ambient_rythm_ph_5_loop.ogg"
+dest_files=["res://.godot/imported/ambient_rythm_ph_5_loop.ogg-00fddc139f187ecc84303fa6707f1cec.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

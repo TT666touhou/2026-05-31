@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://pjh1pggfdfb6"
+path="res://.godot/imported/alien_drone_scanning_2.ogg-0410bfa33bcc04bdaf7b4996167b8fed.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/SFX/Creatures/Alien Drone/alien_drone_scanning_2.ogg"
+dest_files=["res://.godot/imported/alien_drone_scanning_2.ogg-0410bfa33bcc04bdaf7b4996167b8fed.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

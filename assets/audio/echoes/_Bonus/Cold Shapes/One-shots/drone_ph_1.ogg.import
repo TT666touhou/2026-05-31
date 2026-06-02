@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://coto7h8tb8mmn"
+path="res://.godot/imported/drone_ph_1.ogg-e788f3c8453e149181cfe5510a12cd18.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/One-shots/drone_ph_1.ogg"
+dest_files=["res://.godot/imported/drone_ph_1.ogg-e788f3c8453e149181cfe5510a12cd18.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

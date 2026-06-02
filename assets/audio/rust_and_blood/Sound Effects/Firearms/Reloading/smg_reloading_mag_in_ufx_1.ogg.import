@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://hr7woikg31us"
+path="res://.godot/imported/smg_reloading_mag_in_ufx_1.ogg-76d94cead18abb2ed255461afcbbed46.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Reloading/smg_reloading_mag_in_ufx_1.ogg"
+dest_files=["res://.godot/imported/smg_reloading_mag_in_ufx_1.ogg-76d94cead18abb2ed255461afcbbed46.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

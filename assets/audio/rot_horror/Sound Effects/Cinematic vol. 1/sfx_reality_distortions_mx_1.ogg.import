@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d1s5dpdxctyn1"
+path="res://.godot/imported/sfx_reality_distortions_mx_1.ogg-558a66e436952b2f48c12d812491ed5e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_reality_distortions_mx_1.ogg"
+dest_files=["res://.godot/imported/sfx_reality_distortions_mx_1.ogg-558a66e436952b2f48c12d812491ed5e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

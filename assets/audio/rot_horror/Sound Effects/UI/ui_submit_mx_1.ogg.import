@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dsdhvaudrlacj"
+path="res://.godot/imported/ui_submit_mx_1.ogg-988d9d71fec9eab50d4e66b893da91cc.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/UI/ui_submit_mx_1.ogg"
+dest_files=["res://.godot/imported/ui_submit_mx_1.ogg-988d9d71fec9eab50d4e66b893da91cc.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

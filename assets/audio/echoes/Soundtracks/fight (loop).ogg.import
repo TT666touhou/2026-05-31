@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dvnf5x1nllau5"
+path="res://.godot/imported/fight (loop).ogg-accba9d357de01679a499037dd50105b.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/Soundtracks/fight (loop).ogg"
+dest_files=["res://.godot/imported/fight (loop).ogg-accba9d357de01679a499037dd50105b.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bigltj7hl5aja"
+path="res://.godot/imported/old_rifle_fire_ufx_5.ogg-aa1c6668c2681c3e7d8a153c2ae62c75.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/old_rifle_fire_ufx_5.ogg"
+dest_files=["res://.godot/imported/old_rifle_fire_ufx_5.ogg-aa1c6668c2681c3e7d8a153c2ae62c75.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

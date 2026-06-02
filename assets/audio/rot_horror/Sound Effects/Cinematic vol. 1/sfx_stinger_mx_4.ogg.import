@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dc37iw51wexlh"
+path="res://.godot/imported/sfx_stinger_mx_4.ogg-43906f0ee2f41f440792f3b9420ff4f2.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_stinger_mx_4.ogg"
+dest_files=["res://.godot/imported/sfx_stinger_mx_4.ogg-43906f0ee2f41f440792f3b9420ff4f2.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

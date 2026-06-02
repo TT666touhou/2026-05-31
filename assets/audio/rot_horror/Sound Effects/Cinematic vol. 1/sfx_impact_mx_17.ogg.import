@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://hoqk6pjxq4m4"
+path="res://.godot/imported/sfx_impact_mx_17.ogg-f8855a8b93c5258a5b83274039668af2.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_impact_mx_17.ogg"
+dest_files=["res://.godot/imported/sfx_impact_mx_17.ogg-f8855a8b93c5258a5b83274039668af2.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

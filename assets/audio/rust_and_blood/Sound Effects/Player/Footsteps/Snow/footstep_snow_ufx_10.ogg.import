@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d4kmo6yjsbyso"
+path="res://.godot/imported/footstep_snow_ufx_10.ogg-1ca2a9ad5837f1b6efb8f1703a59a197.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Snow/footstep_snow_ufx_10.ogg"
+dest_files=["res://.godot/imported/footstep_snow_ufx_10.ogg-1ca2a9ad5837f1b6efb8f1703a59a197.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://de4l4ohsawo8u"
+path="res://.godot/imported/distorted_reality_mx_2.ogg-cf4ab0d35dae886a9cd0721a890a287e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Tracks/Cursed Music/distorted_reality_mx_2.ogg"
+dest_files=["res://.godot/imported/distorted_reality_mx_2.ogg-cf4ab0d35dae886a9cd0721a890a287e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

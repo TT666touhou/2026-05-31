@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c6da74llbagko"
+path="res://.godot/imported/phantom_1.ogg-fae217e86f19175bd1ce6a9415c3dbe9.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/One-shots/phantom_1.ogg"
+dest_files=["res://.godot/imported/phantom_1.ogg-fae217e86f19175bd1ce6a9415c3dbe9.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

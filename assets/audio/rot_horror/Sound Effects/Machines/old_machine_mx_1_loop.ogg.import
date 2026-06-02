@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bkqjqwcsod7sp"
+path="res://.godot/imported/old_machine_mx_1_loop.ogg-0956dc82927a6eea5b56e22803365cfd.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Machines/old_machine_mx_1_loop.ogg"
+dest_files=["res://.godot/imported/old_machine_mx_1_loop.ogg-0956dc82927a6eea5b56e22803365cfd.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

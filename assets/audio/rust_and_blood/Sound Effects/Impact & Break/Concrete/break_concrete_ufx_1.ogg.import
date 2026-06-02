@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://mf0r2sarme3c"
+path="res://.godot/imported/break_concrete_ufx_1.ogg-98f8f3974fad9d063293c8d411f2d15c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Impact & Break/Concrete/break_concrete_ufx_1.ogg"
+dest_files=["res://.godot/imported/break_concrete_ufx_1.ogg-98f8f3974fad9d063293c8d411f2d15c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

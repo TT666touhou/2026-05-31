@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://edwly0hjek1n"
+path="res://.godot/imported/sfx_poltergeist_mx_2.ogg-ec0ba49b9e31c7371ab1a80e29678c3c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_poltergeist_mx_2.ogg"
+dest_files=["res://.godot/imported/sfx_poltergeist_mx_2.ogg-ec0ba49b9e31c7371ab1a80e29678c3c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

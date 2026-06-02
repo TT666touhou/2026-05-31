@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://co02j4jnb8l4n"
+path="res://.godot/imported/sharp_critical_hit_body_ufx_1.ogg-ee48355fa6db0dcf84847a04692b512c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Hit/sharp_critical_hit_body_ufx_1.ogg"
+dest_files=["res://.godot/imported/sharp_critical_hit_body_ufx_1.ogg-ee48355fa6db0dcf84847a04692b512c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

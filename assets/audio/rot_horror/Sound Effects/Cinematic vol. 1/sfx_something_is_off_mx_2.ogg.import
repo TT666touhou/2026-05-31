@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://78jcntj1qcba"
+path="res://.godot/imported/sfx_something_is_off_mx_2.ogg-952c25daf84a0224b076207b5a75f688.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_something_is_off_mx_2.ogg"
+dest_files=["res://.godot/imported/sfx_something_is_off_mx_2.ogg-952c25daf84a0224b076207b5a75f688.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

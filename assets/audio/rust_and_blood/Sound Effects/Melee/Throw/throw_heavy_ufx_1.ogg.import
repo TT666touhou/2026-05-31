@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ojmruwhxnvh1"
+path="res://.godot/imported/throw_heavy_ufx_1.ogg-b23e60633b005cf76b96826a5bbb74ea.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Throw/throw_heavy_ufx_1.ogg"
+dest_files=["res://.godot/imported/throw_heavy_ufx_1.ogg-b23e60633b005cf76b96826a5bbb74ea.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

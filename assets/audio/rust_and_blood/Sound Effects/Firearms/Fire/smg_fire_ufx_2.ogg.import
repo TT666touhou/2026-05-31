@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d2gbicc6k8c8t"
+path="res://.godot/imported/smg_fire_ufx_2.ogg-742e5e6a5e08cd6b1c4c9f53780d0970.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/smg_fire_ufx_2.ogg"
+dest_files=["res://.godot/imported/smg_fire_ufx_2.ogg-742e5e6a5e08cd6b1c4c9f53780d0970.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

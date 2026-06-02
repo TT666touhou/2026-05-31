@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://djj24hjc7btnv"
+path="res://.godot/imported/revolver_fire_ufx_2.ogg-717c8a52ad9e79de7a392adbd8315d49.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/revolver_fire_ufx_2.ogg"
+dest_files=["res://.godot/imported/revolver_fire_ufx_2.ogg-717c8a52ad9e79de7a392adbd8315d49.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

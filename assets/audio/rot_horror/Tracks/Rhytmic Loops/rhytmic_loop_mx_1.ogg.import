@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cmgqwbdr7sts0"
+path="res://.godot/imported/rhytmic_loop_mx_1.ogg-c7221124fd2a86a18c570a6c9266914f.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Tracks/Rhytmic Loops/rhytmic_loop_mx_1.ogg"
+dest_files=["res://.godot/imported/rhytmic_loop_mx_1.ogg-c7221124fd2a86a18c570a6c9266914f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

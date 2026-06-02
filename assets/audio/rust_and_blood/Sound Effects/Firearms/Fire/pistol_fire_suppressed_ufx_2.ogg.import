@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://brnvi2brk7cks"
+path="res://.godot/imported/pistol_fire_suppressed_ufx_2.ogg-e10da35a164df0016cee7b37056dfc3c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Fire/pistol_fire_suppressed_ufx_2.ogg"
+dest_files=["res://.godot/imported/pistol_fire_suppressed_ufx_2.ogg-e10da35a164df0016cee7b37056dfc3c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

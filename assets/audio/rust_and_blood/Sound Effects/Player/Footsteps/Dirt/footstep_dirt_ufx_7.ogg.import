@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://2gjqfuw6b1v7"
+path="res://.godot/imported/footstep_dirt_ufx_7.ogg-0ecc4e170a1533e317f520dc71a08e6a.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Dirt/footstep_dirt_ufx_7.ogg"
+dest_files=["res://.godot/imported/footstep_dirt_ufx_7.ogg-0ecc4e170a1533e317f520dc71a08e6a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

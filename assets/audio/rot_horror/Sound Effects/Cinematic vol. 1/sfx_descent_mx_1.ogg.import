@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dsx1rgwbr41sq"
+path="res://.godot/imported/sfx_descent_mx_1.ogg-d78d437975217a1338caa06ce54f3f0e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Cinematic vol. 1/sfx_descent_mx_1.ogg"
+dest_files=["res://.godot/imported/sfx_descent_mx_1.ogg-d78d437975217a1338caa06ce54f3f0e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

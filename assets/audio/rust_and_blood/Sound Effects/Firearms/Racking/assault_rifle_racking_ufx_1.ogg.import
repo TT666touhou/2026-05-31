@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://de78gtpng56rv"
+path="res://.godot/imported/assault_rifle_racking_ufx_1.ogg-f2809ae9d7b473d9ce8b4351b80d6e9a.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Racking/assault_rifle_racking_ufx_1.ogg"
+dest_files=["res://.godot/imported/assault_rifle_racking_ufx_1.ogg-f2809ae9d7b473d9ce8b4351b80d6e9a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

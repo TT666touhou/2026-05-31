@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bv5ixb373pvi3"
+path="res://.godot/imported/monster_mx_4.ogg-1dfb8b7a6b4b49fa61df5c26e9acd5c1.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rot_horror/Sound Effects/Monsters/monster_mx_4.ogg"
+dest_files=["res://.godot/imported/monster_mx_4.ogg-1dfb8b7a6b4b49fa61df5c26e9acd5c1.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

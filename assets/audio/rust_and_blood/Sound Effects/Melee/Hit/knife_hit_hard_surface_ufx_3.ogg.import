@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://d2vr0eqfqygie"
+path="res://.godot/imported/knife_hit_hard_surface_ufx_3.ogg-91cc39519a3977651c41103153b3419d.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Hit/knife_hit_hard_surface_ufx_3.ogg"
+dest_files=["res://.godot/imported/knife_hit_hard_surface_ufx_3.ogg-91cc39519a3977651c41103153b3419d.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

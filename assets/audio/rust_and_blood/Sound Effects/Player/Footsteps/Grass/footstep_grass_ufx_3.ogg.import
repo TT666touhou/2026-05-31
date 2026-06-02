@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://c126t8s6td3by"
+path="res://.godot/imported/footstep_grass_ufx_3.ogg-fcae7ae31b126b27cc735ebd5195510a.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Grass/footstep_grass_ufx_3.ogg"
+dest_files=["res://.godot/imported/footstep_grass_ufx_3.ogg-fcae7ae31b126b27cc735ebd5195510a.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

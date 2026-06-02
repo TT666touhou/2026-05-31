@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://exfa3cchb783"
+path="res://.godot/imported/firearm_drop_ufx_2.ogg-c3059f1d453d0f7e267324ffec907503.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Drop/firearm_drop_ufx_2.ogg"
+dest_files=["res://.godot/imported/firearm_drop_ufx_2.ogg-c3059f1d453d0f7e267324ffec907503.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

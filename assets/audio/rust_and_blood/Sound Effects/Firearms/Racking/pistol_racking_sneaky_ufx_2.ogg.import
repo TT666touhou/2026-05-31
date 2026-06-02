@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://fs6xqi2eoc2p"
+path="res://.godot/imported/pistol_racking_sneaky_ufx_2.ogg-9b291df9dab542872ccb95e4aa7227fa.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Racking/pistol_racking_sneaky_ufx_2.ogg"
+dest_files=["res://.godot/imported/pistol_racking_sneaky_ufx_2.ogg-9b291df9dab542872ccb95e4aa7227fa.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

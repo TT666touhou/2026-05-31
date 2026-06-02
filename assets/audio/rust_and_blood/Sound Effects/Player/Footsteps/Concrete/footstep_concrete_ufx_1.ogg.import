@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b3vvpvpe3a625"
+path="res://.godot/imported/footstep_concrete_ufx_1.ogg-3c795775f717b89b061be08c6b804b0c.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Concrete/footstep_concrete_ufx_1.ogg"
+dest_files=["res://.godot/imported/footstep_concrete_ufx_1.ogg-3c795775f717b89b061be08c6b804b0c.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

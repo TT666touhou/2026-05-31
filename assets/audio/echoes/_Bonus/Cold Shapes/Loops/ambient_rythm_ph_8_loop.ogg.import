@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://bp2dnxgi82akq"
+path="res://.godot/imported/ambient_rythm_ph_8_loop.ogg-4c1cc8211f60738666312b9178a10165.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/_Bonus/Cold Shapes/Loops/ambient_rythm_ph_8_loop.ogg"
+dest_files=["res://.godot/imported/ambient_rythm_ph_8_loop.ogg-4c1cc8211f60738666312b9178a10165.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cw8lia0oa7yom"
+path="res://.godot/imported/sfx cinematic 53.ogg-26e6b3d3ef049bcf85f9025f23e01daa.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/echoes/SFX/Cinematic/sfx cinematic 53.ogg"
+dest_files=["res://.godot/imported/sfx cinematic 53.ogg-26e6b3d3ef049bcf85f9025f23e01daa.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

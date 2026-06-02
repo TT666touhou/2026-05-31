@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://cr21gualt5r7f"
+path="res://.godot/imported/knife_draw_ufx_1.ogg-cf6370673eb65bc8446985c3ac05d20e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Draw/knife_draw_ufx_1.ogg"
+dest_files=["res://.godot/imported/knife_draw_ufx_1.ogg-cf6370673eb65bc8446985c3ac05d20e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

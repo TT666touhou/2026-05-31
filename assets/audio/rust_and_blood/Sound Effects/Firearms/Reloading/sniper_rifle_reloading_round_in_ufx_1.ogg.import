@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://dayu3tjm1hhrc"
+path="res://.godot/imported/sniper_rifle_reloading_round_in_ufx_1.ogg-eb51d298926bfebb33d5aa6a6e801ad7.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Reloading/sniper_rifle_reloading_round_in_ufx_1.ogg"
+dest_files=["res://.godot/imported/sniper_rifle_reloading_round_in_ufx_1.ogg-eb51d298926bfebb33d5aa6a6e801ad7.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

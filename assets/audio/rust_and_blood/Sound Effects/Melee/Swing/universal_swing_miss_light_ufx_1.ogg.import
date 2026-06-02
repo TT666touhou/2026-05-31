@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://306wtgf6y5pg"
+path="res://.godot/imported/universal_swing_miss_light_ufx_1.ogg-1fca3918144d1cda3087debe835da28f.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Swing/universal_swing_miss_light_ufx_1.ogg"
+dest_files=["res://.godot/imported/universal_swing_miss_light_ufx_1.ogg-1fca3918144d1cda3087debe835da28f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

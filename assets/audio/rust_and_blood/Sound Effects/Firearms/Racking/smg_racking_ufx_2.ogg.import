@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b5eyf0cvc7hh7"
+path="res://.godot/imported/smg_racking_ufx_2.ogg-055a326e8849b8bd6d8c3d708743d169.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Firearms/Racking/smg_racking_ufx_2.ogg"
+dest_files=["res://.godot/imported/smg_racking_ufx_2.ogg-055a326e8849b8bd6d8c3d708743d169.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

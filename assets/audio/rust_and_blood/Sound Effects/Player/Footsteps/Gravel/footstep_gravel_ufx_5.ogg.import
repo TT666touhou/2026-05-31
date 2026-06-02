@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://602iy5w284qh"
+path="res://.godot/imported/footstep_gravel_ufx_5.ogg-91da696bf388bf28778577f6d6ac468f.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Player/Footsteps/Gravel/footstep_gravel_ufx_5.ogg"
+dest_files=["res://.godot/imported/footstep_gravel_ufx_5.ogg-91da696bf388bf28778577f6d6ac468f.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

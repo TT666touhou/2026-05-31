@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://ohof47n4lnt8"
+path="res://.godot/imported/blunt_hit_wood_ufx_1.ogg-4a9972a11e733a1c159b2cc2a48c3f3e.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/audio/rust_and_blood/Sound Effects/Melee/Hit/blunt_hit_wood_ufx_1.ogg"
+dest_files=["res://.godot/imported/blunt_hit_wood_ufx_1.ogg-4a9972a11e733a1c159b2cc2a48c3f3e.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
